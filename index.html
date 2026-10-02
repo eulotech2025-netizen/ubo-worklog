@@ -7,7 +7,7 @@
 <title>UBO ONE 업무 일지</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=Gothic+A1:wght@800&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
-/* 레이아웃: 머리(숫자) → 마일스톤 타임라인(노션형 계단) → 일지 달력(누르면 옆에 일지 · 주보 카드). 원본은 저장소의 일지 md, tools/report/site.mjs 가 만든다 */
+/* 레이아웃: 머리 →마일스톤 타임라인(노션형 계단) → 일지 달력(누르면 옆에 일지 · 주보 카드). 원본은 저장소의 일지 md, tools/report/site.mjs 가 만든다 */
 :root{
   color-scheme:light;
   --bg:#F3F5F8;--surface:#FFFFFF;--surface-2:#F7F9FB;--ink:#1B2430;--muted:#5F6B7A;--line:#D5DBE3;
@@ -45,16 +45,6 @@ header{display:grid;gap:14px}
 .eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;color:var(--muted)}
 h1{font-size:clamp(30px,5vw,44px);line-height:1.15}
 .lede{margin:0;color:var(--muted);font-size:16px;max-width:60ch}
-
-/* 숫자 */
-.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.stats > div{padding:12px 16px;display:grid;gap:2px;min-width:0}
-.stats > div + div{border-left:1px solid var(--line)}
-.stats small{font-size:12px;color:var(--muted)}
-.stats b{font-family:var(--f-mono);font-weight:500;font-size:22px;font-variant-numeric:tabular-nums;line-height:1.25}
-.stats b span{font-family:var(--f-body);font-size:13px;color:var(--muted);margin-left:3px}
-.stats .on b{color:var(--accent)}
-@media (max-width:720px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stats > div:nth-child(3){border-left:0}.stats > div:nth-child(n+3){border-top:1px solid var(--line)}}
 
 /* 마일스톤 타임라인 */
 .tl-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
@@ -178,13 +168,12 @@ footer{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padd
     <div class="eyebrow">UBO ONE · 개발 업무 일지 · 1차 계약 2026-10-01 ~ 2027-03-31</div>
     <h1>업무 일지</h1>
     <p class="lede">우보브랜드샵 통합 플랫폼(UBO ONE) 개발에서 매일 한 일과 마일스톤 진행입니다. 일지는 근무일마다 쌓이고, 금요일 주보로 묶어 보고합니다.</p>
-    <div class="stats" id="stats"></div>
   </header>
 
   <section aria-labelledby="h-ms">
     <div>
       <h2 id="h-ms">마일스톤</h2>
-      <p class="sub">막대는 마일스톤까지 가는 기간, ◆ 는 목표일입니다. 줄을 누르면 산출물과 완료 기준이 나오고, ▶ 를 누르면 회차가 펼쳐집니다.</p>
+      <p class="sub">막대는 마일스톤까지 가는 기간, ◆ 는 목표일입니다. 줄을 누르면 산출물과 완료 기준이 나옵니다.</p>
     </div>
     <div class="tl-card">
       <div class="tl-bar">
@@ -221,7 +210,7 @@ footer{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padd
   </footer>
 </div>
 
-<script id="data" type="application/json">{"contract":{"start":"2026-10-01","end":"2027-03-31"},"milestones":[{"id":"M1","name":"착수","a":"2026-09-28","due":"2026-10-08","c":"p0","ph":"회차 0","out":["출시 1 기능 목록 (시트)","총괄 기획안 PDF","첫 주보"],"ok":"사장님이 기능 목록에 서명","who":"사장님 · 과장","subs":[{"n":"회차 0","d":"시범 · 보고와 서명 한 바퀴","a":"2026-09-28","b":"2026-10-09","c":"p0"}]},{"id":"M2","name":"화면 가안 완료","a":"2026-10-12","due":"2026-11-19","c":"p1","ph":"회차 1 · 2","out":["화면 10개 가안 (샘플 데이터)","화면 페이지 PDF","기능별 업무 규칙"],"ok":"목요일 시연에서 화면 10개를 눌러 보고, 실무자가 업무 규칙을 확인","who":"과장 · 실무자","subs":[{"n":"회차 1","d":"화면 가안 ① 설정 · 견적 · 주문 · 재고 · 출고 요청함","a":"2026-10-12","b":"2026-10-30","c":"p1"},{"n":"회차 2","d":"화면 가안 ② 입고 · 작업지시 · 실사 · 접수함 · 발주 · 배송 · 링크","a":"2026-11-02","b":"2026-11-20","c":"p1"}]},{"id":"M3","name":"첫 연동 · 중간점검","a":"2026-11-23","due":"2027-01-07","c":"p2","ph":"회차 3 · 4","out":["저장 · 연결 설계 결정 기록","로그인 · 설정 · 주문 → 출고 실제 저장","중간점검 1장"],"ok":"실제 주문 1건이 주문 → 출고 요청 → 출고까지 저장되고 검수 체크리스트 통과","who":"과장 · 실무자 · 사장님","subs":[{"n":"회차 3","d":"저장 · 연결 설계만","a":"2026-11-23","b":"2026-12-04","c":"p2"},{"n":"회차 4","d":"연동 ① 설정 · 주문 · 재고 기본 (성탄 포함 4주)","a":"2026-12-07","b":"2026-12-31","c":"p3"}]},{"id":"M4","name":"병행 시작","a":"2027-01-04","due":"2027-02-18","c":"p3","ph":"회차 5 · 6","out":["이카운트 자료 이관 결과","숫자 대조 리포트","접수함 · 재고 확장 · 발주 · 배송 기본"],"ok":"자료 100% 이관, 업체 1곳 실제 주문을 워크스와 이카운트에 함께 입력 시작","who":"경리 · 과장","subs":[{"n":"회차 5","d":"연동 ② 접수함 · 재고 확장","a":"2027-01-04","b":"2027-01-22","c":"p3"},{"n":"회차 6","d":"연동 ③ 이카운트 연결 · 발주 · 배송 (설 02-05 ~ 02-08 추정)","a":"2027-01-25","b":"2027-02-12","c":"p3"}]},{"id":"M5","name":"성과 보고 · 연장 제안","a":"2027-02-15","due":"2027-03-18","c":"p4","ph":"병행","out":["성과 보고 PDF (전후 숫자)","출시 노트","연장 제안서 (출시 2)"],"ok":"병행 1개월 숫자 일치 · 실무자 확인 · 검수 전부 통과","who":"사장님","subs":[{"n":"병행","d":"업체 1곳 → 5곳","a":"2027-02-15","b":"2027-03-18","c":"p4"}]},{"id":"종료","name":"계약 종료","a":"2027-03-19","due":"2027-03-31","c":"p0","ph":"마무리","out":["인수인계 묶음 (운영 · 백업 · 매뉴얼 · 교육 자료)","회사 계정 넘기기"],"ok":"회사 계정으로 모든 자료가 넘어감","who":"사장님","subs":[]}],"weeks":[{"start":"2026-09-28","daily":[{"date":"2026-10-01","title":"10-01 (목) · 회차 0 · M1 착수 D-7","work":"15:20 ~ 17:45","minutes":145,"done":[{"tag":"정함","text":"화면 시안은 처음에는 Claude Design 으로 만든다","proof":"ADR 004"},{"tag":"조사","text":"이카운트 메뉴 지도 — 12묶음 · 화면 140개를 UBO ONE 기능에 연결","proof":"이카운트 메뉴 지도"},{"tag":"조사","text":"카카오워크 기능 지도 — 12묶음을 업무 체크리스트에 연결","proof":"카카오워크 기능 지도"},{"tag":"만듦","text":"업무별 기능 체크리스트에 모듈별 보기 탭 설계","proof":"체크리스트 설계"},{"tag":"만듦","text":"화면 느낌 고르기 시안 — 글꼴 · 색 · 표 등 7항목 × 3안","proof":"톤앤매너 시안"},{"tag":"만듦","text":"디자인 시스템 설계 — 값 · 부품 · 화면 틀을 한 장에","proof":"디자인 시스템 설계"},{"tag":"정함","text":"6개월 마일스톤 5개 · 일지와 주보 방식","proof":"진행판"},{"tag":"정함","text":"회사 계정 받음 — 같은 계정으로 GitHub 가입","proof":"회사 계정"}],"blocked":["이카운트 5계정 관리자 권한 — 09-28 계정 받음, 몇 계정 · 관리자 여부 확인 중","이카운트 외부 연결 기능 가능 여부 · 한도 · 비용 — 착수 전 확인 필요"],"next":["기능 목록 서명 준비 (M1 10-08)","업무 일지 웹페이지 공개"],"counts":{"만듦":3,"정함":3,"조사":2}}],"weekly":null}],"totals":{"만듦":3,"정함":3,"조사":2},"days":1,"minutes":145,"weeklyCount":0,"built":"2026-10-02T06:35:52.647Z"}</script>
+<script id="data" type="application/json">{"contract":{"start":"2026-10-01","end":"2027-03-31"},"milestones":[{"id":"M1","name":"착수","a":"2026-09-28","due":"2026-10-15","c":"p0","ph":"회차 0","out":["출시 1 기능 목록 (시트) — 워크스 핵심","총괄 기획안 PDF","첫 주보"],"ok":"사장님이 기능 목록에 서명","who":"사장님 · 과장","subs":[]},{"id":"M2","name":"화면 가안","a":"2026-10-19","due":"2026-11-26","c":"p1","ph":"화면","out":["워크스 핵심 화면 가안 — 설정 · 견적 · 주문 · 재고 · 출고 요청함 (샘플 데이터)","화면 페이지 PDF","주문 · 출고 · 재고 업무 규칙"],"ok":"목요일 시연에서 화면을 눌러 보고, 실무자가 업무 규칙을 확인","who":"과장 · 실무자","subs":[]},{"id":"M3","name":"실제 저장","a":"2026-11-30","due":"2027-01-28","c":"p2","ph":"저장 (연말 포함)","out":["저장 · 연결 설계 결정 기록","로그인 · 설정 · 주문 → 출고 → 재고 실제 저장"],"ok":"실제 주문 1건이 주문 → 출고 요청 → 출고 → 재고까지 저장되고 검수 체크리스트 통과","who":"과장 · 실무자","subs":[]},{"id":"M4","name":"사내 사용 · 성과 보고","a":"2027-02-01","due":"2027-03-18","c":"p3","ph":"사용 (설 포함)","out":["영업 · 창고가 실제 주문을 워크스로","여유 되면 접수함 · 발주 · 배송","성과 보고 PDF (전후 숫자) · 출시 노트","연장 제안서 (출시 2)"],"ok":"영업 · 창고가 실제 주문을 워크스로 처리하고 실무자가 확인","who":"사장님","subs":[]},{"id":"종료","name":"계약 종료","a":"2027-03-19","due":"2027-03-31","c":"p0","ph":"마무리","out":["인수인계 묶음 (운영 · 백업 · 매뉴얼 · 교육 자료)","회사 계정 넘기기"],"ok":"회사 계정으로 모든 자료가 넘어감","who":"사장님","subs":[]}],"weeks":[{"start":"2026-09-28","daily":[{"date":"2026-10-01","title":"10-01 (목) · 회차 0 · M1 착수 D-7","work":"15:20 ~ 17:45","minutes":145,"done":[{"tag":"정함","text":"화면 시안은 처음에는 Claude Design 으로 만든다","proof":"ADR 004"},{"tag":"조사","text":"이카운트 메뉴 지도 — 12묶음 · 화면 140개를 UBO ONE 기능에 연결","proof":"이카운트 메뉴 지도"},{"tag":"조사","text":"카카오워크 기능 지도 — 12묶음을 업무 체크리스트에 연결","proof":"카카오워크 기능 지도"},{"tag":"만듦","text":"업무별 기능 체크리스트에 모듈별 보기 탭 설계","proof":"체크리스트 설계"},{"tag":"만듦","text":"화면 느낌 고르기 시안 — 글꼴 · 색 · 표 등 7항목 × 3안","proof":"톤앤매너 시안"},{"tag":"만듦","text":"디자인 시스템 설계 — 값 · 부품 · 화면 틀을 한 장에","proof":"디자인 시스템 설계"},{"tag":"정함","text":"6개월 마일스톤 5개 · 일지와 주보 방식","proof":"진행판"},{"tag":"정함","text":"회사 계정 받음 — 같은 계정으로 GitHub 가입","proof":"회사 계정"}],"blocked":["이카운트 5계정 관리자 권한 — 09-28 계정 받음, 몇 계정 · 관리자 여부 확인 중","이카운트 외부 연결 기능 가능 여부 · 한도 · 비용 — 착수 전 확인 필요"],"next":["기능 목록 서명 준비 (M1 10-08)","업무 일지 웹페이지 공개"],"counts":{"만듦":3,"정함":3,"조사":2}}],"weekly":null}],"totals":{"만듦":3,"정함":3,"조사":2},"days":1,"minutes":145,"weeklyCount":0,"built":"2026-10-02T06:46:02.945Z"}</script>
 <script>
 (() => {
   const DATA = JSON.parse(document.getElementById('data').textContent);
@@ -238,17 +227,6 @@ footer{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padd
   const dd = x => Math.round((D(x) - today) / DAY);
   const next = MS.find(m => dd(m.due) >= 0) || null;
   const state = m => dd(m.due) < 0 ? ['확인', ''] : m === next ? ['진행 중', ' cur'] : ['예정', ''];
-
-  // ── 숫자 ──
-  const cs = D(DATA.contract.start), ce = D(DATA.contract.end);
-  const dayNo = Math.min(Math.max(Math.round((today - cs) / DAY) + 1, 0), Math.round((ce - cs) / DAY) + 1);
-  const t = DATA.totals;
-  document.getElementById('stats').innerHTML = [
-    `<div><small>계약</small><b>${dayNo}<span>일째 / 182</span></b></div>`,
-    next ? `<div class="on"><small>다음 마일스톤 · ${esc(next.id)} ${esc(next.name)}</small><b>D-${dd(next.due)}<span>${md(next.due)}</span></b></div>` : `<div><small>다음 마일스톤</small><b>—</b></div>`,
-    `<div><small>일지 · 기록된 근무</small><b>${DATA.days}<span>장</span> ${Math.round(DATA.minutes / 60 * 10) / 10}<span>시간</span></b></div>`,
-    `<div><small>쌓인 결과</small><b style="font-size:15px;padding-top:6px">만듦 ${t['만듦']} · 정함 ${t['정함']} · 조사 ${t['조사']}</b></div>`,
-  ].join('');
 
   // ── 타임라인 ──
   const S = D('2026-09-28'), E = D('2027-04-05'), T = E - S;
@@ -318,6 +296,7 @@ footer{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padd
     if (sEl) select(+sEl.dataset.s);
   });
   const ex = document.getElementById('expand');
+  ex.hidden = !MS.some(m => m.subs.length);
   ex.addEventListener('click', () => {
     const open = ex.getAttribute('aria-pressed') !== 'true';
     ex.setAttribute('aria-pressed', String(open)); ex.textContent = open ? '회차 접기' : '회차 펼치기';
