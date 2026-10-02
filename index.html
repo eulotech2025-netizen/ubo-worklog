@@ -7,7 +7,7 @@
 <title>UBO ONE 업무 일지</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=Gothic+A1:wght@800&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
-/* 레이아웃: 머리(숫자) → 마일스톤 타임라인(노션형 계단) → 주별 묶음(주보 카드 + 일지 카드). 원본은 저장소의 일지 md, tools/report/site.mjs 가 만든다 */
+/* 레이아웃: 머리(숫자) → 마일스톤 타임라인(노션형 계단) → 일지 달력(누르면 옆에 일지 · 주보 카드). 원본은 저장소의 일지 md, tools/report/site.mjs 가 만든다 */
 :root{
   color-scheme:light;
   --bg:#F3F5F8;--surface:#FFFFFF;--surface-2:#F7F9FB;--ink:#1B2430;--muted:#5F6B7A;--line:#D5DBE3;
@@ -117,15 +117,36 @@ h1{font-size:clamp(30px,5vw,44px);line-height:1.15}
 .props ul{margin:0;padding-left:16px;display:grid;gap:2px}
 .props .sm{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
 
-/* 주 · 일지 카드 */
-.filter{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:12.5px;color:var(--muted)}
-.week{display:grid;gap:12px}
-.week-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px 16px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:6px}
-.week-h h3{font-size:16px}
-.week-h h3 small{font-family:var(--f-mono);font-weight:500;font-size:12px;color:var(--muted);margin-left:8px}
-.week-h .cnt{font-size:12.5px;color:var(--muted)}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;align-items:start}
-@media (max-width:400px){.cards{grid-template-columns:1fr}}
+/* 일지 달력 + 옆 카드 */
+.cal-wrap{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:860px){.cal-wrap{grid-template-columns:minmax(0,1fr)}}
+.cal-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.cal-bar{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.cal-t{font-family:var(--f-display);font-weight:800;font-size:17px}
+.btn:disabled{opacity:.35;cursor:default;background:var(--surface)}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;padding:10px}
+.cal .wd{font-size:11.5px;font-weight:600;color:var(--muted);text-align:center}
+.cal .wd.we{opacity:.7}
+.day{all:unset;box-sizing:border-box;min-height:74px;padding:5px 6px 6px;border:1px solid transparent;border-radius:8px;display:flex;flex-direction:column;gap:5px;min-width:0}
+.day.has{cursor:pointer;background:var(--surface-2);border-color:var(--line)}
+.day.has:hover{border-color:var(--accent)}
+.day[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.day:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.day .top{display:flex;justify-content:space-between;align-items:center;gap:2px}
+.day .n{font-family:var(--f-mono);font-size:12.5px;line-height:20px;min-width:20px;text-align:center;border-radius:999px;font-variant-numeric:tabular-nums}
+.day.we .n{color:var(--muted)}
+.day.today .n{background:var(--today);color:var(--on-today)}
+.day .ms{font-family:var(--f-mono);font-size:10.5px;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+.day .ms::before{content:"";width:7px;height:7px;background:var(--ink);transform:rotate(45deg)}
+.dots{display:flex;flex-wrap:wrap;gap:3px}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--tc)}
+.day .wb{margin-top:auto;align-self:flex-start;font-size:10.5px;font-weight:600;line-height:1.5;padding:0 5px;border-radius:4px;color:var(--accent);border:1px solid var(--accent)}
+@media (max-width:520px){.cal{gap:3px;padding:8px}.day{min-height:58px;padding:4px}.day .ms span{display:none}.dots{gap:2px}.dots i{width:6px;height:6px}}
+.cal-key{display:flex;gap:6px 14px;flex-wrap:wrap;padding:8px 14px 10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.cal-key .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--tc);margin-right:5px;vertical-align:1px}
+.cal-side{display:grid;gap:12px;min-width:0}
+
+/* 일지 · 주보 카드 */
 .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px 16px;display:grid;gap:10px;min-width:0}
 .card.wkly{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 .card-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
@@ -139,7 +160,6 @@ ul.items{margin:0;padding:0;list-style:none;display:grid;gap:5px;font-size:13.5p
 ul.items li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:baseline}
 ul.items li.plain{grid-template-columns:10px minmax(0,1fr)}
 ul.items li.plain::before{content:"·";color:var(--muted)}
-ul.items li.dim{opacity:.28}
 .tag{display:inline-block;font-size:11px;font-weight:600;line-height:1.6;padding:0 6px;border-radius:4px;border:1px solid var(--line);background:var(--surface-2);white-space:nowrap}
 .tag::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--tc);margin-right:4px;vertical-align:1px}
 .tag.t-만듦{--tc:var(--p1)}.tag.t-정함{--tc:var(--p2)}.tag.t-조사{--tc:var(--p3)}
@@ -179,16 +199,20 @@ footer{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padd
   <section aria-labelledby="h-log">
     <div>
       <h2 id="h-log">일지</h2>
-      <p class="sub">최근 주가 위에 있습니다. 한 줄마다 꼬리표 하나 — 만듦(새로 생긴 화면 · 기능 · 문서) · 정함(결정 · 서명 · 합의) · 조사(인터뷰 · 분석 · 측정) — 와 증거가 붙습니다.</p>
+      <p class="sub">근무일마다 한 장. 점 하나가 한 일 한 줄입니다 — 만듦(새로 생긴 화면 · 기능 · 문서) · 정함(결정 · 서명 · 합의) · 조사(인터뷰 · 분석 · 측정). 날짜를 누르면 그 날 일지가 나옵니다.</p>
     </div>
-    <div class="filter" role="group" aria-label="꼬리표로 보기">
-      <span>보기</span>
-      <button class="btn" type="button" data-f="" aria-pressed="true">전체</button>
-      <button class="btn" type="button" data-f="만듦" aria-pressed="false">만듦</button>
-      <button class="btn" type="button" data-f="정함" aria-pressed="false">정함</button>
-      <button class="btn" type="button" data-f="조사" aria-pressed="false">조사</button>
+    <div class="cal-wrap">
+      <div class="cal-card">
+        <div class="cal-bar">
+          <button class="btn" id="prevM" type="button" aria-label="이전 달">◀</button>
+          <span class="cal-t" id="calT" aria-live="polite"></span>
+          <button class="btn" id="nextM" type="button" aria-label="다음 달">▶</button>
+        </div>
+        <div class="cal" id="cal"></div>
+        <div class="cal-key"><span><i class="dot" style="--tc:var(--p1)"></i>만듦</span><span><i class="dot" style="--tc:var(--p2)"></i>정함</span><span><i class="dot" style="--tc:var(--p3)"></i>조사</span><span><i class="k-dia"></i>목표일</span></div>
+      </div>
+      <div class="cal-side" id="side" aria-live="polite"></div>
     </div>
-    <div id="weeks" style="display:grid;gap:28px"></div>
   </section>
 
   <footer>
@@ -197,7 +221,7 @@ footer{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padd
   </footer>
 </div>
 
-<script id="data" type="application/json">{"contract":{"start":"2026-10-01","end":"2027-03-31"},"milestones":[{"id":"M1","name":"착수","a":"2026-09-28","due":"2026-10-08","c":"p0","ph":"회차 0","out":["출시 1 기능 목록 (시트)","총괄 기획안 PDF","첫 주보"],"ok":"사장님이 기능 목록에 서명","who":"사장님 · 과장","subs":[{"n":"회차 0","d":"시범 · 보고와 서명 한 바퀴","a":"2026-09-28","b":"2026-10-09","c":"p0"}]},{"id":"M2","name":"화면 가안 완료","a":"2026-10-12","due":"2026-11-19","c":"p1","ph":"회차 1 · 2","out":["화면 10개 가안 (샘플 데이터)","화면 페이지 PDF","기능별 업무 규칙"],"ok":"목요일 시연에서 화면 10개를 눌러 보고, 실무자가 업무 규칙을 확인","who":"과장 · 실무자","subs":[{"n":"회차 1","d":"화면 가안 ① 설정 · 견적 · 주문 · 재고 · 출고 요청함","a":"2026-10-12","b":"2026-10-30","c":"p1"},{"n":"회차 2","d":"화면 가안 ② 입고 · 작업지시 · 실사 · 접수함 · 발주 · 배송 · 링크","a":"2026-11-02","b":"2026-11-20","c":"p1"}]},{"id":"M3","name":"첫 연동 · 중간점검","a":"2026-11-23","due":"2027-01-07","c":"p2","ph":"회차 3 · 4","out":["저장 · 연결 설계 결정 기록","로그인 · 설정 · 주문 → 출고 실제 저장","중간점검 1장"],"ok":"실제 주문 1건이 주문 → 출고 요청 → 출고까지 저장되고 검수 체크리스트 통과","who":"과장 · 실무자 · 사장님","subs":[{"n":"회차 3","d":"저장 · 연결 설계만","a":"2026-11-23","b":"2026-12-04","c":"p2"},{"n":"회차 4","d":"연동 ① 설정 · 주문 · 재고 기본 (성탄 포함 4주)","a":"2026-12-07","b":"2026-12-31","c":"p3"}]},{"id":"M4","name":"병행 시작","a":"2027-01-04","due":"2027-02-18","c":"p3","ph":"회차 5 · 6","out":["이카운트 자료 이관 결과","숫자 대조 리포트","접수함 · 재고 확장 · 발주 · 배송 기본"],"ok":"자료 100% 이관, 업체 1곳 실제 주문을 워크스와 이카운트에 함께 입력 시작","who":"경리 · 과장","subs":[{"n":"회차 5","d":"연동 ② 접수함 · 재고 확장","a":"2027-01-04","b":"2027-01-22","c":"p3"},{"n":"회차 6","d":"연동 ③ 이카운트 연결 · 발주 · 배송 (설 02-05 ~ 02-08 추정)","a":"2027-01-25","b":"2027-02-12","c":"p3"}]},{"id":"M5","name":"성과 보고 · 연장 제안","a":"2027-02-15","due":"2027-03-18","c":"p4","ph":"병행","out":["성과 보고 PDF (전후 숫자)","출시 노트","연장 제안서 (출시 2)"],"ok":"병행 1개월 숫자 일치 · 실무자 확인 · 검수 전부 통과","who":"사장님","subs":[{"n":"병행","d":"업체 1곳 → 5곳","a":"2027-02-15","b":"2027-03-18","c":"p4"}]},{"id":"종료","name":"계약 종료","a":"2027-03-19","due":"2027-03-31","c":"p0","ph":"마무리","out":["인수인계 묶음 (운영 · 백업 · 매뉴얼 · 교육 자료)","회사 계정 넘기기"],"ok":"회사 계정으로 모든 자료가 넘어감","who":"사장님","subs":[]}],"weeks":[{"start":"2026-09-28","daily":[{"date":"2026-10-01","title":"10-01 (목) · 회차 0 · M1 착수 D-7","work":"15:20 ~ 17:45","minutes":145,"done":[{"tag":"정함","text":"화면 시안은 처음에는 Claude Design 으로 만든다","proof":"ADR 004"},{"tag":"조사","text":"이카운트 메뉴 지도 — 12묶음 · 화면 140개를 UBO ONE 기능에 연결","proof":"이카운트 메뉴 지도"},{"tag":"조사","text":"카카오워크 기능 지도 — 12묶음을 업무 체크리스트에 연결","proof":"카카오워크 기능 지도"},{"tag":"만듦","text":"업무별 기능 체크리스트에 모듈별 보기 탭 설계","proof":"체크리스트 설계"},{"tag":"만듦","text":"화면 느낌 고르기 시안 — 글꼴 · 색 · 표 등 7항목 × 3안","proof":"톤앤매너 시안"},{"tag":"만듦","text":"디자인 시스템 설계 — 값 · 부품 · 화면 틀을 한 장에","proof":"디자인 시스템 설계"},{"tag":"정함","text":"6개월 마일스톤 5개 · 일지와 주보 방식","proof":"진행판"},{"tag":"정함","text":"회사 계정 받음 — 같은 계정으로 GitHub 가입","proof":"회사 계정"}],"blocked":["이카운트 5계정 관리자 권한 — 09-28 계정 받음, 몇 계정 · 관리자 여부 확인 중","이카운트 외부 연결 기능 가능 여부 · 한도 · 비용 — 착수 전 확인 필요"],"next":["기능 목록 서명 준비 (M1 10-08)","업무 일지 웹페이지 공개"],"counts":{"만듦":3,"정함":3,"조사":2}}],"weekly":null}],"totals":{"만듦":3,"정함":3,"조사":2},"days":1,"minutes":145,"weeklyCount":0,"built":"2026-10-02T06:16:01.284Z"}</script>
+<script id="data" type="application/json">{"contract":{"start":"2026-10-01","end":"2027-03-31"},"milestones":[{"id":"M1","name":"착수","a":"2026-09-28","due":"2026-10-08","c":"p0","ph":"회차 0","out":["출시 1 기능 목록 (시트)","총괄 기획안 PDF","첫 주보"],"ok":"사장님이 기능 목록에 서명","who":"사장님 · 과장","subs":[{"n":"회차 0","d":"시범 · 보고와 서명 한 바퀴","a":"2026-09-28","b":"2026-10-09","c":"p0"}]},{"id":"M2","name":"화면 가안 완료","a":"2026-10-12","due":"2026-11-19","c":"p1","ph":"회차 1 · 2","out":["화면 10개 가안 (샘플 데이터)","화면 페이지 PDF","기능별 업무 규칙"],"ok":"목요일 시연에서 화면 10개를 눌러 보고, 실무자가 업무 규칙을 확인","who":"과장 · 실무자","subs":[{"n":"회차 1","d":"화면 가안 ① 설정 · 견적 · 주문 · 재고 · 출고 요청함","a":"2026-10-12","b":"2026-10-30","c":"p1"},{"n":"회차 2","d":"화면 가안 ② 입고 · 작업지시 · 실사 · 접수함 · 발주 · 배송 · 링크","a":"2026-11-02","b":"2026-11-20","c":"p1"}]},{"id":"M3","name":"첫 연동 · 중간점검","a":"2026-11-23","due":"2027-01-07","c":"p2","ph":"회차 3 · 4","out":["저장 · 연결 설계 결정 기록","로그인 · 설정 · 주문 → 출고 실제 저장","중간점검 1장"],"ok":"실제 주문 1건이 주문 → 출고 요청 → 출고까지 저장되고 검수 체크리스트 통과","who":"과장 · 실무자 · 사장님","subs":[{"n":"회차 3","d":"저장 · 연결 설계만","a":"2026-11-23","b":"2026-12-04","c":"p2"},{"n":"회차 4","d":"연동 ① 설정 · 주문 · 재고 기본 (성탄 포함 4주)","a":"2026-12-07","b":"2026-12-31","c":"p3"}]},{"id":"M4","name":"병행 시작","a":"2027-01-04","due":"2027-02-18","c":"p3","ph":"회차 5 · 6","out":["이카운트 자료 이관 결과","숫자 대조 리포트","접수함 · 재고 확장 · 발주 · 배송 기본"],"ok":"자료 100% 이관, 업체 1곳 실제 주문을 워크스와 이카운트에 함께 입력 시작","who":"경리 · 과장","subs":[{"n":"회차 5","d":"연동 ② 접수함 · 재고 확장","a":"2027-01-04","b":"2027-01-22","c":"p3"},{"n":"회차 6","d":"연동 ③ 이카운트 연결 · 발주 · 배송 (설 02-05 ~ 02-08 추정)","a":"2027-01-25","b":"2027-02-12","c":"p3"}]},{"id":"M5","name":"성과 보고 · 연장 제안","a":"2027-02-15","due":"2027-03-18","c":"p4","ph":"병행","out":["성과 보고 PDF (전후 숫자)","출시 노트","연장 제안서 (출시 2)"],"ok":"병행 1개월 숫자 일치 · 실무자 확인 · 검수 전부 통과","who":"사장님","subs":[{"n":"병행","d":"업체 1곳 → 5곳","a":"2027-02-15","b":"2027-03-18","c":"p4"}]},{"id":"종료","name":"계약 종료","a":"2027-03-19","due":"2027-03-31","c":"p0","ph":"마무리","out":["인수인계 묶음 (운영 · 백업 · 매뉴얼 · 교육 자료)","회사 계정 넘기기"],"ok":"회사 계정으로 모든 자료가 넘어감","who":"사장님","subs":[]}],"weeks":[{"start":"2026-09-28","daily":[{"date":"2026-10-01","title":"10-01 (목) · 회차 0 · M1 착수 D-7","work":"15:20 ~ 17:45","minutes":145,"done":[{"tag":"정함","text":"화면 시안은 처음에는 Claude Design 으로 만든다","proof":"ADR 004"},{"tag":"조사","text":"이카운트 메뉴 지도 — 12묶음 · 화면 140개를 UBO ONE 기능에 연결","proof":"이카운트 메뉴 지도"},{"tag":"조사","text":"카카오워크 기능 지도 — 12묶음을 업무 체크리스트에 연결","proof":"카카오워크 기능 지도"},{"tag":"만듦","text":"업무별 기능 체크리스트에 모듈별 보기 탭 설계","proof":"체크리스트 설계"},{"tag":"만듦","text":"화면 느낌 고르기 시안 — 글꼴 · 색 · 표 등 7항목 × 3안","proof":"톤앤매너 시안"},{"tag":"만듦","text":"디자인 시스템 설계 — 값 · 부품 · 화면 틀을 한 장에","proof":"디자인 시스템 설계"},{"tag":"정함","text":"6개월 마일스톤 5개 · 일지와 주보 방식","proof":"진행판"},{"tag":"정함","text":"회사 계정 받음 — 같은 계정으로 GitHub 가입","proof":"회사 계정"}],"blocked":["이카운트 5계정 관리자 권한 — 09-28 계정 받음, 몇 계정 · 관리자 여부 확인 중","이카운트 외부 연결 기능 가능 여부 · 한도 · 비용 — 착수 전 확인 필요"],"next":["기능 목록 서명 준비 (M1 10-08)","업무 일지 웹페이지 공개"],"counts":{"만듦":3,"정함":3,"조사":2}}],"weekly":null}],"totals":{"만듦":3,"정함":3,"조사":2},"days":1,"minutes":145,"weeklyCount":0,"built":"2026-10-02T06:35:52.647Z"}</script>
 <script>
 (() => {
   const DATA = JSON.parse(document.getElementById('data').textContent);
@@ -300,7 +324,7 @@ footer{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padd
     MS.forEach((m, i) => setOpen(i, open)); fit();
   });
 
-  // ── 주 · 일지 ──
+  // ── 일지 · 주보 카드 ──
   const tags = d => ['만듦', '정함', '조사'].map(k => `${k} ${d[k]}`).join(' · ');
   const plain = arr => arr.map(x => `<li class="plain"><span>${esc(x)}</span></li>`).join('');
   const dayCard = d => {
@@ -310,7 +334,7 @@ footer{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padd
       ${rest ? `<div class="meta">${esc(rest)}</div>` : ''}
       <div class="sec">한 일 · ${tags(d.counts)}</div>
       <ul class="items">${d.done.map(it => it.tag
-        ? `<li data-tag="${it.tag}"><span class="tag t-${it.tag}">${it.tag}</span><span>${esc(it.text)}${it.proof ? `<span class="pf">${esc(it.proof)}</span>` : ''}</span></li>`
+        ? `<li><span class="tag t-${it.tag}">${it.tag}</span><span>${esc(it.text)}${it.proof ? `<span class="pf">${esc(it.proof)}</span>` : ''}</span></li>`
         : `<li class="plain"><span>${esc(it.text)}</span></li>`).join('')}</ul>
       ${d.blocked.length ? `<div class="sec">막힌 것 · 회사 대기</div><ul class="items">${plain(d.blocked)}</ul>` : ''}
       ${d.next.length ? `<div class="sec">다음</div><ul class="items">${plain(d.next)}</ul>` : ''}
@@ -321,22 +345,65 @@ footer{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padd
       <div style="font-weight:600;font-size:14px">${esc(w.head)}</div>
       <ol class="wk5">${w.items.map(it => `<li><b>${esc(it.label)}</b><span>${esc(it.text)}</span></li>`).join('')}</ol>
     </article>`;
-  const weeksEl = document.getElementById('weeks');
-  if (!DATA.weeks.length) weeksEl.innerHTML = `<div class="empty">아직 일지가 없습니다. 첫 근무일이 끝나면 여기에 카드가 생깁니다.</div>`;
-  else weeksEl.innerHTML = DATA.weeks.map(w => {
-    const end = new Date(D(w.start)); end.setDate(end.getDate() + 6);
-    const sum = { 만듦: 0, 정함: 0, 조사: 0 }; w.daily.forEach(d => ['만듦', '정함', '조사'].forEach(k => { sum[k] += d.counts[k]; }));
-    return `<div class="week">
-      <div class="week-h"><h3>${md(w.start)} 주<small>${md(w.start)} ~ ${md(iso(end))}</small></h3><span class="cnt">일지 ${w.daily.length}장 · ${tags(sum)}</span></div>
-      <div class="cards">${w.weekly ? weeklyCard(w.weekly) : ''}${w.daily.slice().reverse().map(dayCard).join('')}</div>
-    </div>`;
-  }).join('');
+  // ── 일지 달력 ──
+  const byDate = {};
+  DATA.weeks.forEach(w => {
+    w.daily.forEach(d => { (byDate[d.date] ??= {}).day = d; });
+    if (w.weekly) (byDate[w.weekly.date] ??= {}).weekly = w.weekly;
+  });
+  const logged = Object.keys(byDate).sort();
+  const dueOf = Object.fromEntries(MS.map(m => [m.due, m]));
+  const ym = x => { const d = D(x); return d.getFullYear() * 12 + d.getMonth(); };
+  const lo = Math.min(ym(DATA.contract.start), ...logged.map(ym));
+  const hi = Math.max(ym(DATA.contract.end), ...logged.map(ym));
+  const TC = { 만듦: 'p1', 정함: 'p2', 조사: 'p3' };
+  const cal = document.getElementById('cal'), side = document.getElementById('side'), calT = document.getElementById('calT');
+  const prevB = document.getElementById('prevM'), nextB = document.getElementById('nextM');
+  let cur = Math.min(Math.max(today.getFullYear() * 12 + today.getMonth(), lo), hi);
+  let sel = null;
 
-  document.querySelectorAll('.filter .btn').forEach(b => b.addEventListener('click', () => {
-    document.querySelectorAll('.filter .btn').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-    const f = b.dataset.f;
-    document.querySelectorAll('ul.items li[data-tag]').forEach(li => li.classList.toggle('dim', !!f && li.dataset.tag !== f));
-  }));
+  const cell = x => {
+    const e = byDate[x], d = D(x), m = dueOf[x];
+    const cls = ['day', d.getDay() % 6 === 0 && 'we', x === tIso && 'today', e && 'has'].filter(Boolean).join(' ');
+    const top = `<span class="top"><span class="n">${d.getDate()}</span>${m ? `<span class="ms" title="${esc(m.id)} ${esc(m.name)} 목표일"><span>${esc(m.id)}</span></span>` : ''}</span>`;
+    if (!e) return `<div class="${cls}">${top}</div>`;
+    const done = e.day ? e.day.done : [];
+    const label = `${d.getMonth() + 1}월 ${d.getDate()}일 (${wd(x)})${e.day ? ` 일지 · 한 일 ${done.length}줄` : ''}${e.weekly ? ' · 주보' : ''}${m ? ` · ${m.id} 목표일` : ''}`;
+    return `<button class="${cls}" type="button" data-d="${x}" aria-pressed="${x === sel}" aria-label="${esc(label)}">${top}`
+      + `<span class="dots">${done.map(it => `<i style="--tc:var(--${TC[it.tag] || 'p0'})"></i>`).join('')}</span>`
+      + `${e.weekly ? '<span class="wb">주보</span>' : ''}</button>`;
+  };
+  const renderMonth = () => {
+    const y = Math.floor(cur / 12), mo = cur % 12;
+    calT.textContent = `${y}년 ${mo + 1}월`;
+    prevB.disabled = cur <= lo; nextB.disabled = cur >= hi;
+    let h = [...'월화수목금토일'].map((c, i) => `<span class="wd${i > 4 ? ' we' : ''}">${c}</span>`).join('');
+    h += '<span></span>'.repeat((new Date(y, mo, 1).getDay() + 6) % 7);
+    for (let i = 1, last = new Date(y, mo + 1, 0).getDate(); i <= last; i++) h += cell(iso(new Date(y, mo, i)));
+    cal.innerHTML = h;
+  };
+  const pick = x => {
+    sel = x;
+    const e = byDate[x];
+    side.innerHTML = (e.day ? dayCard(e.day) : '') + (e.weekly ? weeklyCard(e.weekly) : '');
+    cal.querySelectorAll('.day.has').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.d === x)));
+  };
+  const fromHash = () => { const x = decodeURIComponent(location.hash.slice(1)); return byDate[x] ? x : null; };
+  cal.addEventListener('click', e => {
+    const b = e.target.closest('.day.has'); if (!b) return;
+    pick(b.dataset.d);
+    history.replaceState(null, '', '#' + b.dataset.d);
+    if (matchMedia('(max-width:860px)').matches) side.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  prevB.addEventListener('click', () => { cur--; renderMonth(); });
+  nextB.addEventListener('click', () => { cur++; renderMonth(); });
+  addEventListener('hashchange', () => { const x = fromHash(); if (x) { cur = ym(x); renderMonth(); pick(x); } });
+  const start = fromHash();
+  if (start) cur = ym(start);
+  renderMonth();
+  if (logged.length) pick(start || logged[logged.length - 1]);
+  else side.innerHTML = `<div class="empty">아직 일지가 없습니다. 첫 근무일이 끝나면 달력에 점이 생깁니다.</div>`;
+  if (start) document.getElementById('h-log').scrollIntoView();
 
   const bt = new Date(DATA.built);
   document.getElementById('built').textContent = `마지막 갱신 ${iso(bt)} ${String(bt.getHours()).padStart(2, '0')}:${String(bt.getMinutes()).padStart(2, '0')}`;
