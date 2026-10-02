@@ -1,0 +1,1084 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UBO 디자인 시스템</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@800&family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans+KR:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* UBO 디자인 시스템 — 회사가 보고 확인하는 한 장이자 화면을 만드는 블록 모음.
+   1 화면 느낌(시안 A · B · C 비교 · 항목별 정한 안) → 2 기초 → 3 부품 → 4 화면 틀 → 5 말 → 6 지킬 것 → 7 값 모음 → 부록 고르기 표(인쇄용).
+   값은 script 의 TOKENS 한 곳, 정한 값은 CHOSEN 한 곳, 판매 업체 이름은 COMPANIES 한 곳, 견본 데이터는 SAMPLE 한 곳.
+   설계: docs/superpowers/specs/2026-10-01-design-system-design.md · 2026-10-01-tone-manner-options-design.md
+   (톤앤매너 시안 design/tokens/톤앤매너-시안.html 은 10-02 이 파일로 합쳤다 — 기록은 git 842ec1d)
+   문서 바탕은 중립 회색 — 견본(.tok)만 고른 값으로 바뀐다. 그림 줄이기는 zoom (transform: scale 은 인쇄 때 잘림). */
+:root{--desk:#EEF0F3;--chrome:#FFFFFF;--ink:#1B2430;--sub:#5F6B7A;--mute:#8A95A3;--rule:#D5DBE3;--faint:#F5F7F9;--on:#1B2430;--on-ink:#FFFFFF;--warn:#A35F00;--ok:#1E7B3A;--mark:#D93025}
+@media screen and (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){color-scheme:dark;--desk:#14181D;--chrome:#1C2128;--ink:#E6EAF0;--sub:#9AA5B3;--mute:#6F7A88;--rule:#2E3640;--faint:#20262E;--on:#E6EAF0;--on-ink:#14181D;--warn:#F0B35A;--ok:#5BC27A;--mark:#F2665A}
+}
+:root[data-theme="dark"]{color-scheme:dark;--desk:#14181D;--chrome:#1C2128;--ink:#E6EAF0;--sub:#9AA5B3;--mute:#6F7A88;--rule:#2E3640;--faint:#20262E;--on:#E6EAF0;--on-ink:#14181D;--warn:#F0B35A;--ok:#5BC27A;--mark:#F2665A}
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--desk);color:var(--ink);font-family:'IBM Plex Sans KR','Malgun Gothic','Apple SD Gothic Neo',system-ui,sans-serif;font-size:14px;line-height:1.55;word-break:keep-all}
+a{color:inherit;text-underline-offset:2px}
+code{font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;font-size:12px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px}
+.mute{color:var(--mute)}
+
+/* 머리 */
+.top{background:var(--chrome);border-bottom:1px solid var(--rule)}
+.top .wrap{padding-block:20px 14px;display:grid;gap:10px}
+.top h1{margin:0;font-family:'Gothic A1','IBM Plex Sans KR',sans-serif;font-weight:800;font-size:28px;line-height:1.2}
+.status{margin:0;padding:8px 12px;border-left:3px solid var(--warn);background:var(--faint);font-size:14.5px;font-weight:600;max-width:110ch}
+.status.done{border-left-color:var(--ok)}
+.lede{margin:0;color:var(--sub);max-width:80ch}
+.toc{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13px;color:var(--sub);margin:0;padding:0;list-style:none}
+.toc b{color:var(--ink);font-weight:600;margin-right:4px}
+.toc a{text-decoration:none}
+.toc a:hover{text-decoration:underline}
+
+/* 바꾸기 — 1절 아래에 두고, 거기서부터 위에 붙는다 */
+.panel{position:sticky;top:0;z-index:5;background:var(--chrome);border-block:1px solid var(--rule)}
+@media (max-width:900px){.panel{position:static}}
+.panel .wrap{padding-block:10px;display:grid;gap:8px}
+.ctl{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center}
+.ctl-h{font-size:13px;font-weight:700;white-space:nowrap}
+.grp{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0}
+.grp>span{font-size:12.5px;color:var(--sub);white-space:nowrap}
+.seg{display:inline-flex;flex-wrap:wrap;max-width:100%;border:1px solid var(--rule);border-radius:8px;overflow:hidden}
+.seg button{border:0;border-left:1px solid var(--rule);background:transparent;color:var(--ink);padding:4px 9px;font:inherit;font-size:12.5px;cursor:pointer;white-space:nowrap}
+.seg button:first-child{border-left:0}
+.seg button[aria-pressed="true"]{background:var(--on);color:var(--on-ink);font-weight:600}
+.seg button:focus-visible,.copy:focus-visible,summary:focus-visible{outline:2px solid #5FA8FF;outline-offset:1px}
+@media (max-width:600px){.seg .long{display:none}}
+.now{margin:0;font-size:13px;color:var(--sub)}
+.now b{color:var(--ink)}
+
+/* 본문 */
+.feel{padding-block:22px 34px}
+main.wrap{padding-block:22px 44px;display:grid;gap:44px}
+.part{display:grid;gap:16px;scroll-margin-top:170px}
+#feel,#feel .blk,#feel .ask{scroll-margin-top:16px}
+.part>h2{margin:0;font-family:'Gothic A1','IBM Plex Sans KR',sans-serif;font-weight:800;font-size:23px;line-height:1.25;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
+.part>h2 small{font-family:'IBM Plex Sans KR',sans-serif;font-weight:500;font-size:13.5px;color:var(--sub)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,500px),1fr));gap:16px;align-items:start}
+.blk{background:var(--chrome);border:1px solid var(--rule);border-radius:10px;padding:16px;display:grid;grid-template-columns:minmax(0,1fr);gap:12px;min-width:0;scroll-margin-top:170px}
+.blk-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+.blk-h h3{margin:0;font-size:16.5px}
+.blk-h code{color:var(--sub)}
+.tag{font-size:11.5px;padding:1px 8px;border-radius:999px;border:1px solid var(--rule);color:var(--sub);font-weight:500;font-style:normal;white-space:nowrap}
+.tag.hot{border-color:var(--warn);color:var(--warn)}
+.use{margin:0;color:var(--sub);font-size:13.5px}
+.rules{margin:0;padding-left:18px;font-size:13.5px;display:grid;gap:3px}
+.rules b{font-weight:600}
+.t{width:100%;border-collapse:collapse;font-size:13.5px}
+.t th,.t td{border-bottom:1px solid var(--rule);padding:6px 8px;text-align:left;vertical-align:top}
+.t th{font-size:12.5px;color:var(--sub);font-weight:600}
+.t tr.on td,.t td.on{background:var(--faint);font-weight:600}
+.t th.on{background:var(--faint);color:var(--ink)}
+.t .big{font-size:15px;font-weight:600}
+.scroll{overflow-x:auto}
+pre.code{margin:0;padding:14px 16px;background:var(--faint);border:1px solid var(--rule);border-radius:8px;overflow:auto;font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;font-size:12px;line-height:1.6;max-height:540px}
+.copy{justify-self:start;border:1px solid var(--on);background:var(--on);color:var(--on-ink);border-radius:8px;padding:6px 14px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+
+/* ── 1. 화면 느낌 ── */
+.nb{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:var(--mark);color:#FFFFFF;font-family:'IBM Plex Sans KR',sans-serif;font-size:12.5px;font-weight:700;line-height:1;flex:none}
+.asks{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px}
+.asks div{border-top:2px solid var(--ink);padding-top:8px;display:grid;gap:2px}
+.asks b{font-size:14.5px}
+.asks span{color:var(--sub);font-size:13px}
+.pre-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:14px}
+.pre,.opt{margin:0;display:grid;grid-template-columns:minmax(0,1fr);gap:8px;align-content:start;padding:10px;border:1px solid var(--rule);border-radius:10px;min-width:0;background:var(--chrome)}
+.pre.pick,.opt.pick{border:2px solid var(--ink);padding:9px}
+.pre-h{display:flex;gap:10px;align-items:flex-start}
+.letter{display:grid;place-items:center;width:30px;height:30px;border:1.5px solid var(--ink);border-radius:6px;font-family:'Gothic A1','IBM Plex Sans KR',sans-serif;font-weight:800;font-size:16px;flex:none}
+.pick .letter{background:var(--ink);color:var(--chrome)}
+.pre-h b{display:block;font-size:14.5px}
+.pre-h span span{display:block;color:var(--sub);font-size:12.5px;line-height:1.45}
+.fitbox{min-width:0;width:100%;overflow:hidden}
+.fitbox>.frame{border:1px solid var(--rule)}
+.cmp td{font-size:13px}
+.cmp td:first-child{white-space:nowrap}
+a.itm{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-weight:600}
+a.itm:hover{text-decoration:underline}
+.chg{display:inline-block;margin-left:6px;padding:0 6px;border:1px solid var(--warn);border-radius:999px;color:var(--warn);font-size:11px;font-weight:500;font-style:normal;white-space:nowrap}
+.item-intro{display:grid;gap:4px;margin-top:6px}
+.item-intro h3{margin:0;font-size:18px}
+.item-h{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.item-h h3{margin:0;font-size:17px}
+.item-h .q{color:var(--sub);font-size:13.5px}
+.item-h .size{margin-left:auto;font-size:12px;color:var(--mute)}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+.opt figcaption{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-size:13px}
+.opt figcaption b{font-size:14.5px}
+.opt .note{color:var(--sub)}
+.opt .tags{display:flex;flex-wrap:wrap;gap:4px;margin-left:auto}
+.pickmark{display:inline-flex;align-items:center;padding:1px 9px;border-radius:999px;background:var(--ink);color:var(--chrome);font-size:12px;font-weight:600;white-space:nowrap}
+.ask{display:grid;gap:6px;padding:16px 18px;background:var(--chrome);border:1px solid var(--rule);border-left:4px solid var(--ink);border-radius:10px}
+.ask b{font-size:16px}
+.ask p{margin:0}
+.ask .sub{color:var(--sub);font-size:13.5px}
+
+/* 견본 무대 — 안은 고른 값(.tok)으로 그린다 */
+.stage{border-radius:8px;padding:16px;background:var(--u-bg);border:1px solid var(--u-line);overflow-x:auto;display:flex;flex-wrap:wrap;gap:12px;align-items:center;min-width:0}
+.stage.col{flex-direction:column;align-items:flex-start}
+.stage.fill{display:block}
+.cap{font-family:'IBM Plex Sans KR','Malgun Gothic',sans-serif;font-size:11.5px;color:var(--u-sub);line-height:1.4}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}
+.row>.cap:first-child{width:7em;flex:none}
+
+/* ── 값 → 견본. 변수 규칙(.tok[data-*]{--u-…})은 script 가 TOKENS 에서 만든다 ── */
+.tok{font-family:var(--u-ff);font-size:var(--u-fs);line-height:1.35;color:var(--u-ink);font-variant-numeric:tabular-nums;letter-spacing:0;text-align:left;word-break:normal}
+.tok *{box-sizing:border-box}
+.u-sp{flex:1}
+.u-ic{display:inline-block;width:.95em;height:.95em;flex:none;color:var(--u-sub)}
+.u-btn{display:inline-flex;align-items:center;justify-content:center;gap:2px;height:var(--u-ctl);padding:0 calc(var(--u-pad) + 4px);border:1px solid var(--u-line2);border-radius:var(--u-r);background:var(--u-surface);color:var(--u-ink);font-size:.95em;white-space:nowrap;flex:none}
+.u-btn.pri{background:var(--u-pri);border-color:var(--u-pri);color:var(--u-pri-ink);font-weight:700}
+.u-btn.danger{color:var(--u-danger);border-color:var(--u-danger);font-weight:600}
+.u-btn.off{opacity:.42}
+.u-btn kbd{font:inherit;font-size:.86em;opacity:.85}
+.u-btn.big{height:52px;min-width:150px;padding:0 22px;font-size:1.08em;font-weight:700}
+.tok[data-color="contrast"] .u-btn:not(.pri){border-width:1.5px;font-weight:500}
+.u-pill{display:inline-flex;align-items:center;height:1.75em;padding:0 .65em;border-radius:var(--u-rp);font-size:.82em;font-weight:700;white-space:nowrap;flex:none}
+.s-done{background:var(--s-done-bg);color:var(--s-done)}.s-doing{background:var(--s-doing-bg);color:var(--s-doing)}.s-check{background:var(--s-check-bg);color:var(--s-check)}
+.s-wait{background:var(--s-wait-bg);color:var(--s-wait)}.s-late{background:var(--s-late-bg);color:var(--s-late)}
+
+/* 입력칸 */
+.u-f{display:flex;align-items:center;gap:8px;min-width:0}
+.u-l{flex:none;width:4.6em;color:var(--u-sub);white-space:nowrap}
+.u-l .req{color:var(--u-danger);margin-left:2px}
+.u-fc{display:grid;gap:4px;min-width:0}
+.u-fc>.u-l{width:auto}
+.u-in{flex:1;min-width:0;display:flex;align-items:center;gap:6px;height:var(--u-ctl);padding:0 9px;border:1px solid var(--u-line2);border-radius:var(--u-r);background:#FFFFFF;white-space:nowrap;overflow:hidden}
+.u-in .u-ic{margin-left:auto}
+.u-in.num{justify-content:flex-end}
+.u-in.ph{color:var(--u-sub)}
+.u-in.err{border-color:var(--u-danger);box-shadow:inset 0 0 0 1px var(--u-danger)}
+.u-in.ro{background:var(--u-panel);color:var(--u-sub)}
+.u-in.cur{border-color:var(--u-acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--u-acc) 22%,transparent)}
+.tok[data-color="contrast"] .u-in{border:1.5px solid var(--u-line2)}
+.u-err{color:var(--u-danger);font-size:.86em}
+.u-look{flex:1;display:flex;gap:4px;min-width:0}
+.u-look .code{flex:none;width:6.2em}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px 24px;width:100%}
+.fcell{display:grid;gap:5px;align-content:start;min-width:0}
+.u-cb{display:inline-grid;place-items:center;width:15px;height:15px;border:1.5px solid var(--u-line2);border-radius:3px;background:var(--u-surface);color:var(--u-pri-ink);font-size:10px;line-height:1;vertical-align:middle;flex:none}
+.u-cb.on{background:var(--u-pri);border-color:var(--u-pri)}
+
+/* 표 */
+.u-tablebox{background:var(--u-surface);border-radius:var(--u-rc);overflow:hidden;min-width:640px}
+.u-table{width:100%;border-collapse:collapse;table-layout:fixed}
+.u-table th,.u-table td{height:var(--u-row);padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;vertical-align:middle}
+.u-table th{font-weight:700;font-size:.92em}
+.u-table .n{text-align:right}
+.u-table .c{text-align:center}
+.u-table .no{text-align:center;color:var(--u-sub);font-size:.84em;padding:0}
+.u-table .add{color:var(--u-link);font-size:.92em}
+.u-table .link{color:var(--u-link);text-decoration:underline;text-underline-offset:2px}
+.u-table .sort{color:var(--u-acc);font-size:.8em;margin-left:3px}
+.u-table td.auto{color:var(--u-sub)}
+.u-table td.cur{outline:2px solid var(--u-acc);outline-offset:-2px;background:var(--u-surface)}
+.u-table td.edited{position:relative}
+.u-table td.edited::after{content:"";position:absolute;top:0;right:0;border-style:solid;border-width:0 8px 8px 0;border-color:transparent var(--u-warn-ink) transparent transparent}
+.tok[data-table="grid"] .u-table th{background:var(--u-head);color:var(--u-head-ink)}
+.tok[data-table="grid"] .u-table th,.tok[data-table="grid"] .u-table td{border:1px solid var(--u-line)}
+.tok[data-table="grid"] .u-table td.auto{background:var(--u-panel)}
+.tok[data-table="grid"] .u-table .no span{display:inline-block;min-width:1.7em;border:1px solid var(--u-line2);border-radius:var(--u-r);line-height:1.4}
+.tok[data-table="lines"] .u-table th{background:transparent;color:var(--u-sub);border-bottom:1.5px solid var(--u-line2)}
+.tok[data-table="lines"] .u-table td{border-bottom:1px solid var(--u-line)}
+.tok[data-table="zebra"] .u-table th{background:var(--u-head);color:var(--u-head-ink)}
+.tok[data-table="zebra"] .u-table tbody tr:nth-child(even) td{background:var(--u-zebra)}
+.u-sum{display:flex;justify-content:flex-end;align-items:baseline;gap:calc(var(--u-gap) * 2.2);padding:calc(var(--u-pad) * .8) 8px;border-top:1.5px solid var(--u-line2);background:var(--u-surface)}
+.u-sum span{color:var(--u-sub);font-size:.9em}
+.u-sum b{color:var(--u-ink);margin-left:6px;font-size:1.04em}
+.u-sum .grand b{font-size:1.2em}
+.u-more{position:absolute;left:0;right:0;bottom:0;padding:22px 0 5px;text-align:center;font-size:.86em;font-weight:700;color:var(--u-sub);background:linear-gradient(to bottom,transparent,var(--u-surface) 60%)}
+.u-more[hidden]{display:none}
+
+/* 업체 이름표 · 안내 · 고르기 */
+.u-co{display:inline-flex;align-items:center;gap:6px;height:1.95em;padding:0 .7em;border:1px solid var(--u-line2);border-radius:var(--u-rp);background:var(--u-surface);font-size:.9em;font-weight:500;white-space:nowrap;flex:none}
+.u-co .logo{display:inline-grid;place-items:center;width:1.3em;height:1.3em;border:1px dashed var(--u-line2);border-radius:3px;font-size:.62em;color:var(--u-sub)}
+.u-co.bad{border:0;color:#FFFFFF;font-weight:700}
+.u-note{display:flex;align-items:center;gap:8px;padding:calc(var(--u-pad) * .6 + 2px) 10px;border:1px solid;border-radius:var(--u-r);font-size:.92em}
+.u-note.warn{background:var(--u-warn-bg);color:var(--u-warn-ink);border-color:var(--u-warn-line)}
+.u-note.err{background:color-mix(in srgb,var(--u-danger) 9%,var(--u-surface));color:var(--u-danger);border-color:color-mix(in srgb,var(--u-danger) 35%,var(--u-surface))}
+.u-note.ok{background:color-mix(in srgb,var(--u-ok) 9%,var(--u-surface));color:var(--u-ok);border-color:color-mix(in srgb,var(--u-ok) 35%,var(--u-surface))}
+.u-note.info{background:color-mix(in srgb,var(--u-acc) 8%,var(--u-surface));color:var(--u-ink);border-color:color-mix(in srgb,var(--u-acc) 30%,var(--u-surface))}
+.u-toast{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:var(--u-r);background:#1F2630;color:#FFFFFF;font-size:.95em;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.u-dialog{width:330px;max-width:100%;background:var(--u-surface);border:1px solid var(--u-line);border-radius:var(--u-rc);box-shadow:0 12px 32px rgba(0,0,0,.16);overflow:hidden}
+.u-dialog .d-b{display:grid;gap:6px;padding:16px 18px}
+.u-dialog .d-b b{font-size:1.08em}
+.u-dialog .d-b span{color:var(--u-sub)}
+.u-dialog .d-a{display:flex;justify-content:flex-end;gap:6px;padding:10px 14px;background:var(--u-panel);border-top:1px solid var(--u-line)}
+.u-empty{display:grid;justify-items:center;gap:8px;padding:22px 30px;border:1px dashed var(--u-line2);border-radius:var(--u-rc);background:var(--u-surface);color:var(--u-sub);text-align:center}
+.u-empty b{color:var(--u-ink);font-size:1.05em}
+.ngrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:16px;width:100%;align-items:start}
+.u-chips{display:flex;flex-wrap:wrap;gap:6px}
+.u-chips span{display:inline-flex;align-items:center;height:calc(var(--u-ctl) - 4px);padding:0 10px;border:1px solid var(--u-line2);border-radius:var(--u-rp);font-size:.88em;white-space:nowrap;background:var(--u-surface)}
+.u-chips .on{background:var(--u-pri);border-color:var(--u-pri);color:var(--u-pri-ink);font-weight:700}
+.u-pager{display:flex;align-items:center;gap:3px}
+.u-pager span{display:inline-grid;place-items:center;min-width:calc(var(--u-ctl) - 4px);height:calc(var(--u-ctl) - 4px);padding:0 4px;border-radius:var(--u-rp);font-size:.9em}
+.u-pager .on{background:var(--u-pri);color:var(--u-pri-ink);font-weight:700}
+.u-pager .of{color:var(--u-sub);margin-left:6px}
+.u-period{display:flex;align-items:center;gap:6px}
+.u-period .u-in{flex:none;width:9.2em}
+
+/* 메뉴줄 · 창 머리 */
+.u-nav{flex:none;display:flex;align-items:center;gap:calc(var(--u-gap) * 2.2);height:calc(var(--u-row) + 14px);padding:0 18px;background:var(--u-nav);color:var(--u-nav-ink);border-bottom:1px solid var(--u-line)}
+.u-logo{font-weight:700;font-size:1.08em;white-space:nowrap}
+.tok[data-color="blue"] .u-logo{color:var(--u-pri)}
+.u-menu{display:flex;gap:calc(var(--u-gap) * 1.8);align-self:stretch}
+.u-menu span{display:flex;align-items:center;padding-top:3px;border-bottom:3px solid transparent;white-space:nowrap}
+.u-menu .on{border-bottom-color:var(--u-nav-on);font-weight:700}
+.u-user{margin-left:auto;font-size:.9em;opacity:.85;white-space:nowrap}
+.u-win{display:flex;flex-direction:column;background:var(--u-surface);border:1px solid var(--u-line);border-radius:var(--u-rc);overflow:hidden}
+.tok[data-color="contrast"] .u-win{border:2px solid var(--u-ink)}
+.u-winbar{display:none;flex:none;align-items:center;gap:10px;height:28px;padding:0 10px;background:var(--u-bar);color:var(--u-bar-ink);font-size:12px}
+.tok[data-color="blue"] .u-winbar{display:flex}
+.u-winbar .ico{margin-left:auto;letter-spacing:6px;opacity:.9}
+.u-head{flex:none;display:flex;align-items:center;gap:var(--u-gap);padding:calc(var(--u-pad) + 2px) calc(var(--u-pad) + 6px)}
+.u-title{font-size:1.32em;font-weight:700;white-space:nowrap}
+.u-saved{font-size:.86em;color:var(--u-ok);white-space:nowrap}
+.u-count{font-size:.86em;color:var(--u-sub);white-space:nowrap}
+.appbar{width:100%;min-width:720px;border:1px solid var(--u-line);border-radius:var(--u-rc);overflow:hidden;background:var(--u-bg)}
+.appbar .u-win{margin:var(--u-gap)}
+
+/* 화면 그림 — 실제 크기로 그리고 zoom 으로 칸에 맞춘다 (transform: scale 은 인쇄 때 잘림) */
+.frame{position:relative;overflow:hidden;flex:none;border:1px solid var(--u-line)}
+.frame-in{position:absolute;top:0;left:0}
+.ui{position:relative;width:100%;height:100%;overflow:hidden;display:flex;flex-direction:column;background:var(--u-bg)}
+.u-body{flex:1;min-height:0;display:flex;flex-direction:column;padding:var(--u-gap)}
+.u-body>.u-win{flex:1;min-height:0}
+.u-form{flex:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--u-gap) calc(var(--u-gap) * 2);margin:0 calc(var(--u-pad) + 6px);padding:var(--u-pad) calc(var(--u-pad) + 4px);background:var(--u-panel);border-radius:var(--u-rc)}
+.tok[data-color="blue"] .u-form{border:1px solid var(--u-line)}
+.tok[data-color="navy"] .u-form,.tok[data-color="contrast"] .u-form{padding-left:0;padding-right:0}
+.u-tools,.u-find,.u-bar2{flex:none;display:flex;align-items:center;gap:8px;padding:var(--u-pad) calc(var(--u-pad) + 6px) calc(var(--u-pad) * .6)}
+.u-tools .u-btn{height:calc(var(--u-ctl) - 2px);font-size:.9em}
+.u-find{padding-top:0}
+.u-find .q{flex:none;width:280px}
+.u-tablewrap{position:relative;flex:1;min-height:0;overflow:hidden;margin:0 calc(var(--u-pad) + 6px)}
+.ui .u-sum{flex:none;margin:0 calc(var(--u-pad) + 6px)}
+.ui .u-note{flex:none;margin:calc(var(--u-pad) * .6) calc(var(--u-pad) + 6px) var(--u-pad)}
+.u-actions{flex:none;display:flex;align-items:center;gap:6px;padding:var(--u-pad) calc(var(--u-pad) + 6px);border-top:1px solid var(--u-line);background:var(--u-panel)}
+.u-actions.big{gap:10px;padding:12px 16px;background:var(--u-surface);border-top:2px solid var(--u-line2)}
+
+/* 작은 그림 — 1절 항목별 견본 */
+.mini{padding:6px;background:var(--u-surface)}
+.mini .u-tablewrap{margin:0}
+.mini.ctl{gap:var(--u-gap);padding:12px;justify-content:center;align-items:flex-start}
+.mini .u-head{padding:2px 2px 8px}
+.mini .u-tools{padding:8px 0 0}
+.mini .u-note{margin:0;align-self:stretch}
+.mini .u-fc{align-self:stretch}
+.m-row{display:flex;align-items:center;gap:8px}
+.mini.ctl .u-in{flex:none;width:150px}
+.mini .u-fc .u-in{width:auto}
+.mini.ctl .p-card{max-width:100%;align-self:flex-start}
+
+/* 휴대폰 */
+.mobile{border:8px solid #1D2026;border-radius:30px}
+.p-status{flex:none;height:22px;display:flex;justify-content:space-between;align-items:center;padding:0 16px;font-size:11px;background:var(--u-nav);color:var(--u-nav-ink)}
+.p-bar{flex:none;display:flex;align-items:center;gap:8px;padding:calc(var(--u-pad) + 2px) 14px;background:var(--u-nav);color:var(--u-nav-ink);border-bottom:1px solid var(--u-line)}
+.p-bar b{font-size:1.14em;white-space:nowrap}
+.p-cnt{display:inline-flex;align-items:center;justify-content:center;min-width:1.6em;height:1.6em;padding:0 .4em;border-radius:999px;background:var(--u-acc);color:#FFFFFF;font-size:.8em;font-weight:700}
+.p-who{margin-left:auto;font-size:.82em;opacity:.85;white-space:nowrap}
+.p-chips{flex:none;padding:var(--u-pad) 12px;overflow:hidden;background:var(--u-surface);border-bottom:1px solid var(--u-line)}
+.p-chips .u-chips{flex-wrap:nowrap}
+.p-list{position:relative;flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:var(--u-gap);padding:var(--u-gap) 10px}
+.p-list .u-more{background:linear-gradient(to bottom,transparent,var(--u-bg) 60%)}
+.p-card{flex:none;display:flex;flex-direction:column;gap:calc(var(--u-gap) * .45);padding:var(--u-pad) 12px;background:var(--u-surface);border:1px solid var(--u-line);border-radius:var(--u-rc)}
+.tok[data-color="contrast"] .p-card{border:1.5px solid var(--u-line2)}
+.p-top{display:flex;align-items:center;gap:8px}
+.p-time{color:var(--u-sub);font-size:.9em;white-space:nowrap}
+.p-link{margin-left:auto;color:var(--u-link);font-weight:700;font-size:.92em;white-space:nowrap}
+.p-cust{display:flex;align-items:center;gap:6px;min-width:0}
+.p-cust b{font-size:1.04em;white-space:nowrap}
+.p-cust .u-co{height:1.7em;font-size:.76em}
+.p-items,.p-wh{color:var(--u-sub);font-size:.92em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-act{display:flex;justify-content:flex-end;gap:6px}
+.p-act .u-btn{height:calc(var(--u-ctl) - 2px);font-size:.9em}
+.p-card .u-btn.big{width:100%;height:46px;min-width:0}
+.p-done{color:var(--u-ok);font-size:.88em;font-weight:700}
+.p-tabs{flex:none;display:flex;justify-content:space-around;align-items:center;height:48px;border-top:1px solid var(--u-line);background:var(--u-surface);font-size:.8em;color:var(--u-sub)}
+.p-tabs .on{color:var(--u-acc);font-weight:700}
+.cards{display:grid;gap:var(--u-gap);width:340px;max-width:100%;align-self:flex-start}
+
+/* 기초 견본 */
+.sw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;width:100%}
+.sw{display:grid;gap:1px;font-family:'IBM Plex Sans KR','Malgun Gothic',sans-serif;font-size:12px;color:var(--u-ink);min-width:0}
+.sw i{display:grid;place-items:center;height:42px;border-radius:6px;border:1px solid rgba(0,0,0,.1);margin-bottom:4px}
+.sw b{font-size:12.5px}
+.sw span,.sw code{color:var(--u-sub);overflow-wrap:anywhere}
+.sw code{font-size:11px}
+.ty{display:grid;gap:12px;width:100%}
+.ty>div{display:grid;grid-template-columns:13em 1fr;align-items:baseline;gap:12px}
+@media (max-width:600px){.ty>div{grid-template-columns:minmax(0,1fr);gap:2px}}
+.nums{justify-self:start;display:inline-grid;justify-items:end;gap:2px;padding:6px 10px;background:var(--u-surface);border:1px solid var(--u-line);border-radius:var(--u-r)}
+.sp{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-end}
+.sp>div{display:grid;gap:5px;justify-items:start}
+.sp i{display:block;background:color-mix(in srgb,var(--u-acc) 20%,var(--u-surface));border:1px solid color-mix(in srgb,var(--u-acc) 45%,var(--u-surface));border-radius:2px}
+.rd{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-end}
+.rd>div{display:grid;gap:6px;justify-items:start}
+.rd i{display:block;background:var(--u-surface);border:1.5px solid var(--u-line2)}
+
+/* 화면 틀 배치 */
+.lay{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:16px;align-items:start}
+.lay.phone{grid-template-columns:auto minmax(0,1fr)}
+@media (max-width:900px){.lay,.lay.phone{grid-template-columns:minmax(0,1fr)}}
+.fit{min-width:0;width:100%}
+.zones{margin:0;padding-left:22px;font-size:13.5px;display:grid;gap:5px}
+.zones li::marker{font-weight:700}
+.uses{margin:0;font-size:13px;color:var(--sub)}
+.uses b{color:var(--ink);font-weight:600}
+
+/* ── 부록 · 고르기 표 — 화면에서는 접어 두고, 인쇄할 때만 A4 가로 한 장으로 크게 ── */
+.appx{padding-bottom:72px}
+.appx details{background:var(--chrome);border:1px solid var(--rule);border-radius:10px}
+.appx summary{cursor:pointer;padding:12px 16px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;list-style-position:inside}
+.appx summary b{font-size:15px}
+.appx summary span{color:var(--sub);font-size:13px}
+.vote-sheet{display:grid;gap:10px;padding:4px 16px 16px;font-size:13px}
+.vote-top{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
+.vote-sheet h2{margin:0;font-family:'Gothic A1','IBM Plex Sans KR',sans-serif;font-weight:800;font-size:19px;line-height:1.25}
+.vote-sheet .lede{max-width:none}
+.vote-key{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px}
+.vote-key span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.vote-key .nb{min-width:18px;height:18px;font-size:11px;padding:0 4px}
+.vote{min-width:640px}
+.vote th,.vote td{border:1px solid var(--rule);vertical-align:middle}
+.vote th{background:var(--faint)}
+.vote th small{display:block;font-weight:400;color:var(--sub);font-size:11px}
+.vote td{height:30px}
+.vote .pk{white-space:nowrap}
+.vote .pk span{margin-right:12px}
+.cb{display:inline-block;width:12px;height:12px;border:1.2px solid var(--ink);border-radius:2px;vertical-align:-1px;margin-right:4px;background:#FFFFFF}
+.wrap-up{border:1.5px solid var(--ink);border-radius:6px;padding:10px 14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:8px 18px}
+.wrap-up b{grid-column:1 / -1}
+.wrap-up span{border-bottom:1px solid var(--rule);padding-bottom:4px;color:var(--sub)}
+.vote-foot{margin:0;font-size:11.5px;color:var(--mute)}
+
+@page{size:A4;margin:12mm}
+@page vote{size:A4 landscape;margin:10mm}
+@media print{
+  html,body{background:#FFFFFF}
+  .panel,.copy,.appx summary{display:none!important}
+  .blk,.pre,.opt,.ask{break-inside:avoid}
+  .appx{page:vote;break-before:page;padding:0;max-width:none}
+  .appx details{border:0;border-radius:0}
+  body.only-vote>:not(#appx){display:none!important}
+  body.only-vote .appx{break-before:auto}
+  .vote-sheet{padding:0;gap:3.5mm;font-size:10pt;color:#1B2430}
+  .vote-sheet h2{font-size:18pt}
+  .vote-sheet .lede{font-size:10.5pt;color:#5F6B7A}
+  .vote-key{font-size:9.5pt;gap:1mm 5mm}
+  .vote{min-width:0;font-size:10pt}
+  .vote th,.vote td{border-color:#B8C0CA}
+  .vote th small{font-size:8pt}
+  .vote td{height:11.5mm}
+  .cb{width:3.4mm;height:3.4mm;border-color:#1B2430}
+  .wrap-up{grid-template-columns:repeat(4,1fr);border-color:#1B2430;font-size:10.5pt}
+  .vote-foot{font-size:8pt}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<nav class="wl-nav" aria-label="웹 일지 메뉴"><div class="wl-in"><span class="wl-brand">UBO ONE</span><a href="./">업무 일지</a><a href="design.html" aria-current="page">디자인</a></div></nav>
+<style>
+html{scroll-padding-top:64px}
+.wl-nav{--wl-bg:#FFFFFF;--wl-line:#D5DBE3;--wl-ink:#1B2430;--wl-muted:#5F6B7A;--wl-accent:#0E8A78;position:sticky;top:0;z-index:100;background:var(--wl-bg);border-bottom:1px solid var(--wl-line);font-family:'IBM Plex Sans KR','Noto Sans KR','Malgun Gothic',system-ui,sans-serif}
+
+.wl-nav .wl-in{max-width:1120px;margin:0 auto;padding:0 20px;display:flex;align-items:stretch;gap:2px;height:48px}
+.wl-nav .wl-brand{display:flex;align-items:center;font-weight:700;font-size:14px;letter-spacing:.02em;color:var(--wl-ink);margin-right:16px;white-space:nowrap}
+.wl-nav a{display:flex;align-items:center;padding:0 12px;font-size:14px;font-weight:600;color:var(--wl-muted);text-decoration:none;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.wl-nav a:hover{color:var(--wl-ink)}
+.wl-nav a[aria-current="page"]{color:var(--wl-ink);border-bottom-color:var(--wl-accent)}
+.wl-nav a:focus-visible{outline:2px solid var(--wl-accent);outline-offset:-2px}
+@media (max-width:520px){.wl-nav .wl-in{padding:0 12px}.wl-nav .wl-brand{margin-right:8px}.wl-nav a{padding:0 9px}}
+@media print{.wl-nav{display:none}}
+</style>
+<header class="top">
+  <div class="wrap">
+    <h1>UBO 디자인 시스템</h1>
+    <p class="status" id="status"></p>
+    <p class="lede">새 프로그램(UBO 워크스) 화면을 어떤 느낌 · 부품 · 말로 만들지 한 장에 모았습니다. 먼저 <a href="#feel">1. 화면 느낌</a>을 보시고 이대로 가도 될지 알려 주세요. 2절부터는 그 느낌으로 만든 색 · 글자 · 버튼 · 표 같은 부품과 화면 틀이고, 화면을 그릴 때 이 장을 기준으로 삼습니다.</p>
+    <ul class="toc">
+      <li><b>1 화면 느낌</b><a href="#f-compare">한눈 비교</a> · <a href="#f-font">항목별 ①~⑨</a> · <a href="#f-ask">확인 부탁</a></li>
+      <li><b>2 기초</b><a href="#color">색</a> · <a href="#type">글자</a> · <a href="#space">간격</a> · <a href="#radius">모서리</a></li>
+      <li><b>3 부품</b><a href="#btn">버튼</a> · <a href="#field">입력칸</a> · <a href="#ltable">목록 표</a> · <a href="#etable">입력 표</a> · <a href="#status-pill">상태</a> · <a href="#company">업체</a> · <a href="#notice">안내</a> · <a href="#filter">고르기</a> · <a href="#card">휴대폰 카드</a> · <a href="#bar">메뉴줄</a></li>
+      <li><b>4 화면 틀</b><a href="#l-list">목록</a> · <a href="#l-entry">입력</a> · <a href="#l-phone">휴대폰</a></li>
+      <li><a href="#words"><b>5 말</b></a></li>
+      <li><a href="#rules"><b>6 지킬 것</b></a></li>
+      <li><a href="#export"><b>7 값 모음</b></a></li>
+      <li><a href="#appx"><b>부록 고르기 표</b></a></li>
+    </ul>
+  </div>
+</header>
+<div class="wrap feel" id="feelBox"></div>
+<div class="panel" id="panel" aria-label="견본 바꿔 보기">
+  <div class="wrap">
+    <div class="ctl" id="presetCtl"></div>
+    <div class="ctl" id="axisCtl"></div>
+    <p class="now" id="now"></p>
+  </div>
+</div>
+<main class="wrap" id="content"></main>
+<section class="wrap appx" id="appx" aria-label="부록 고르기 표"></section>
+<script>
+'use strict';
+
+// ── 판매 업체 이름 — 이 파일에서 업체 이름은 여기서만 나온다. 공개 페이지로 올릴 때 이 줄만 바꿔 끼운다 ──
+const COMPANIES = ['가람상사', '나래상사', '보람샵-김포', '보람샵-인천', '세움'];
+
+// ── 값 — 이 파일의 유일한 원본. 견본 CSS · 값 모음이 모두 여기서 나온다 ─────────
+// 키는 CSS 변수 이름(앞의 -- 뺌)
+const TOKENS = {
+  font: {
+    dotum: { 'u-ff': '"Dotum","돋움","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",sans-serif' },
+    malgun: { 'u-ff': '"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",sans-serif' },
+    noto: { 'u-ff': '"Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",sans-serif' },
+  },
+  size: { s: { 'u-fs': '13px' }, m: { 'u-fs': '14px' }, l: { 'u-fs': '16px' } },
+  density: {
+    tight: { 'u-row': '28px', 'u-ctl': '24px', 'u-pad': '6px', 'u-gap': '6px' },
+    normal: { 'u-row': '36px', 'u-ctl': '32px', 'u-pad': '10px', 'u-gap': '10px' },
+    loose: { 'u-row': '48px', 'u-ctl': '42px', 'u-pad': '14px', 'u-gap': '14px' },
+  },
+  radius: {
+    sharp: { 'u-r': '2px', 'u-rp': '2px', 'u-rc': '2px' },
+    soft: { 'u-r': '6px', 'u-rp': '6px', 'u-rc': '8px' },
+    round: { 'u-r': '12px', 'u-rp': '999px', 'u-rc': '16px' },
+  },
+  color: {
+    blue: {
+      'u-bg': '#F7F8F9', 'u-surface': '#FFFFFF', 'u-panel': '#F4F6F9', 'u-line': '#D9DDE3', 'u-line2': '#C3C9D1', 'u-head': '#F1F3F6', 'u-head-ink': '#222831', 'u-ink': '#111418', 'u-sub': '#646B74',
+      'u-pri': '#2B4BD8', 'u-pri-ink': '#FFFFFF', 'u-bar': '#2B4BD8', 'u-bar-ink': '#FFFFFF', 'u-nav': '#FFFFFF', 'u-nav-ink': '#222831', 'u-nav-on': '#2B4BD8',
+      'u-link': '#2443C4', 'u-acc': '#2B4BD8', 'u-ok': '#1E7B3A', 'u-danger': '#C62828', 'u-zebra': '#F4F6F9', 'u-warn-bg': '#FFF4E5', 'u-warn-ink': '#A44A00', 'u-warn-line': '#F5C98A',
+      's-done-bg': '#E6F4EA', 's-done': '#1E7B3A', 's-doing-bg': '#E8EDFF', 's-doing': '#2443C4', 's-check-bg': '#F1E9FF', 's-check': '#6A3DC0', 's-wait-bg': '#EEF0F3', 's-wait': '#4D545C', 's-late-bg': '#FDE7E7', 's-late': '#C62828',
+    },
+    navy: {
+      'u-bg': '#F2F4F7', 'u-surface': '#FFFFFF', 'u-panel': '#FFFFFF', 'u-line': '#E3E7ED', 'u-line2': '#CDD4DD', 'u-head': '#F7F9FB', 'u-head-ink': '#5B6675', 'u-ink': '#1B2430', 'u-sub': '#6B7685',
+      'u-pri': '#1E3A5F', 'u-pri-ink': '#FFFFFF', 'u-bar': '#FFFFFF', 'u-bar-ink': '#1E3A5F', 'u-nav': '#1E3A5F', 'u-nav-ink': '#E8EEF5', 'u-nav-on': '#3FC7B0',
+      'u-link': '#0E7C6B', 'u-acc': '#0E8A78', 'u-ok': '#0B6B5C', 'u-danger': '#B3261E', 'u-zebra': '#F6F8FA', 'u-warn-bg': '#FFF6E0', 'u-warn-ink': '#8A5300', 'u-warn-line': '#F1D08A',
+      's-done-bg': '#DDF1EC', 's-done': '#0B6B5C', 's-doing-bg': '#E3ECF7', 's-doing': '#1E3A5F', 's-check-bg': '#ECE8F7', 's-check': '#5B47A8', 's-wait-bg': '#EEF1F4', 's-wait': '#5B6675', 's-late-bg': '#FBE4E1', 's-late': '#B3261E',
+    },
+    contrast: {
+      'u-bg': '#FFFFFF', 'u-surface': '#FFFFFF', 'u-panel': '#FFFFFF', 'u-line': '#A3AAB3', 'u-line2': '#4B5563', 'u-head': '#111827', 'u-head-ink': '#FFFFFF', 'u-ink': '#0B0F14', 'u-sub': '#374151',
+      'u-pri': '#C2410C', 'u-pri-ink': '#FFFFFF', 'u-bar': '#111827', 'u-bar-ink': '#FFFFFF', 'u-nav': '#0B0F14', 'u-nav-ink': '#FFFFFF', 'u-nav-on': '#F97316',
+      'u-link': '#C2410C', 'u-acc': '#EA580C', 'u-ok': '#15803D', 'u-danger': '#DC2626', 'u-zebra': '#F0F1F3', 'u-warn-bg': '#FFEDD5', 'u-warn-ink': '#9A3412', 'u-warn-line': '#FB923C',
+      's-done-bg': '#15803D', 's-done': '#FFFFFF', 's-doing-bg': '#1D4ED8', 's-doing': '#FFFFFF', 's-check-bg': '#6D28D9', 's-check': '#FFFFFF', 's-wait-bg': '#4B5563', 's-wait': '#FFFFFF', 's-late-bg': '#DC2626', 's-late': '#FFFFFF',
+    },
+  },
+};
+document.head.insertAdjacentHTML('beforeend', `<style id="tokens">${Object.entries(TOKENS).flatMap(([axis, opts]) =>
+  Object.entries(opts).map(([v, vars]) => `.tok[data-${axis}="${v}"]{${Object.entries(vars).map(([k, x]) => `--${k}:${x}`).join(';')}}`)).join('\n')}</style>`);
+
+// ── 항목 ① ~ ⑨ — 모양 일곱(AXES) + 말 둘(SAY_AXES). 번호는 이 순서다 ─────────
+// crop 은 1절 항목별 견본의 그림 종류, real 은 실제 크기로 보이는 항목, foot 은 항목 아래 한 줄
+const AXES = [
+  { k: 'font', name: '글꼴', q: '어떤 글씨가 오래 읽기 편한가요?', crop: 'text', real: true, opts: [
+    { v: 'dotum', label: '돋움', note: '지금 이카운트 글꼴' }, { v: 'malgun', label: '맑은 고딕', note: '윈도 기본 글꼴' }, { v: 'noto', label: '본고딕', note: '요즘 앱에 많이 쓰는 글꼴' } ] },
+  { k: 'size', name: '글자 크기', q: '자리에서 편하게 읽히는 크기는?', crop: 'text', real: true, opts: [
+    { v: 's', label: '작게', note: '이카운트와 비슷' }, { v: 'm', label: '보통', note: '' }, { v: 'l', label: '크게', note: '창고 · 휴대폰에 맞춤' } ] },
+  { k: 'density', name: '촘촘함', q: '한 화면에 몇 줄이 보이면 좋을까요?', crop: 'density', real: true, opts: [
+    { v: 'tight', label: '촘촘', note: '한 화면에 많이' }, { v: 'normal', label: '보통', note: '' }, { v: 'loose', label: '넉넉', note: '누르기 쉽고 덜 보임' } ] },
+  { k: 'color', name: '색', q: '하루 종일 봐도 괜찮은 색은?', crop: 'entry', opts: [
+    { v: 'blue', label: '진한 파랑', note: '이카운트와 비슷' }, { v: 'navy', label: '남색 + 청록', note: '차분함' }, { v: 'contrast', label: '검정 대비 + 주황', note: '멀리서도 또렷' } ],
+    foot: '그림 아래 줄은 그 색으로 본 상태 표시 다섯 가지(완료 · 진행 · 검수 · 대기 · 지연)입니다.' },
+  { k: 'table', name: '표 모양', q: '숫자를 따라 읽기 쉬운 표는?', crop: 'table', opts: [
+    { v: 'grid', label: '칸막이 + 줄 번호', note: '이카운트와 같음' }, { v: 'lines', label: '가로줄', note: '선을 줄임' }, { v: 'zebra', label: '줄무늬', note: '한 줄씩 색' } ] },
+  { k: 'btn', name: '버튼 자리', q: '저장 · 확정 버튼이 어디 있으면 편할까요?', crop: 'entry', opts: [
+    { v: 'bottom', label: '아래 모음 + 단축키', note: '이카운트와 같음' }, { v: 'top', label: '오른쪽 위', note: '제목 옆' }, { v: 'big', label: '아래 큰 버튼', note: '터치 · 휴대폰에 편함' } ],
+    foot: '단축키(F2 새로 만들기 · F3 찾기 · F8 저장)는 이카운트와 같은 키로 두고, 버튼 이름에는 적지 않습니다 — 추정, 회차 2 에서 주문 기능을 정할 때 확정.' },
+  { k: 'radius', name: '모서리', q: '버튼 · 칸의 모서리는?', crop: 'controls', real: true, opts: [
+    { v: 'sharp', label: '각지게', note: '이카운트와 비슷' }, { v: 'soft', label: '살짝 둥글게', note: '' }, { v: 'round', label: '둥글게', note: '부드러움' } ] },
+];
+const SAY_AXES = [
+  { k: 'words', name: '용어', q: '이카운트에서 쓰던 말을 그대로 둘까요?', crop: 'words', real: true, opts: [
+    { v: 'ecount', label: '이카운트 말', note: '지금 쓰는 말 — 새로 익힐 게 없음' }, { v: 'easy', label: '쉬운 말', note: '처음 보는 사람도 바로 앎 · 처음 며칠은 헷갈릴 수 있음' } ],
+    foot: '세금계산서 · 장부에 찍히는 말(거래처 · 담당자 · 규격 · 단가 · 공급가액 · 부가세 · 미수금 · 잔액)은 그대로 둡니다. 바뀌는 말 10개 전체는 <a href="#w-terms">5. 말 → 용어</a>.' },
+  { k: 'tone', name: '안내 문구', q: '알림 · 안내 글은 어떤 말투가 좋을까요?', crop: 'tone', real: true, opts: [
+    { v: 'formal', label: '합니다', note: '공손하고 또렷함' }, { v: 'polite', label: '해요', note: '부드러움' }, { v: 'short', label: '짧게', note: '빨리 읽히지만 딱딱함' } ],
+    foot: '한 프로그램 안에서는 한 가지 말투만 씁니다. 상황별 문장은 <a href="#w-tone">5. 말 → 안내 문구 말투</a>.' },
+];
+const ITEMS9 = [...AXES, ...SAY_AXES];
+const ax = k => ITEMS9.find(a => a.k === k);
+const PRESETS = {
+  A: { name: '이카운트처럼', line: '지금 쓰는 이카운트와 거의 같은 모양입니다. 새로 익힐 게 가장 적습니다.',
+    s: { font: 'dotum', size: 's', density: 'tight', color: 'blue', table: 'grid', btn: 'bottom', radius: 'sharp' } },
+  B: { name: '차분하게 정리', line: '선을 줄이고 여백을 조금 두었습니다. 오래 봐도 눈이 덜 피곤한 쪽입니다.',
+    s: { font: 'noto', size: 'm', density: 'normal', color: 'navy', table: 'lines', btn: 'top', radius: 'soft' } },
+  C: { name: '크고 또렷하게', line: '창고 · 휴대폰에서도 잘 보이게 크게 했습니다. 대신 한 화면에 보이는 줄이 적습니다.',
+    s: { font: 'noto', size: 'l', density: 'loose', color: 'contrast', table: 'zebra', btn: 'big', radius: 'round' } },
+};
+// 정한 값 — 바꿀 때는 여기만 고친다. 회사 확인을 받으면 confirmed: true (맨 위 상태 줄 · 값 모음 머리가 같이 바뀐다)
+const CHOSEN = { date: '2026-10-02', note: '초안', confirmed: false, s: { ...PRESETS.C.s, density: 'normal', color: 'navy', table: 'grid' }, words: 'easy', tone: 'formal' };
+const FONT_NAME = { dotum: '돋움 (Dotum)', malgun: '맑은 고딕 (Malgun Gothic)', noto: '본고딕 (Noto Sans KR)' };
+
+// ── 말 ─────────────────────────────────────────────────────────────────
+const WORDS = {
+  ecount: { quote: '견적서입력', list: '견적서조회', item: '품목', code: '품목코드', name: '품목명', wh: '출하창고', memo: '적요', date: '일자', find: '품목 찾기', search: '검색', newDoc: '신규', save: '저장', confirm: '주문 확정', print: '견적서 인쇄', reset: '다시 작성', delSel: '선택삭제', ship: '출하지시서', act: '출하 처리', detail: '상세' },
+  easy: { quote: '견적 작성', list: '견적 목록', item: '상품', code: '상품 코드', name: '상품명', wh: '출고 창고', memo: '메모', date: '날짜', find: '상품 찾기', search: '찾기', newDoc: '새로 만들기', save: '저장', confirm: '주문으로 확정', print: '견적서 PDF', reset: '처음부터', delSel: '선택 삭제', ship: '출고 요청함', act: '출고 처리', detail: '자세히' },
+};
+const KEYS = { new: 'F2', search: 'F3', find: 'F3', confirm: 'F7', save: 'F8' }; // 이카운트와 같은 키 — '아래 모음' 버튼에서만 보인다
+const TONES = {
+  formal: { saved: '저장했습니다', lack: n => `${n} 재고가 부족합니다. 가용 수량 0개`, need: '거래처를 선택해 주세요', delQ: '이 견적을 삭제할까요?', delD: '되돌릴 수 없습니다.', empty: '아직 견적이 없습니다', emptyD: '새 견적을 만들어 주세요', info: '10월 견적은 금요일까지 확정해 주세요', done: '주문으로 확정했습니다' },
+  polite: { saved: '저장했어요', lack: n => `${n} 재고가 부족해요. 가용 수량 0개`, need: '거래처를 골라 주세요', delQ: '이 견적을 지울까요?', delD: '되돌릴 수 없어요.', empty: '아직 견적이 없어요', emptyD: '새 견적을 만들어 보세요', info: '10월 견적은 금요일까지 확정해 주세요', done: '주문으로 확정했어요' },
+  short: { saved: '저장 완료', lack: n => `${n} 재고 부족 · 가용 0`, need: '거래처 필수', delQ: '견적 삭제?', delD: '되돌릴 수 없음', empty: '견적 없음', emptyD: '새 견적 만들기', info: '10월 견적 금요일까지 확정', done: '주문 확정 완료' },
+};
+const TERMS = [
+  ['파는 물건', '품목', '상품'], ['물건 번호', '품목코드', '상품 코드'], ['창고에 내보내라고 넘기는 문서', '출하지시서', '출고 요청'],
+  ['창고에서 물건을 내보냄', '출하', '출고'], ['줄마다 적는 짧은 말', '적요', '메모'], ['날짜 칸', '일자', '날짜'], ['새 문서 만들기', '신규', '새로 만들기'],
+  ['적던 것을 지우고 처음부터', '다시 작성', '처음부터'], ['견적 만드는 화면', '견적서입력', '견적 작성'], ['판매 넣는 화면', '판매입력', '판매 등록'],
+];
+
+// ── 견본 데이터 — 실제 거래처 · 금액이 아니다. co 는 COMPANIES 의 번호 ───────
+const SAMPLE = {
+  items: [
+    { code: 'SF-301', name: '3인 패브릭 소파', spec: '그레이 2100', qty: 2, price: 890000, memo: '2층 배송' },
+    { code: 'DK-120', name: '원목 책상', spec: '1200×600', qty: 4, price: 245000, memo: '', edited: true },
+    { code: 'CH-015', name: '사무용 의자', spec: '메쉬 블랙', qty: 8, price: 89000, memo: '' },
+    { code: 'WD-180', name: '슬라이딩 옷장', spec: '1800 화이트', qty: 1, price: 1150000, memo: '', lack: true },
+    { code: 'SH-012', name: '신발장 12단', spec: '월넛', qty: 3, price: 132000, memo: '현관 설치' },
+  ],
+  extra: { code: 'TB-090', name: '회의 테이블', spec: '900 원형', qty: 2, price: 310000, memo: '' },
+  list: [
+    { date: '10-01', cust: '가나인테리어', co: 1, items: '3인 패브릭 소파 외 4건', amt: 5519800, st: 'doing', who: '박지훈' },
+    { date: '09-30', cust: '한결가구', co: 0, items: '원목 책상 외 1건', amt: 1348600, st: 'done', who: '이수민' },
+    { date: '09-30', cust: '다온오피스', co: 2, items: '사무용 의자', amt: 783200, st: 'wait', who: '박지훈' },
+    { date: '09-29', cust: '서해건설', co: 4, items: '슬라이딩 옷장 외 2건', amt: 2860000, st: 'late', who: '최다은' },
+    { date: '09-27', cust: '예시상회', co: 3, items: '신발장 12단', amt: 435600, st: 'done', who: '이수민' },
+    { date: '09-26', cust: '가나인테리어', co: 1, items: '회의 테이블 외 3건', amt: 1920000, st: 'check', who: '박지훈' },
+    { date: '09-25', cust: '한결가구', co: 0, items: '책장 5단 외 2건', amt: 1105500, st: 'done', who: '최다은' },
+    { date: '09-24', cust: '다온오피스', co: 2, items: '파티션 1200', amt: 968000, st: 'done', who: '이수민' },
+    { date: '09-23', cust: '서해건설', co: 4, items: '원목 책상 외 5건', amt: 3410000, st: 'done', who: '최다은' },
+  ],
+  cards: [
+    { st: 'late', time: '10:30까지', cust: '가나인테리어', co: 1, items: '3인 패브릭 소파 외 2건 · 7개', wh: '김포 1창고' },
+    { st: 'wait', time: '11:00까지', cust: '한결가구', co: 0, items: '원목 책상 · 4개', wh: '김포 1창고' },
+    { st: 'doing', time: '13:00까지', cust: '다온오피스', co: 2, items: '사무용 의자 · 8개', wh: '김포 2창고' },
+    { st: 'check', time: '14:30까지', cust: '서해건설', co: 4, items: '슬라이딩 옷장 · 1개', wh: '파주 창고' },
+    { st: 'done', time: '09:10 처리', cust: '예시상회', co: 3, items: '신발장 12단 · 3개', wh: '인천 창고' },
+  ],
+};
+const ST = { done: '완료', doing: '진행', check: '검수', wait: '대기', late: '지연' };
+
+const fmt = n => n.toLocaleString('ko-KR');
+const supply = it => it.qty * it.price;
+const vat = it => supply(it) / 10;
+const SEARCH = '<svg class="u-ic" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.4 10.4 14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+const CAL = '<svg class="u-ic" viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="3" width="12" height="11" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M2 6.5h12M5.5 1.5v3M10.5 1.5v3" stroke="currentColor" stroke-width="1.4"/></svg>';
+const optOf = (a, v) => a.opts.find(o => o.v === v) || a.opts[0];
+const attrs = s => Object.entries(s).map(([k, v]) => `data-${k}="${v}"`).join(' ');
+const px = (axis, v, key) => TOKENS[axis][v][key];
+const md = d => d.slice(5);
+const CIRCLED = '①②③④⑤⑥⑦⑧⑨';
+
+// ── 정한 값 · 지금 보는 값 ──────────────────────────────────────────────
+const START = { ...CHOSEN.s, words: CHOSEN.words, tone: CHOSEN.tone };
+const state = { ...START };
+const onChosen = () => Object.keys(START).every(k => state[k] === START[k]);
+function nearestOf(s) {
+  let best = 'B', hit = -1;
+  for (const [key, p] of Object.entries(PRESETS)) {
+    const n = AXES.filter(a => p.s[a.k] === s[a.k]).length;
+    if (n > hit) { best = key; hit = n; }
+  }
+  return best;
+}
+const diffOf = s => AXES.filter(a => PRESETS[nearestOf(s)].s[a.k] !== s[a.k]);
+function summaryOf(s) {
+  const near = nearestOf(s);
+  const diff = diffOf(s);
+  return diff.length ? `시안 ${near} 바탕 + ${diff.map(a => `${a.name} ${optOf(a, s[a.k]).label}`).join(' · ')}` : `시안 ${near} 그대로`;
+}
+const confirmText = () => CHOSEN.confirmed ? '회사 확인' : '회사 확인 전';
+const statusText = () => `정한 값 — 시안 ${nearestOf(START)} 바탕 (${md(CHOSEN.date)} ${CHOSEN.note}, ${confirmText()})`;
+
+// ── 부품 그리기 ─────────────────────────────────────────────────────────
+function btn(s, key, label, cls = '') {
+  const k = s.btn === 'bottom' && KEYS[key] ? `<kbd>(${KEYS[key]})</kbd>` : '';
+  return `<span class="u-btn ${cls}">${label}${k}</span>`;
+}
+const stage = (inner, cls = '') => `<div class="stage tok ${cls}" ${attrs(state)}>${inner}</div>`;
+const blk = (id, name, code, use, body, tag = '') => `<article class="blk" id="${id}"><div class="blk-h"><h3>${name}</h3><code>${code}</code>${tag}</div><p class="use">${use}</p>${body}</article>`;
+const rules = list => `<ul class="rules">${list.map(x => `<li>${x}</li>`).join('')}</ul>`;
+const frame = (inner, w, h, scale) => `<div class="frame" style="width:${(w * scale).toFixed(1)}px;height:${(h * scale).toFixed(1)}px">`
+  + `<div class="frame-in" style="width:${w}px;height:${h}px;zoom:${scale}">${inner}</div></div>`;
+
+// 입력 표 — 상품 줄 · 빈 줄(칸막이) 또는 '줄 추가' · 지금 칸 · 손으로 고친 단가 · 자동 계산 칸
+// opt.cols 로 칸을 고른다(1절 작은 그림). opt.fill 이 없으면 꼬리 줄을 달지 않는다
+const COLS = W => ({
+  code: [W.code, 9, it => it.code], name: [W.name, 19, it => it.name], spec: ['규격', 12, it => it.spec],
+  qty: ['수량', 6, it => it.qty, 'n'], price: ['단가', 10, it => fmt(it.price), 'n'],
+  supply: ['공급가액', 11, it => fmt(supply(it)), 'n auto'], vat: ['부가세', 9, it => fmt(vat(it)), 'n auto'], total: ['합계', 11, it => fmt(supply(it) + vat(it)), 'n auto'],
+  memo: [W.memo, 13, it => it.lack ? '<span class="u-pill s-late">가용 0</span>' : it.memo],
+});
+const ALL_COLS = ['code', 'name', 'spec', 'qty', 'price', 'supply', 'vat', 'total', 'memo'];
+function entryTable(s, items, opt = {}) {
+  const defs = COLS(WORDS[s.words]);
+  const grid = s.table === 'grid';
+  const cols = (opt.cols || ALL_COLS).map(k => [k, ...defs[k]]);
+  const sum = cols.reduce((a, c) => a + c[2], 0);
+  const colg = (grid ? '<col style="width:38px">' : '') + cols.map(c => `<col style="width:${(c[2] / sum * 100).toFixed(2)}%">`).join('');
+  const head = (grid ? '<th class="c">No</th>' : '') + cols.map(c => `<th${c[4] ? ' class="n"' : ''}>${c[1]}</th>`).join('');
+  const rows = items.map((it, i) => `<tr data-r>${grid ? `<td class="no"><span>${i + 1}</span></td>` : ''}${cols.map(c => {
+    const cls = [c[4], opt.cur && opt.cur[0] === i && opt.cur[1] === c[0] ? 'cur' : '', it.edited && c[0] === 'price' ? 'edited' : ''].filter(Boolean).join(' ');
+    return `<td${cls ? ` class="${cls}"` : ''}>${c[3](it)}</td>`;
+  }).join('')}</tr>`).join('');
+  const tail = opt.fill === undefined ? ''
+    : grid ? Array.from({ length: opt.fill }, (_, i) => `<tr><td class="no"><span>${items.length + i + 1}</span></td>${cols.map(() => '<td></td>').join('')}</tr>`).join('')
+    : `<tr><td class="add" colspan="${cols.length}">+ 줄 추가</td></tr>`;
+  return `<table class="u-table"><colgroup>${colg}</colgroup><thead><tr>${head}</tr></thead><tbody>${rows}${tail}</tbody></table>`;
+}
+function sumHtml(items) {
+  const sup = items.reduce((a, it) => a + supply(it), 0);
+  const v = items.reduce((a, it) => a + vat(it), 0);
+  return `<div class="u-sum"><span>수량<b>${items.reduce((a, it) => a + it.qty, 0)}</b></span><span>공급가액<b>${fmt(sup)}</b></span><span>부가세<b>${fmt(v)}</b></span><span class="grand">합계<b>${fmt(sup + v)}</b></span></div>`;
+}
+// 목록 표 — 고르기 칸 · 날짜(누르면 상세) · 판매 업체 · 금액 · 상태
+function listTable(s, rows) {
+  const W = WORDS[s.words];
+  const grid = s.table === 'grid';
+  const colg = `${grid ? '<col style="width:38px">' : ''}<col style="width:34px"><col style="width:8%"><col style="width:14%"><col style="width:16%"><col style="width:24%"><col style="width:13%"><col style="width:8%"><col style="width:9%"><col style="width:7%">`;
+  const head = `${grid ? '<th class="c">No</th>' : ''}<th class="c"><span class="u-cb"></span></th><th>${W.date}<span class="sort">▼</span></th><th>거래처</th><th>판매 업체</th><th>${W.item}</th><th class="n">금액</th><th>상태</th><th>담당</th><th class="c">인쇄</th>`;
+  const body = rows.map((r, i) => `<tr data-r>${grid ? `<td class="no"><span>${i + 1}</span></td>` : ''}<td class="c"><span class="u-cb${i === 1 ? ' on' : ''}">${i === 1 ? '✓' : ''}</span></td><td><span class="link">${r.date}</span></td><td>${r.cust}</td><td>${COMPANIES[r.co]}</td><td>${r.items}</td><td class="n">${fmt(r.amt)}</td><td><span class="u-pill s-${r.st}">${ST[r.st]}</span></td><td>${r.who}</td><td class="c"><span class="link">인쇄</span></td></tr>`).join('');
+  return `<table class="u-table"><colgroup>${colg}</colgroup><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+}
+const navHtml = () => '<div class="u-nav"><span class="u-logo">UBO 워크스</span><div class="u-menu"><span class="on">견적</span><span>주문</span><span>재고</span><span>출고</span><span>구매</span><span>배송</span><span>설정</span></div><span class="u-user">박지훈 · 영업</span></div>';
+function mobileCard(s, c) {
+  const W = WORDS[s.words];
+  const done = c.st === 'done';
+  const link = s.btn === 'top' && !done ? `<span class="p-link">${W.act} ›</span>` : '';
+  const act = done ? '<span class="p-done">✓ 처리 끝</span>'
+    : s.btn === 'big' ? `<span class="u-btn pri big">${W.act}</span>`
+    : s.btn === 'bottom' ? `<div class="p-act"><span class="u-btn">${W.detail}</span><span class="u-btn pri">${W.act}</span></div>` : '';
+  return `<div class="p-card" data-r><div class="p-top"><span class="u-pill s-${c.st}">${ST[c.st]}</span><span class="p-time">${c.time}</span>${link}</div>`
+    + `<div class="p-cust"><b>${c.cust}</b><span class="u-co">${COMPANIES[c.co]}</span></div><div class="p-items">${c.items}</div><div class="p-wh">${c.wh}</div>${act}</div>`;
+}
+
+// ── 화면 그림 ───────────────────────────────────────────────────────────
+function entryMock(s) {
+  const W = WORDS[s.words];
+  const T = TONES[s.tone];
+  const I = SAMPLE.items;
+  const field = (l, v, icon = '') => `<div class="u-f"><span class="u-l">${l}</span><span class="u-in">${v}${icon}</span></div>`;
+  const top = s.btn === 'top' ? `${btn(s, 'print', W.print)}${btn(s, 'confirm', W.confirm)}${btn(s, 'save', W.save, 'pri')}` : '';
+  const actions = s.btn === 'bottom'
+    ? `<div class="u-actions">${btn(s, 'save', W.save, 'pri')}${btn(s, 'confirm', W.confirm)}${btn(s, 'print', W.print)}${btn(s, 'reset', W.reset)}${btn(s, 'close', '닫기')}</div>`
+    : s.btn === 'big' ? `<div class="u-actions big">${btn(s, 'close', '닫기')}${btn(s, 'reset', W.reset)}${btn(s, 'print', W.print)}<span class="u-sp"></span>${btn(s, 'confirm', W.confirm, 'big')}${btn(s, 'save', W.save, 'pri big')}</div>` : '';
+  return `<div class="tok ui" ${attrs(s)}>${navHtml()}<div class="u-body"><div class="u-win">
+<div class="u-winbar"><span>${W.quote}</span><span class="ico">▢ ✕</span></div>
+<div class="u-head"><span class="u-title">${W.quote}</span><span class="u-pill s-wait">작성 중</span><span class="u-saved">✓ ${T.saved} · 10:42</span><span class="u-sp"></span>${top}</div>
+<div class="u-form">${field('판매 업체', COMPANIES[1], '<span class="u-ic" style="width:auto">▾</span>')}${field(W.date, '2026-10-01')}${field('거래처', '가나인테리어', SEARCH)}${field('담당자', '박지훈')}${field(W.wh, '김포 1창고', SEARCH)}${field('납기일', '2026-10-08')}</div>
+<div class="u-tools">${btn(s, 'find', W.find)}<span class="u-btn">재고 보기</span><span class="u-btn">줄 추가</span><span class="u-sp"></span><span class="u-count">${I.length}줄</span></div>
+<div class="u-tablewrap" data-scroll="줄">${entryTable(s, I, { fill: 12 })}<div class="u-more" hidden></div></div>
+${sumHtml(I)}<div class="u-note warn">⚠ ${T.lack(I.find(it => it.lack).name)}</div>${actions}
+</div></div></div>`;
+}
+function listMock(s) {
+  const W = WORDS[s.words];
+  const top = s.btn === 'top' ? `${btn(s, 'excel', '엑셀')}${btn(s, 'print', '인쇄')}${btn(s, 'new', W.newDoc, 'pri')}` : '';
+  const actions = s.btn === 'bottom'
+    ? `<div class="u-actions">${btn(s, 'new', W.newDoc, 'pri')}${btn(s, 'print', '인쇄')}${btn(s, 'excel', '엑셀')}${btn(s, 'del', W.delSel)}</div>`
+    : s.btn === 'big' ? `<div class="u-actions big">${btn(s, 'print', '인쇄')}${btn(s, 'excel', '엑셀')}${btn(s, 'del', W.delSel)}<span class="u-sp"></span>${btn(s, 'new', W.newDoc, 'pri big')}</div>` : '';
+  return `<div class="tok ui" ${attrs(s)}>${navHtml()}<div class="u-body"><div class="u-win">
+<div class="u-winbar"><span>${W.list}</span><span class="ico">▢ ✕</span></div>
+<div class="u-head"><span class="u-title">${W.list}</span><span class="u-count">54건</span><span class="u-sp"></span>${top}</div>
+<div class="u-find"><span class="u-in q ph">거래처 · ${W.item}으로 ${W.search}${SEARCH}</span>${btn(s, 'search', W.search)}<span class="u-sp"></span><div class="u-period"><span class="u-in">2026-09-01${CAL}</span>~<span class="u-in">2026-10-31${CAL}</span></div><span class="u-btn">이번 달</span></div>
+<div class="u-bar2"><div class="u-chips"><span class="on">전체 54</span><span>대기 6</span><span>진행 9</span><span>검수 3</span><span>지연 2</span><span>완료 34</span></div><span class="u-sp"></span><div class="u-pager"><span>‹</span><span class="on">1</span><span>2</span><span>3</span><span>…</span><span>6</span><span>›</span><span class="of">/ 6쪽</span></div></div>
+<div class="u-tablewrap" data-scroll="줄">${listTable(s, SAMPLE.list)}<div class="u-more" hidden></div></div>
+${actions}
+</div></div></div>`;
+}
+function phoneMock(s) {
+  const W = WORDS[s.words];
+  return `<div class="tok ui mobile" ${attrs(s)}>
+<div class="p-status"><span>9:41</span><span>▮▮▮ ◔</span></div>
+<div class="p-bar"><b>${W.ship}</b><span class="p-cnt">5</span><span class="p-who">김포 1창고</span></div>
+<div class="p-chips"><div class="u-chips"><span class="on">전체 5</span><span>대기 1</span><span>진행 1</span><span>검수 1</span><span>지연 1</span><span>완료 1</span></div></div>
+<div class="p-list" data-scroll="건">${SAMPLE.cards.map(c => mobileCard(s, c)).join('')}<div class="u-more" hidden></div></div>
+<div class="p-tabs"><span>홈</span><span class="on">출고</span><span>재고</span><span>더보기</span></div>
+</div>`;
+}
+// 작은 그림 — 1절 항목별 견본. 바꾸는 항목 말고는 정한 값으로 그린다
+function mini(s, kind) {
+  const W = WORDS[s.words];
+  const T = TONES[s.tone];
+  const I = SAMPLE.items;
+  const box = (inner, cls = '') => `<div class="tok ui mini ${cls}" ${attrs(s)}>${inner}</div>`;
+  const pills = Object.entries(ST).map(([k, v]) => `<span class="u-pill s-${k}">${v}</span>`).join('');
+  if (kind === 'text') return box(`<div class="u-tablewrap">${entryTable(s, I.slice(0, 2), { cols: ['name', 'total'] })}</div>`);
+  if (kind === 'density') return box(`<div class="u-tablewrap" data-scroll="줄">${entryTable(s, [...I, SAMPLE.extra], { cols: ['name', 'total'] })}<div class="u-more" hidden></div></div>`);
+  if (kind === 'table') return box(`<div class="u-tablewrap">${entryTable(s, I.slice(0, 4), { cols: ['name', 'spec', 'qty', 'total'] })}</div>`);
+  if (kind === 'status') return box(`<div class="m-row">${pills}</div>`, 'ctl');
+  if (kind === 'words') return box(`<div class="u-head"><span class="u-title">${W.quote}</span><span class="u-sp"></span><span class="u-btn">${W.newDoc}</span></div>`
+    + `<div class="u-tablewrap">${entryTable(s, I.slice(0, 2), { cols: ['code', 'name', 'memo'] })}</div><div class="u-tools"><span class="u-btn">${W.find}</span><span class="u-btn">${W.reset}</span></div>`);
+  if (kind === 'tone') return box(`<span class="u-toast">✓ ${T.saved}</span><div class="u-note warn">⚠ ${T.lack('슬라이딩 옷장')}</div>`
+    + `<div class="u-fc"><span class="u-in err ph">거래처 ${W.search}${SEARCH}</span><span class="u-err">${T.need}</span></div>`, 'ctl');
+  // controls — 칸 · 버튼 · 알약 · 카드 (모서리)
+  return box(`<div class="m-row"><span class="u-in">가나인테리어${SEARCH}</span><span class="u-btn pri">${W.save}</span><span class="u-btn">닫기</span></div><div class="m-row">${pills}</div>`
+    + `<div class="p-card"><div class="p-top"><span class="u-pill s-wait">대기</span><span class="p-time">11:00까지</span></div><div class="p-cust"><b>한결가구</b><span class="u-co">${COMPANIES[0]}</span></div></div>`, 'ctl');
+}
+// 그림 종류 → [그리는 함수, 실제 폭, 실제 높이]
+const KINDS = {
+  entry: [entryMock, 1000, 760], list: [listMock, 1000, 640], phone: [phoneMock, 360, 640],
+  text: [s => mini(s, 'text'), 330, 124], density: [s => mini(s, 'density'), 330, 210], table: [s => mini(s, 'table'), 470, 200],
+  controls: [s => mini(s, 'controls'), 330, 174], status: [s => mini(s, 'status'), 330, 44], words: [s => mini(s, 'words'), 420, 226], tone: [s => mini(s, 'tone'), 380, 182],
+};
+// data-s: live(지금 단추 값) · chosen(정한 값) · A/B/C(그 시안 + 정한 말). data-ax/data-v 가 있으면 그 항목만 바꾼다
+function stateOf(el) {
+  const k = el.dataset.s;
+  const base = k === 'live' ? state : PRESETS[k] ? { ...PRESETS[k].s, words: CHOSEN.words, tone: CHOSEN.tone } : START;
+  return el.dataset.ax ? { ...base, [el.dataset.ax]: el.dataset.v } : base;
+}
+// 그림을 칸 폭에 맞춰 줄인다 (실제 크기보다 키우지는 않는다)
+function fitAll(root) {
+  root.querySelectorAll('[data-mock]').forEach(el => {
+    const [fn, w, h] = KINDS[el.dataset.mock];
+    const cs = getComputedStyle(el);
+    // 휴대폰 틀 칸은 그림 폭만큼만 잡히므로(auto) 블록 폭으로 잰다
+    const inner = el.closest('.lay.phone') ? el.closest('.blk').clientWidth - 66
+      : el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 2;
+    const scale = Math.max(0.2, Math.min(1, inner / w));
+    el.innerHTML = frame(fn(stateOf(el)), w, h, +scale.toFixed(3));
+  });
+}
+
+// ── 1. 화면 느낌 — 단추와 상관없이 늘 정한 값 · 시안 그대로 ──────────────
+function feel() {
+  const near = nearestOf(START);
+  const diff = diffOf(START);
+  const num = a => `<b class="nb">${ITEMS9.indexOf(a) + 1}</b>`;
+  const asks = [
+    ['오래 봐도 눈이 편한가', '하루 종일 켜 두는 화면입니다. 글씨 · 색이 피곤하지 않은지'],
+    ['한 화면에 충분히 보이나', '스크롤 없이 봐야 할 것이 다 보이는지 — 많이 보일수록 글씨는 작아집니다'],
+    ['이카운트에서 넘어와도 안 헷갈리나', '버튼 자리 · 말 · 단축키가 바뀌어도 괜찮은지'],
+  ].map(([b, t]) => `<div><b>${b}</b><span>${t}</span></div>`).join('');
+  const cards = [{ key: '정', title: '정한 값', line: summaryOf(START), s: 'chosen', pick: true },
+    ...Object.entries(PRESETS).map(([k, p]) => ({ key: k, title: `시안 ${k} · ${p.name}`, line: p.line, s: k }))]
+    .map(c => `<figure class="pre${c.pick ? ' pick' : ''}"><figcaption class="pre-h"><span class="letter">${c.key}</span><span><b>${c.title}</b><span>${c.line}</span></span></figcaption><div class="fitbox" data-mock="entry" data-s="${c.s}"></div></figure>`).join('');
+  const rows = ITEMS9.map(a => {
+    const say = !(a.k in PRESETS.A.s);
+    const changed = diff.includes(a);
+    return `<tr><td><a class="itm" href="#f-${a.k}">${num(a)}${a.name}</a></td><td class="on">${optOf(a, START[a.k]).label}${changed ? `<em class="chg">${near} 에서 바꿈</em>` : ''}</td>`
+      + Object.values(PRESETS).map(p => `<td>${say ? '<span class="mute">따로 고름</span>' : optOf(a, p.s[a.k]).label}</td>`).join('') + '</tr>';
+  }).join('');
+  const items = ITEMS9.map(a => {
+    const say = !(a.k in PRESETS.A.s);
+    const figs = a.opts.map(o => {
+      const on = START[a.k] === o.v;
+      const tags = say ? '' : Object.entries(PRESETS).filter(([, p]) => p.s[a.k] === o.v).map(([k]) => `<em class="tag">시안 ${k}</em>`).join('');
+      const status = a.k === 'color' ? `<div class="fitbox" data-mock="status" data-s="chosen" data-ax="color" data-v="${o.v}"></div>` : '';
+      return `<figure class="opt${on ? ' pick' : ''}"><div class="fitbox" data-mock="${a.crop}" data-s="chosen" data-ax="${a.k}" data-v="${o.v}"></div>${status}`
+        + `<figcaption>${on ? '<span class="pickmark">✓ 정한 안</span>' : ''}<b>${o.label}</b>${o.note ? `<span class="note">${o.note}</span>` : ''}${tags ? `<span class="tags">${tags}</span>` : ''}</figcaption></figure>`;
+    }).join('');
+    return `<article class="blk item" id="f-${a.k}"><div class="item-h">${num(a)}<h3>${a.name}</h3><span class="q">${a.q}</span><span class="size">${a.real ? '실제 크기' : '줄여서 보임'}</span></div>`
+      + `<div class="opts">${figs}</div>${a.foot ? `<p class="use">${a.foot}</p>` : ''}</article>`;
+  }).join('');
+  const W = WORDS[CHOSEN.words];
+  return `<section class="part" id="feel"><h2>1. 화면 느낌<small>화면을 어떤 느낌으로 만들지 — 정한 안과 다른 안을 나란히 놓았습니다</small></h2>
+<article class="blk" id="f-compare"><div class="blk-h"><h3>시안 A · B · C 한눈에</h3></div>
+<div class="asks">${asks}</div>
+<p class="use">세 시안은 항목 ①~⑦ 값을 묶은 것입니다. 정한 값은 시안 ${near} 를 바탕으로 ${['한', '두', '세', '네', '다섯', '여섯', '일곱'][diff.length - 1] || ''} 항목(${diff.map(a => `${CIRCLED[ITEMS9.indexOf(a)]} ${a.name}`).join(' · ')})을 바꿨습니다.
+그림 속 말은 넷 다 정한 말(${optOf(ax('words'), CHOSEN.words).label} · ${optOf(ax('tone'), CHOSEN.tone).label})로 맞춰 모양만 비교합니다. 거래처 · 상품 · 금액은 모두 예시입니다.</p>
+<div class="pre-grid">${cards}</div>
+<div class="scroll"><table class="t cmp"><thead><tr><th>항목</th><th class="on">정한 값</th>${Object.entries(PRESETS).map(([k, p]) => `<th>${k} ${p.name}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>
+</article>
+<div class="item-intro"><h3>항목별로 — 정한 안과 다른 안</h3><p class="use">바꾸는 항목 말고는 정한 값 그대로 두고 그렸습니다. 정한 안에 ✓ 표시. 여러 시안을 섞어도 됩니다 — 예) "정한 값인데 글자는 보통".</p></div>
+${items}
+<div class="ask" id="f-ask"><b>확인 부탁드립니다</b>
+<p>이 느낌으로 가도 될지 봐 주세요. 바꾸고 싶은 항목은 번호로 알려 주세요 — 예) "③ 촘촘함은 촘촘으로", "⑧ 용어는 이카운트 말로".</p>
+<p class="sub">회의에서 한 분씩 적으실 때는 맨 끝 <a href="#appx">부록 · 고르기 표</a>를 인쇄해 쓰시면 됩니다. 아래 2절부터는 이 느낌으로 만든 부품 · 화면 틀이고, 바로 아래 단추로 다른 안을 넣어 볼 수 있습니다 — 예) 버튼 자리를 바꾸면 '${W.quote}' 화면의 ${W.save} 버튼 자리가 바뀝니다.</p></div>
+</section>`;
+}
+
+// ── 2. 기초 ─────────────────────────────────────────────────────────────
+const ROLES = [
+  ['u-bg', '바탕', '화면 뒤'], ['u-surface', '면', '창 · 카드 · 표'], ['u-panel', '판', '입력칸 묶음 · 버튼 줄'], ['u-line', '선', '칸 · 표 선'],
+  ['u-line2', '진한 선', '입력칸 테두리 · 합계 위'], ['u-ink', '글자', '본문'], ['u-sub', '보조 글자', '칸 이름 · 설명'], ['u-pri', '주색', '주 버튼'],
+  ['u-nav', '메뉴줄', '맨 위 메뉴'], ['u-acc', '강조', '지금 칸 · 고른 것'], ['u-link', '링크', '누르면 열리는 글자'], ['u-head', '표 머리', '표 맨 윗줄'],
+  ['u-zebra', '줄무늬', '한 줄 건너 바탕'], ['u-danger', '위험', '삭제 · 오류'], ['u-warn-bg', '경고 바탕', '안내 줄 (경고)'], ['u-ok', '완료 글자', '저장됨 표시'],
+];
+const STATUS = [['wait', '대기', '아직 손 안 댐'], ['doing', '진행', '하는 중'], ['check', '검수', '확인 기다림'], ['done', '완료', '끝난 일'], ['late', '지연', '약속 시간 지남']];
+
+function foundations() {
+  const s = state;
+  const C = TOKENS.color[s.color];
+  const base = parseFloat(px('size', s.size, 'u-fs'));
+  const D = TOKENS.density[s.density];
+  const R = TOKENS.radius[s.radius];
+  const sw = ROLES.map(([k, name, use]) => `<div class="sw"><i style="background:var(--${k})"></i><b>${name}</b><span>${use}</span><code>--${k} ${C[k]}</code></div>`).join('');
+  const st = STATUS.map(([k, name, use]) => `<div class="sw"><i style="background:var(--u-surface)"><span class="u-pill s-${k}">${name}</span></i><b>${name}</b><span>${use}</span><code>${C[`s-${k}-bg`]} / ${C[`s-${k}`]}</code></div>`).join('');
+  const TYPE = [['화면 제목', 1.32, 700, WORDS[s.words].quote], ['묶음 제목', 1.1, 700, `${WORDS[s.words].item} · 합계`], ['본문', 1, 400, '가나인테리어 · 2026-10-01 · 김포 1창고'],
+    ['표 머리', 0.92, 700, `${WORDS[s.words].name} · 수량 · 합계`], ['작은 글씨', 0.86, 400, '마지막 저장 10:42 · 5줄']];
+  const ty = TYPE.map(([n, f, w, sample]) => `<div><span class="cap">${n} · ${f}배 · ${+(base * f).toFixed(1)}px · ${w === 700 ? '굵게' : '보통'}</span><span style="font-size:${f}em;font-weight:${w}">${sample}</span></div>`).join('');
+  const dens = Object.entries(TOKENS.density).map(([v, d]) => `<tr${v === s.density ? ' class="on"' : ''}><td>${optOf(ax('density'), v).label}</td><td>${d['u-row']}</td><td>${d['u-ctl']}</td><td>${d['u-pad']}</td><td>${d['u-gap']}</td></tr>`).join('');
+  const rads = Object.entries(TOKENS.radius).map(([v, r]) => `<tr${v === s.radius ? ' class="on"' : ''}><td>${optOf(ax('radius'), v).label}</td><td>${r['u-r']}</td><td>${r['u-rp'] === '999px' ? '끝까지 둥글게' : r['u-rp']}</td><td>${r['u-rc']}</td></tr>`).join('');
+  return `<section class="part" id="found"><h2>2. 기초<small>모든 부품이 이 값만 쓴다 — 색 · 글자 · 간격 · 모서리</small></h2>
+${blk('color', '색', 'color', '역할로 부른다 — "파랑" 이 아니라 "주색". 시안이 바뀌어도 역할 이름은 그대로다.', stage(`<div class="sw-grid">${sw}</div>`, 'fill')
+    + `<div class="blk-h"><h3 style="font-size:14.5px">상태 다섯 색</h3></div>${stage(`<div class="sw-grid">${st}</div>`, 'fill')}`
+    + rules(['상태 색은 늘 이 다섯 가지 — 업무마다 색을 새로 만들지 않는다 (<a href="#status-pill">상태 표시</a>)', '업체 5곳은 색으로 구분하지 않는다 (<a href="#company">업체 이름표</a>)']))}
+<div class="cols">
+${blk('type', '글자', 'typography', `글꼴 ${FONT_NAME[s.font]} · 기본 ${base}px. 크기는 기본의 배수로만 쓴다.`, stage(`<div class="ty">${ty}<div><span class="cap">숫자 · 폭이 같은 숫자</span><span class="nums"><span>1,958,000</span><span>783,200</span><span>18</span></span></div></div>`, 'fill'))}
+<div style="display:grid;gap:16px;min-width:0">
+${blk('space', '간격 · 줄 높이', 'spacing', '촘촘함 하나를 고르면 줄 높이 · 칸 높이 · 안쪽 여백 · 사이가 같이 바뀐다.', stage(`<div class="sp">
+<div><i style="width:46px;height:var(--u-row)"></i><span class="cap">줄 높이 ${D['u-row']}</span></div>
+<div><i style="width:46px;height:var(--u-ctl)"></i><span class="cap">칸 · 버튼 높이 ${D['u-ctl']}</span></div>
+<div><i style="height:18px;width:var(--u-pad)"></i><span class="cap">안쪽 여백 ${D['u-pad']}</span></div>
+<div><i style="height:18px;width:var(--u-gap)"></i><span class="cap">사이 ${D['u-gap']}</span></div></div>`) + `<div class="scroll"><table class="t"><thead><tr><th>촘촘함</th><th>줄 높이</th><th>칸 높이</th><th>안쪽 여백</th><th>사이</th></tr></thead><tbody>${dens}</tbody></table></div>`)}
+${blk('radius', '모서리', 'radius', '세 가지만 쓴다 — 칸 · 버튼 / 알약 / 카드 · 창.', stage(`<div class="rd">
+<div><i style="width:110px;height:var(--u-ctl);border-radius:var(--u-r)"></i><span class="cap">칸 · 버튼 ${R['u-r']}</span></div>
+<div><span class="u-pill s-doing">진행</span><span class="cap">알약 ${R['u-rp'] === '999px' ? '끝까지' : R['u-rp']}</span></div>
+<div><i style="width:110px;height:60px;border-radius:var(--u-rc)"></i><span class="cap">카드 · 창 ${R['u-rc']}</span></div></div>`) + `<div class="scroll"><table class="t"><thead><tr><th>모서리</th><th>칸 · 버튼</th><th>알약</th><th>카드 · 창</th></tr></thead><tbody>${rads}</tbody></table></div>`)}
+</div></div></section>`;
+}
+
+// ── 3. 부품 ─────────────────────────────────────────────────────────────
+function components() {
+  const s = state;
+  const W = WORDS[s.words];
+  const T = TONES[s.tone];
+  const I = SAMPLE.items;
+  const b = (label, cls = '') => `<span class="u-btn ${cls}">${label}</span>`;
+  const cell = (cap, html) => `<div class="fcell"><span class="cap">${cap}</span>${html}</div>`;
+  const BAD = ['#E53935', '#FB8C00', '#43A047', '#1E88E5', '#8E24AA'];
+  return `<section class="part" id="comp"><h2>3. 부품<small>화면은 이 부품만으로 조립한다 — 새 모양이 필요하면 여기에 먼저 더한다</small></h2>
+${blk('btn', '버튼', 'Button', '누르면 무언가 일어나는 것. 이름은 짧은 동사.', stage(`
+<div class="row"><span class="cap">주 버튼</span>${b(W.save, 'pri')}<span class="cap">한 화면에 하나 — 그 화면에서 가장 많이 하는 일</span></div>
+<div class="row"><span class="cap">보조</span>${b('닫기')}${b(W.print)}${b(W.reset)}</div>
+<div class="row"><span class="cap">위험</span>${b('삭제', 'danger')}<span class="cap">누르면 <a href="#notice">확인 창</a></span></div>
+<div class="row"><span class="cap">쓸 수 없음</span>${b(W.confirm, 'pri off')}<span class="cap">거래처를 고르기 전처럼 아직 누를 수 없을 때</span></div>
+<div class="row"><span class="cap">단축키 표시</span>${b(`${W.save}<kbd>(F8)</kbd>`, 'pri')}${b(`${W.find}<kbd>(F3)</kbd>`)}<span class="cap">버튼 자리 '아래 모음' 일 때 — 이카운트와 같은 키</span></div>
+<div class="row"><span class="cap">큰 버튼</span>${b(W.act, 'pri big')}<span class="cap">휴대폰 · 창고 — 손가락으로 누르는 자리</span></div>`, 'col')
+    + rules(['주 버튼은 한 화면에 하나. 두 개가 같이 중요해 보이면 화면을 나눈다', '"~하기" 를 붙이지 않는다 — 저장 · 확정 · 삭제 · 닫기 · 인쇄 · 찾기 · 추가', '되돌릴 수 없는 일(삭제 · 확정 취소)은 위험 버튼 + 확인 창']))}
+${blk('field', '입력칸', 'Field', '적거나 고르는 칸. PC 는 이름이 왼쪽(이카운트처럼), 휴대폰은 위.', stage(`<div class="fgrid">
+${cell('글자', `<div class="u-f"><span class="u-l">담당자</span><span class="u-in">박지훈</span></div>`)}
+${cell('숫자 — 오른쪽 정렬', `<div class="u-f"><span class="u-l">수량</span><span class="u-in num">8</span></div>`)}
+${cell('날짜', `<div class="u-f"><span class="u-l">${W.date}</span><span class="u-in">2026-10-01${CAL}</span></div>`)}
+${cell('고르기 · 꼭 적을 칸(•)', `<div class="u-f"><span class="u-l">판매 업체<span class="req">•</span></span><span class="u-in">${COMPANIES[1]}<span class="u-ic" style="width:auto">▾</span></span></div>`)}
+${cell('찾기 — 코드 + 이름 (이카운트처럼)', `<div class="u-f"><span class="u-l">${W.item}</span><span class="u-look"><span class="u-in code">SF-301</span><span class="u-in">3인 패브릭 소파${SEARCH}</span></span></div>`)}
+${cell('자동 계산 — 손으로 못 고침', `<div class="u-f"><span class="u-l">공급가액</span><span class="u-in ro num">1,780,000</span></div>`)}
+${cell('오류 — 빨간 테두리 + 할 말', `<div class="u-fc"><div class="u-f"><span class="u-l">거래처<span class="req">•</span></span><span class="u-in err ph">거래처 ${W.search}${SEARCH}</span></div><span class="u-err">${T.need}</span></div>`)}
+${cell('지금 적는 칸', `<div class="u-f"><span class="u-l">거래처</span><span class="u-in cur">가나인테리|</span></div>`)}
+${cell('휴대폰 — 이름은 위에', `<div class="u-fc"><span class="u-l">거래처</span><span class="u-in">가나인테리어${SEARCH}</span></div>`)}
+</div>`, 'fill') + rules(['꼭 적을 칸은 이름 뒤에 빨간 점(•). 비우고 저장하면 그 칸에 할 말을 붙인다 — 맨 위 창으로 띄우지 않는다', '거래처 · 상품은 코드와 이름을 같이 — 코드를 외워 쓰는 직원이 많다(이카운트 습관)']))}
+${blk('ltable', '목록 표', 'ListTable', '여러 건을 훑고 고르는 표 — 견적 목록 · 주문 목록 · 재고 조회.', stage(`<div class="u-tablebox">${listTable(s, SAMPLE.list.slice(0, 4))}</div>`, 'fill')
+    + rules(['날짜(파란 글자)를 누르면 상세. 줄 전체를 눌러도 같다', '판매 업체 칸은 모든 거래 목록에 있다 (설계 원칙 3)', '금액은 오른쪽 정렬 · 쉼표, 상태는 알약, 정렬한 칸에 ▼ 표시']))}
+${blk('etable', '입력 표', 'EntryTable', '상품을 줄줄이 넣는 표 — 견적 · 주문 · 발주 · 입고. 직원들이 하루 종일 쓰는 부품이다.', stage(`<div class="u-tablebox">${entryTable(s, I.slice(0, 3), { fill: 2, cur: [2, 'qty'] })}${sumHtml(I.slice(0, 3))}</div>
+<p class="cap" style="margin:8px 0 0">파란 테두리 = 지금 칸 · 회색 글자 = 자동 계산(손으로 못 고침) · 칸 귀퉁이 ◥ = 손으로 고친 단가</p>`, 'fill')
+    + `<div class="blk-h"><h3 style="font-size:14.5px">키보드 동작 (제안 — 회차 2 에서 주문 기능을 정할 때 확정)</h3></div>`
+    + rules(['<b>Enter · Tab</b> — 오른쪽 칸으로. 줄 끝에서 Enter — 다음 줄 첫 칸', '<b>↑ ↓</b> — 위 · 아래 줄의 같은 칸', `<b>F3</b> 또는 ${W.item}칸에 글자 치기 — ${W.find} 창. 고르면 코드 · 이름 · 규격 · 거래처 단가가 채워진다 (ORD-03)`, '수량 · 단가를 바꾸면 공급가액 · 부가세 · 합계가 바로 다시 계산된다', '마지막 줄을 채우면 빈 줄이 하나 더 생긴다 · <b>Esc</b> — 지금 칸 입력 취소', '단가를 손으로 고치면 칸에 표시하고 누가 고쳤는지 남긴다 (ORD-03 완료 기준)']), '<span class="tag hot">가장 무거운 부품</span>')}
+${blk('status-pill', '상태 표시', 'StatusPill', '일이 어디까지 왔는지. 글자와 색을 같이 써서 색만으로 구분하지 않는다.', stage(`
+<div class="row"><span class="cap">다섯 가지</span>${STATUS.map(([k, n]) => `<span class="u-pill s-${k}">${n}</span>`).join('')}</div>
+<div class="row"><span class="cap">주문 상태 (제안)</span><span class="u-pill s-wait">접수</span><span class="u-pill s-doing">출고대기</span><span class="u-pill s-doing">출고</span><span class="u-pill s-done">완료</span><span class="u-pill s-wait">보류</span><span class="u-pill s-wait">취소</span><span class="u-pill s-late">지연</span></div>`, 'col')
+    + rules(['업무마다 상태 이름은 달라도(ORD-06 접수 → 출고대기 → 출고 → 완료) 색은 다섯 가지 중 하나에 묶는다 — 어디에 묶을지는 업무마다 기능을 정할 때', '지연은 사람이 고르지 않는다 — 약속 시간이 지나면 저절로']))}
+${blk('company', '업체 이름표', 'CompanyTag', '판매 업체(5곳) 표시. 모든 거래 화면 · 카드 · 문서에.', stage(`
+<div class="row"><span class="cap">이름표</span>${COMPANIES.map(c => `<span class="u-co">${c}</span>`).join('')}</div>
+<div class="row"><span class="cap">로고를 받으면</span>${COMPANIES.slice(0, 2).map(c => `<span class="u-co"><span class="logo">로고</span>${c}</span>`).join('')}<span class="cap">로고는 회사에서 받는 중</span></div>
+<div class="row"><span class="cap">하지 않기 ✕</span>${COMPANIES.map((c, i) => `<span class="u-co bad" style="background:${BAD[i]}">${c}</span>`).join('')}<span class="cap">색으로 구분 — 다섯 개는 헷갈린다</span></div>`, 'col'))}
+${blk('notice', '안내', 'Notice · Toast · ConfirmDialog · EmptyState', '알려 줄 말. 말투는 <a href="#words">말</a>의 안내 문구 말투를 따른다.', stage(`<div class="ngrid">
+<div class="fcell"><span class="cap">안내 줄 — 화면 안에 머문다</span><div class="u-note warn">⚠ ${T.lack('슬라이딩 옷장')}</div><div class="u-note err">✕ ${T.need}</div><div class="u-note ok">✓ ${T.done}</div><div class="u-note info">ℹ ${T.info}</div></div>
+<div class="fcell"><span class="cap">잠깐 뜨는 알림 — 3초 뒤 사라진다</span><span class="u-toast">✓ ${T.saved}</span><span class="cap" style="margin-top:10px">확인 창 — 되돌릴 수 없을 때만</span><div class="u-dialog"><div class="d-b"><b>${T.delQ}</b><span>${T.delD}</span></div><div class="d-a"><span class="u-btn">취소</span><span class="u-btn danger">삭제</span></div></div></div>
+<div class="fcell"><span class="cap">빈 화면 — 아직 아무것도 없을 때</span><div class="u-empty"><b>${T.empty}</b><span>${T.emptyD}</span><span class="u-btn pri">${W.newDoc}</span></div></div>
+</div>`, 'fill') + rules(['저장 · 확정처럼 잘 된 일은 잠깐 뜨는 알림, 고쳐야 할 일은 그 칸 옆 또는 안내 줄', '확인 창은 되돌릴 수 없는 일에만 — 자주 띄우면 읽지 않고 누른다']))}
+${blk('filter', '고르기', 'FilterChips · Pager · PeriodPicker · SearchBox', '목록에서 보고 싶은 것만 고르는 부품. 이카운트 조회 화면과 같은 자리.', stage(`
+<div class="row"><span class="cap">찾기</span><span class="u-in ph" style="flex:none;width:min(260px,100%)">거래처 · ${W.item}으로 ${W.search}${SEARCH}</span>${btn(s, 'search', W.search)}</div>
+<div class="row"><span class="cap">기간</span><div class="u-period"><span class="u-in">2026-09-01${CAL}</span>~<span class="u-in">2026-10-31${CAL}</span></div><span class="u-btn">이번 달</span><span class="u-btn">지난달</span></div>
+<div class="row"><span class="cap">상태 필터</span><div class="u-chips"><span class="on">전체 54</span><span>대기 6</span><span>진행 9</span><span>검수 3</span><span>지연 2</span><span>완료 34</span></div></div>
+<div class="row"><span class="cap">쪽 번호</span><div class="u-pager"><span>‹</span><span class="on">1</span><span>2</span><span>3</span><span>…</span><span>6</span><span>›</span><span class="of">/ 6쪽</span></div></div>`, 'col'))}
+${blk('card', '휴대폰 카드', 'MobileCard', '휴대폰에서 한 건 = 카드 한 장. 창고 · 기사 화면.', stage(`<div class="cards">${mobileCard(s, SAMPLE.cards[0])}</div><div class="cards">${mobileCard(s, SAMPLE.cards[4])}</div>`) + rules(['한 손으로 — 처리 버튼은 카드 아래, 손가락 폭', '거래처 · 판매 업체 · 무엇 · 어느 창고를 한눈에']))}
+${blk('bar', '메뉴줄 · 창 머리', 'AppBar · PageHeader', '맨 위 메뉴와 화면 제목 줄. 제목 옆에 상태와 저장 시각.', stage(`<div class="appbar tok" ${attrs(s)}>${navHtml()}<div class="u-win"><div class="u-winbar"><span>${W.quote}</span><span class="ico">▢ ✕</span></div><div class="u-head"><span class="u-title">${W.quote}</span><span class="u-pill s-wait">작성 중</span><span class="u-saved">✓ ${T.saved} · 10:42</span><span class="u-sp"></span>${s.btn === 'top' ? `${btn(s, 'confirm', W.confirm)}${btn(s, 'save', W.save, 'pri')}` : '<span class="cap">버튼 자리가 \'오른쪽 위\' 면 여기에 버튼</span>'}</div></div></div>`, 'fill'))}
+</section>`;
+}
+
+// ── 4. 화면 틀 ──────────────────────────────────────────────────────────
+function layouts() {
+  const W = WORDS[state.words];
+  const lay = (id, name, code, use, mock, zones, uses, cls = '') => blk(id, name, code, use,
+    `<div class="lay ${cls}"><div class="fit stage tok fill" ${attrs(state)} data-mock="${mock}" data-s="live"></div><div style="display:grid;gap:10px;align-content:start"><ol class="zones">${zones.map(z => `<li>${z}</li>`).join('')}</ol><p class="uses"><b>이 틀을 쓰는 화면</b><br>${uses}</p></div></div>`);
+  return `<section class="part" id="layout"><h2>4. 화면 틀<small>이카운트처럼 두 가지 틀이면 출시 1 화면 대부분이 된다 + 휴대폰 하나</small></h2>
+${lay('l-list', '목록 화면', 'ListLayout', '이카운트 \'판매조회\' 와 같은 배치 — 찾고, 고르고, 열어 본다.', 'list',
+    ['제목 줄 — 화면 이름 · 건수', `찾기 줄 — 검색 칸 · ${W.search} · 기간`, '고르기 — 상태 필터 · 쪽 번호', '목록 표 — 날짜를 누르면 상세', `버튼 — ${W.newDoc} · 인쇄 · 엑셀 · ${W.delSel}`],
+    '견적 목록 · 주문 목록 (ORD-S02) · 재고 조회 (STK-S02) · 접수함 (INB-S01) · 발주 목록 (BUY-S01) · 배송 목록 (DLV-S01) · 이관 · 대조 (LNK-S01)')}
+${lay('l-entry', '입력 화면', 'EntryLayout', '이카운트 \'판매입력\' 과 같은 배치 — 위에 칸, 아래에 상품 표.', 'entry',
+    ['제목 줄 — 화면 이름 · 상태 · 저장 시각', `위 칸 — 판매 업체 · ${W.date} · 거래처 · 담당자 · ${W.wh} · 납기일`, `${W.item} 줄 — 입력 표 (<a href="#etable">키보드 동작</a>)`, '합계 — 수량 · 공급가액 · 부가세 · 합계', '안내 — 재고 부족 같은 경고', `버튼 — ${W.save} · ${W.confirm} · ${W.print}`],
+    '견적 작성 (ORD-S01) · 발주서 (BUY-S01) · 입고 · 작업지시 · 실사 (STK-S03) · 설정 기본 정보 6종 (CORE-S01)')}
+${lay('l-phone', '휴대폰 목록', 'MobileListLayout', '창고 · 기사가 한 손으로 쓰는 화면 — 카드를 내리며 처리한다.', 'phone',
+    ['제목 · 건수 · 내 창고', '상태 필터 — 옆으로 밀어서', '카드 — 한 건에 한 장, 처리 버튼은 카드 아래', '아래 탭 — 엄지가 닿는 자리'],
+    '출고 요청함 (STK-S01) · 배송 목록 — 기사 (DLV-S01) · 접수함 — 휴대폰 (INB-S01)', 'phone')}
+</section>`;
+}
+
+// ── 5. 말 · 6. 지킬 것 · 7. 값 모음 ───────────────────────────────────────
+function contentSec() {
+  const s = state;
+  const terms = TERMS.map(([what, ec, easy]) => `<tr><td>${what}</td><td class="big${s.words === 'ecount' ? ' on' : ''}">${ec}</td><td class="big${s.words === 'easy' ? ' on' : ''}">${easy}</td><td>${CHOSEN.words === 'easy' ? easy : ec}</td></tr>`).join('');
+  const TONE_ROWS = [['저장했을 때', 'saved'], ['재고가 모자랄 때', 'lack'], ['칸을 안 채웠을 때', 'need'], ['지우기 전에 물을 때', 'delQ']];
+  const tones = TONE_ROWS.map(([when, k]) => `<tr><td>${when}</td>${['formal', 'polite', 'short'].map(t => { const v = TONES[t][k]; return `<td class="${t === s.tone ? 'on' : ''}">${typeof v === 'function' ? v('').trim() : v}</td>`; }).join('')}</tr>`).join('');
+  return `<section class="part" id="words"><h2>5. 말<small>화면에 들어가는 글 — 용어 · 말투는 ${md(CHOSEN.date)} ${CHOSEN.note} (${confirmText()}, 1절 ⑧ ⑨)</small></h2>
+<div class="cols">
+${blk('w-terms', '용어', 'glossary', `지금 보는 용어: <b>${optOf(ax('words'), s.words).label}</b> (위 단추로 바꾸면 견본도 바뀐다).`, `<div class="scroll"><table class="t"><thead><tr><th>무엇</th><th>이카운트 말</th><th>쉬운 말</th><th>정한 것</th></tr></thead><tbody>${terms}</tbody></table></div>`
+    + `<p class="use"><b>그대로 두는 말</b> — 거래처 · 담당자 · 규격 · 단가 · 공급가액 · 부가세 · 미수금 · 잔액. 세금계산서 · 장부에 그대로 찍히는 말이다.</p>`)}
+<div style="display:grid;gap:16px;min-width:0">
+${blk('w-tone', '안내 문구 말투', 'voice', `지금 보는 말투: <b>${optOf(ax('tone'), s.tone).label}</b>. 한 프로그램 안에서는 한 가지만 쓴다.`, `<div class="scroll"><table class="t"><thead><tr><th>상황</th><th>합니다</th><th>해요</th><th>짧게</th></tr></thead><tbody>${tones}</tbody></table></div>`)}
+${blk('w-btn', '버튼 이름', 'labels', '짧은 동사 하나. 무엇을 하는지만.', rules(['저장 · 확정 · 삭제 · 닫기 · 인쇄 · 찾기 · 추가 — "~하기" 를 붙이지 않는다', '주 버튼은 그 화면의 할 일 — 견적 화면이면 "저장"', '단축키는 이름 뒤 괄호 — 저장(F8). 버튼 자리 \'아래 모음\' 일 때']))}
+${blk('w-num', '숫자 · 날짜 쓰는 법', 'formats', '제안 — 회의 뒤 확정.', rules(['금액: 표 안은 쉼표만 <b>1,958,000</b> · 합계 · 문서는 원을 붙여 <b>5,519,800원</b>', '날짜: <b>2026-10-01</b> · 표 안에서 올해 날짜는 <b>10-01</b>', '시간: 24시 <b>14:30</b> · 수량: 숫자만, 단위는 상품에 따라', '전화 <b>010-1234-5678</b> · 사업자번호 <b>123-45-67890</b>']))}
+</div></div></section>`;
+}
+function rulesSec() {
+  return `<section class="part" id="rules"><h2>6. 지킬 것<small>화면을 그릴 때 · 프로그램을 만들 때 늘 확인</small></h2>
+${blk('r-list', '지킬 것 9가지', 'rules', '어기면 다시 그린다. 근거는 기획의 설계 원칙과 이 장의 정한 값.', rules([
+    '<b>업체는 이름으로</b> — 색으로 구분하지 않는다 (5개는 헷갈린다)',
+    '<b>판매 업체는 모든 거래 화면에</b> — 견적 · 주문 · 출고 · 문서 (설계 원칙 3)',
+    '<b>재고는 위치 · 소유 · 상태를 나눠서</b> — 전부 더한 수를 "팔 수 있는 수량" 으로 보이지 않는다 (설계 원칙 2)',
+    '<b>주 버튼은 한 화면에 하나</b>',
+    '<b>되돌릴 수 없는 일은 확인 창</b> — 삭제 · 확정 취소. 두 번 눌러도 한 번만 처리된다',
+    '<b>숫자는 오른쪽 정렬 · 폭이 같은 숫자</b> — 금액을 세로로 비교할 수 있게',
+    '<b>상태는 알약 + 글자</b> — 색만으로 구분하지 않는다',
+    '<b>휴대폰은 한 손</b> — 큰 버튼은 아래, 손가락 폭 (모바일 우선)',
+    '<b>단축키는 이카운트와 같은 키</b> — F2 신규 · F3 찾기 · F8 저장. 버튼에는 적지 않는다 (아래 큰 버튼, 10-02)',
+  ]))}
+</section>`;
+}
+function tokenText() {
+  const s = state;
+  const pick = axis => TOKENS[axis][s[axis]];
+  const line = obj => Object.entries(obj).map(([k, v]) => `  --${k}: ${v};`).join('\n');
+  const C = pick('color');
+  const status = Object.fromEntries(Object.entries(C).filter(([k]) => k.startsWith('s-')));
+  const colors = Object.fromEntries(Object.entries(C).filter(([k]) => !k.startsWith('s-')));
+  const who = onChosen() ? `정함 ${CHOSEN.date} · ${CHOSEN.note} · ${confirmText()}` : '비교용 — 정한 값 아님';
+  return `/* UBO 디자인 시스템 값 — ${summaryOf(s)} (${who}) */
+:root {
+  /* 글꼴 · 크기 */
+${line(pick('font'))}
+${line(pick('size'))}
+  /* 촘촘함 — 줄 높이 · 칸 높이 · 안쪽 여백 · 사이 */
+${line(pick('density'))}
+  /* 모서리 — 칸 · 알약 · 카드 */
+${line(pick('radius'))}
+  /* 색 (역할) */
+${line(colors)}
+  /* 상태 다섯 색 */
+${line(status)}
+}
+/* 표 모양: ${optOf(ax('table'), s.table).label} · 버튼 자리: ${optOf(ax('btn'), s.btn).label} · 용어: ${optOf(ax('words'), s.words).label} · 안내 문구: ${optOf(ax('tone'), s.tone).label} */`;
+}
+function exportSec() {
+  return `<section class="part" id="export"><h2>7. 값 모음<small>개발용 — 지금 고른 값을 프로그램에 그대로 옮겨 붙이는 글</small></h2>
+${blk('x-css', 'CSS 변수', 'tokens.css', '위 단추를 바꾸면 같이 바뀐다. 클로드 디자인의 디자인 시스템과 맞출 때는 /design-sync 를 직접 시작한다 (ADR 004).', `<pre class="code" id="tokOut"></pre><button type="button" class="copy" id="copy">복사</button>`)}
+</section>`;
+}
+
+// ── 부록 · 고르기 표 — 회의에서 한 분씩 적는 종이. 인쇄하면 A4 가로 한 장 ──
+function appendix() {
+  const cb = '<i class="cb"></i>';
+  const key = ITEMS9.map((a, i) => `<span><b class="nb">${i + 1}</b>${a.name} ${optOf(a, START[a.k]).label}</span>`).join('');
+  const row = `<tr><td></td><td></td><td class="pk"><span>${cb}좋음</span><span>${cb}바꾸고 싶음</span></td><td></td><td></td></tr>`;
+  return `<details id="vote"><summary><b>부록 · 고르기 표</b><span>회의 때 한 분씩 적는 종이 — 눌러서 펼치거나, 펼친 뒤 이 표만 인쇄하세요 (A4 가로 한 장)</span></summary>
+<div class="vote-sheet">
+<div class="vote-top"><h2>고르기 표 — 한 분씩 적어 주세요</h2><button type="button" class="copy" id="printVote">이 표만 인쇄</button></div>
+<p class="lede">${statusText()}. 이대로 좋은지 표시하고, 바꾸고 싶은 항목은 번호와 원하는 안을 적어 주세요. 다른 시안에서 가져와도 됩니다.</p>
+<div class="vote-key">${key}</div>
+<div class="scroll"><table class="t vote"><colgroup><col style="width:11%"><col style="width:12%"><col style="width:19%"><col style="width:34%"><col></colgroup>
+<thead><tr><th>이름</th><th>역할<small>영업 · 창고 · 경리 · 과장</small></th><th>정한 값 그대로</th><th>바꿀 항목<small>번호 · 원하는 안 — 예) ③ 촘촘 · ⑧ 이카운트 말 · 전부 시안 A</small></th><th>한 마디</th></tr></thead>
+<tbody>${row.repeat(9)}</tbody></table></div>
+<div class="wrap-up"><b>정리 (진행자)</b><span>그대로 / 바꿈</span><span>바꿀 항목</span><span>날짜</span><span>진행</span></div>
+<p class="vote-foot">UBO 디자인 시스템 · 1. 화면 느낌 — 항목 번호는 화면의 빨간 번호와 같습니다</p>
+</div></details>`;
+}
+
+// ── 그리기 · 바꾸기 ─────────────────────────────────────────────────────
+const seg = (k, opts) => `<div class="seg" role="group">${opts.map(o => `<button type="button" data-k="${k}" data-v="${o.v}">${o.label}</button>`).join('')}</div>`;
+function buildPanel() {
+  const presets = Object.entries(PRESETS).map(([v, p]) => ({ v, label: `${v}<span class="long"> ${p.name}</span>` }));
+  document.getElementById('presetCtl').innerHTML = `<span class="ctl-h">견본 바꿔 보기</span><div class="grp"><span>시안</span>${seg('preset', [{ v: 'chosen', label: '정한 값' }, ...presets])}</div>`
+    + SAY_AXES.map(a => `<div class="grp"><span>${a.name}</span>${seg(a.k, a.opts)}</div>`).join('');
+  document.getElementById('axisCtl').innerHTML = AXES.map(a => `<div class="grp"><span>${a.name}</span>${seg(a.k, a.opts)}</div>`).join('');
+}
+function paintPanel() {
+  const near = nearestOf(state);
+  const exact = !diffOf(state).length;
+  document.querySelectorAll('#panel [data-k]').forEach(b => {
+    const on = b.dataset.k === 'preset' ? (b.dataset.v === 'chosen' ? onChosen() : exact && b.dataset.v === near) : state[b.dataset.k] === b.dataset.v;
+    b.setAttribute('aria-pressed', on);
+  });
+  const say = SAY_AXES.map(a => optOf(a, state[a.k]).label).join(' · ');
+  document.getElementById('now').innerHTML = onChosen()
+    ? `아래 견본: <b>정한 값</b> — ${summaryOf(state)} · ${say}`
+    : `아래 견본: <b>${summaryOf(state)}</b> · ${say} — 비교용입니다. '정한 값' 을 누르면 돌아옵니다`;
+}
+// 높이를 고정한 표 · 목록에서 가려진 줄을 센다 — 넉넉할수록 덜 보이는 걸 그대로 보여 준다
+function markMore(root) {
+  root.querySelectorAll('[data-scroll]').forEach(box => {
+    const more = box.querySelector('.u-more');
+    if (!more) return;
+    more.hidden = true;
+    const bottom = box.getBoundingClientRect().bottom;
+    const hidden = [...box.querySelectorAll('[data-r]')].filter(r => r.getBoundingClientRect().bottom > bottom + 0.5).length;
+    if (!hidden) return;
+    more.textContent = `아래로 ${hidden}${box.dataset.scroll} 더 ↓`;
+    more.hidden = false;
+  });
+}
+function render() {
+  const keepY = window.scrollY;
+  const content = document.getElementById('content');
+  content.innerHTML = foundations() + components() + layouts() + contentSec() + rulesSec() + exportSec();
+  fitAll(content);
+  markMore(content);
+  document.getElementById('tokOut').textContent = tokenText();
+  paintPanel();
+  window.scrollTo(0, keepY);
+}
+document.getElementById('panel').addEventListener('click', e => {
+  const b = e.target.closest('button[data-k]');
+  if (!b) return;
+  if (b.dataset.k === 'preset') Object.assign(state, b.dataset.v === 'chosen' ? START : PRESETS[b.dataset.v].s);
+  else state[b.dataset.k] = b.dataset.v;
+  render();
+});
+document.getElementById('content').addEventListener('click', async e => {
+  if (e.target.id !== 'copy') return;
+  const text = document.getElementById('tokOut').textContent;
+  let ok = false;
+  try { await navigator.clipboard.writeText(text); ok = true; } catch {
+    const ta = Object.assign(document.createElement('textarea'), { value: text });
+    ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.append(ta); ta.select();
+    try { ok = document.execCommand('copy'); } catch {}
+    ta.remove();
+  }
+  e.target.textContent = ok ? '복사했습니다' : '복사하지 못했습니다 — 직접 골라 복사하세요';
+});
+// 인쇄 — 접힌 부록도 펼쳐서 찍는다. '이 표만 인쇄' 는 부록 한 장만
+let voteWasOpen = false;
+addEventListener('beforeprint', () => { const v = document.getElementById('vote'); voteWasOpen = v.open; v.open = true; });
+addEventListener('afterprint', () => { document.getElementById('vote').open = voteWasOpen; document.body.classList.remove('only-vote'); });
+document.getElementById('appx').addEventListener('click', e => {
+  if (e.target.id !== 'printVote') return;
+  document.body.classList.add('only-vote');
+  window.print();
+});
+
+const statusEl = document.getElementById('status');
+statusEl.textContent = statusText();
+statusEl.classList.toggle('done', CHOSEN.confirmed);
+document.getElementById('feelBox').innerHTML = feel();
+document.getElementById('appx').innerHTML = appendix();
+buildPanel();
+fitAll(document.getElementById('feelBox'));
+markMore(document.getElementById('feelBox'));
+render();
+let resizing = 0;
+addEventListener('resize', () => { cancelAnimationFrame(resizing); resizing = requestAnimationFrame(() => { fitAll(document); markMore(document); }); });
+// 글꼴이 늦게 오면 줄 높이가 바뀐다 — 다 온 뒤 다시 센다
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => markMore(document));
+</script>
+</body>
+</html>
