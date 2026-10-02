@@ -157,6 +157,16 @@ ul.items li.plain::before{content:"·";color:var(--muted)}
 ol.wk5{margin:0;padding-left:0;list-style:none;display:grid;gap:5px;font-size:13.5px}
 ol.wk5 li{display:grid;grid-template-columns:76px minmax(0,1fr);gap:8px}
 ol.wk5 b{font-weight:600;font-size:12.5px;color:var(--muted)}
+/* 회사에 부탁드려요 — 회사가 해 줄 일만 따로 */
+.card.ask{background:color-mix(in oklab,var(--p2) 9%,var(--surface));border-color:color-mix(in oklab,var(--p2) 45%,var(--line))}
+.card.ask .kicker{color:var(--ink);display:flex;align-items:center;gap:6px}
+.card.ask .kicker::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--p2)}
+.card.ask .kicker small{font-family:var(--f-mono);font-weight:500;color:var(--muted);font-size:11px}
+ul.asks{margin:0;padding:0;list-style:none;display:grid;gap:9px}
+ul.asks li{display:grid;grid-template-columns:15px minmax(0,1fr);gap:10px;align-items:start}
+ul.asks .box{width:15px;height:15px;margin-top:3px;border:1.5px solid color-mix(in oklab,var(--p2) 75%,var(--ink));border-radius:4px;background:var(--surface)}
+ul.asks b{font-weight:600;font-size:14px;display:block;line-height:1.45}
+ul.asks small{display:block;font-size:12.5px;color:var(--muted);line-height:1.5}
 .empty{background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:18px;color:var(--muted);font-size:14px}
 footer{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;display:grid;gap:4px}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -210,7 +220,7 @@ footer{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padd
   </footer>
 </div>
 
-<script id="data" type="application/json">{"contract":{"start":"2026-10-01","end":"2027-03-31"},"milestones":[{"id":"M1","name":"착수","a":"2026-09-28","due":"2026-10-15","c":"p0","ph":"회차 0","out":["출시 1 기능 목록 (시트) — 워크스 핵심","총괄 기획안 PDF","첫 주보"],"ok":"사장님이 기능 목록에 서명","who":"사장님 · 과장","subs":[]},{"id":"M2","name":"화면 가안 · 디자인","a":"2026-10-19","due":"2026-11-26","c":"p1","ph":"화면","out":["디자인 시스템 (색 · 글꼴 · 부품)","워크스 핵심 화면 가안 — 설정 · 견적 · 주문 · 재고 · 출고 요청함 (샘플 데이터)","주문 · 출고 · 재고 업무 규칙"],"ok":"목요일 시연에서 화면을 눌러 보고, 실무자가 업무 규칙을 확인","who":"과장 · 실무자","subs":[]},{"id":"M3","name":"설계","a":"2026-11-30","due":"2026-12-17","c":"p2","ph":"설계 (뒤 2주는 연말 여유)","out":["나머지 화면 가안 (여유 되면 접수함 · 발주 · 배송)","백엔드 설계 — 자료 구조 · 프로그램끼리 연결","클라우드 설계 — 서버 · 저장 위치 · 백업 · 비용","내년 전환 계획 한 장"],"ok":"과장이 전환 계획과 비용을 확인","who":"과장 · 사장님","subs":[]},{"id":"M4","name":"전환 시작 · 성과 보고","a":"2027-01-04","due":"2027-03-18","c":"p3","ph":"전환 (설 포함)","out":["서버 세우기 · 코어(로그인 · 업체 · 거래처 · 상품) 실제 저장","이카운트 거래처 · 상품 옮겨 넣어 보기","성과 보고 PDF","연장 제안서 (출시 1 마무리 · 출시 2)"],"ok":"회사 계정 서버에 코어 자료가 실제로 저장되고, 옮긴 거래처 · 상품을 경리가 확인","who":"사장님 · 경리","subs":[]},{"id":"종료","name":"계약 종료","a":"2027-03-19","due":"2027-03-31","c":"p0","ph":"마무리","out":["인수인계 묶음 (운영 · 백업 · 매뉴얼 · 교육 자료)","회사 계정 넘기기"],"ok":"회사 계정으로 모든 자료가 넘어감","who":"사장님","subs":[]}],"weeks":[{"start":"2026-09-28","daily":[{"date":"2026-10-01","title":"10-01 (목) · 회차 0 · M1 착수 D-7","work":"15:20 ~ 17:45","minutes":145,"done":[{"tag":"정함","text":"화면 시안은 처음에는 Claude Design 으로 만든다","proof":"ADR 004"},{"tag":"조사","text":"이카운트 메뉴 지도 — 12묶음 · 화면 140개를 UBO ONE 기능에 연결","proof":"이카운트 메뉴 지도"},{"tag":"조사","text":"카카오워크 기능 지도 — 12묶음을 업무 체크리스트에 연결","proof":"카카오워크 기능 지도"},{"tag":"만듦","text":"업무별 기능 체크리스트에 모듈별 보기 탭 설계","proof":"체크리스트 설계"},{"tag":"만듦","text":"화면 느낌 고르기 시안 — 글꼴 · 색 · 표 등 7항목 × 3안","proof":"톤앤매너 시안"},{"tag":"만듦","text":"디자인 시스템 설계 — 값 · 부품 · 화면 틀을 한 장에","proof":"디자인 시스템 설계"},{"tag":"정함","text":"6개월 마일스톤 5개 · 일지와 주보 방식","proof":"진행판"},{"tag":"정함","text":"회사 계정 받음 — 같은 계정으로 GitHub 가입","proof":"회사 계정"}],"blocked":["이카운트 5계정 관리자 권한 — 09-28 계정 받음, 몇 계정 · 관리자 여부 확인 중","이카운트 외부 연결 기능 가능 여부 · 한도 · 비용 — 착수 전 확인 필요"],"next":["기능 목록 서명 준비 (M1 10-08)","업무 일지 웹페이지 공개"],"counts":{"만듦":3,"정함":3,"조사":2}}],"weekly":null}],"totals":{"만듦":3,"정함":3,"조사":2},"days":1,"minutes":145,"weeklyCount":0,"built":"2026-10-02T06:52:22.760Z"}</script>
+<script id="data" type="application/json">{"contract":{"start":"2026-10-01","end":"2027-03-31"},"milestones":[{"id":"M1","name":"착수","a":"2026-09-28","due":"2026-10-15","c":"p0","ph":"회차 0","out":["화면 기능 체크리스트 — 회사 확인 · 서명","디자인 컨펌 — 화면 느낌 고르기","총괄 기획안 PDF","첫 주보"],"ok":"사장님이 기능 체크리스트에 서명하고 화면 느낌을 고름","who":"사장님 · 과장","subs":[]},{"id":"M2","name":"화면 가안 · 디자인","a":"2026-10-19","due":"2026-11-26","c":"p1","ph":"화면","out":["디자인 시스템 (색 · 글꼴 · 부품)","워크스 핵심 화면 가안 — 설정 · 견적 · 주문 · 재고 · 출고 요청함 (샘플 데이터)","주문 · 출고 · 재고 업무 규칙"],"ok":"목요일 시연에서 화면을 눌러 보고, 실무자가 업무 규칙을 확인","who":"과장 · 실무자","subs":[]},{"id":"M3","name":"설계","a":"2026-11-30","due":"2026-12-17","c":"p2","ph":"설계 (뒤 2주는 연말 여유)","out":["나머지 화면 가안 (여유 되면 접수함 · 발주 · 배송)","백엔드 설계 — 자료 구조 · 프로그램끼리 연결","클라우드 설계 — 서버 · 저장 위치 · 백업 · 비용","내년 전환 계획 한 장"],"ok":"과장이 전환 계획과 비용을 확인","who":"과장 · 사장님","subs":[]},{"id":"M4","name":"전환 시작 · 성과 보고","a":"2027-01-04","due":"2027-03-18","c":"p3","ph":"전환 (설 포함)","out":["서버 세우기 · 코어(로그인 · 업체 · 거래처 · 상품) 실제 저장","이카운트 거래처 · 상품 옮겨 넣어 보기","성과 보고 PDF","연장 제안서 (출시 1 마무리 · 출시 2)"],"ok":"회사 계정 서버에 코어 자료가 실제로 저장되고, 옮긴 거래처 · 상품을 경리가 확인","who":"사장님 · 경리","subs":[]},{"id":"종료","name":"계약 종료","a":"2027-03-19","due":"2027-03-31","c":"p0","ph":"마무리","out":["인수인계 묶음 (운영 · 백업 · 매뉴얼 · 교육 자료)","회사 계정 넘기기"],"ok":"회사 계정으로 모든 자료가 넘어감","who":"사장님","subs":[]}],"weeks":[{"start":"2026-09-28","daily":[{"date":"2026-10-01","title":"10-01 (목) · 회차 0 · M1 착수 D-14","work":"15:20 ~ 17:45","minutes":145,"done":[{"tag":"정함","text":"화면 시안은 처음엔 클로드 디자인으로 만들기로 함","proof":"결정 기록 4"},{"tag":"조사","text":"이카운트 메뉴 140개 · 카카오워크 기능을 새 프로그램과 짝지음","proof":"메뉴 지도"},{"tag":"만듦","text":"업무별 기능 체크리스트 틀","proof":"체크리스트"},{"tag":"만듦","text":"화면 느낌 시안 3가지 · 디자인 기준 한 장","proof":"디자인 시안"},{"tag":"정함","text":"6개월 일정 · 일지와 주보 쓰는 법","proof":"진행판"},{"tag":"정함","text":"회사 계정으로 GitHub 가입","proof":"회사 계정"}],"asks":[{"text":"화면 기능 체크리스트 확인","note":"업무별로 빠진 기능이 없는지 봐 주세요"},{"text":"디자인 컨펌","note":"화면 느낌 시안 중 마음에 드는 것을 골라 주세요"},{"text":"이카운트 관리자 권한","note":"계정은 받았어요. 관리자 권한인지 확인하고 있어요"},{"text":"이카운트 외부 연결 가능 여부","note":"급하지 않아요. 내년 전환 전까지 알면 돼요"}],"next":["기능 체크리스트 서명 준비 (10-15)","업무 일지 웹페이지 열기"],"counts":{"만듦":2,"정함":3,"조사":1}}],"weekly":null}],"totals":{"만듦":2,"정함":3,"조사":1},"days":1,"minutes":145,"weeklyCount":0,"built":"2026-10-02T06:59:25.293Z"}</script>
 <script>
 (() => {
   const DATA = JSON.parse(document.getElementById('data').textContent);
@@ -315,10 +325,13 @@ footer{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padd
       <ul class="items">${d.done.map(it => it.tag
         ? `<li><span class="tag t-${it.tag}">${it.tag}</span><span>${esc(it.text)}${it.proof ? `<span class="pf">${esc(it.proof)}</span>` : ''}</span></li>`
         : `<li class="plain"><span>${esc(it.text)}</span></li>`).join('')}</ul>
-      ${d.blocked.length ? `<div class="sec">막힌 것 · 회사 대기</div><ul class="items">${plain(d.blocked)}</ul>` : ''}
       ${d.next.length ? `<div class="sec">다음</div><ul class="items">${plain(d.next)}</ul>` : ''}
     </article>`;
   };
+  const askCard = d => d.asks.length ? `<article class="card ask">
+      <div class="kicker">회사에 부탁드려요 <small>${md(d.date)} 기준</small></div>
+      <ul class="asks">${d.asks.map(a => `<li><span class="box" aria-hidden="true"></span><span><b>${esc(a.text)}</b>${a.note ? `<small>${esc(a.note)}</small>` : ''}</span></li>`).join('')}</ul>
+    </article>` : '';
   const weeklyCard = w => `<article class="card wkly">
       <div class="kicker">주보 · ${md(w.date)} (${wd(w.date)}) · 카카오워크로 보낸 5줄</div>
       <div style="font-weight:600;font-size:14px">${esc(w.head)}</div>
@@ -364,7 +377,7 @@ footer{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padd
   const pick = x => {
     sel = x;
     const e = byDate[x];
-    side.innerHTML = (e.day ? dayCard(e.day) : '') + (e.weekly ? weeklyCard(e.weekly) : '');
+    side.innerHTML = (e.day ? askCard(e.day) + dayCard(e.day) : '') + (e.weekly ? weeklyCard(e.weekly) : '');
     cal.querySelectorAll('.day.has').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.d === x)));
   };
   const fromHash = () => { const x = decodeURIComponent(location.hash.slice(1)); return byDate[x] ? x : null; };
