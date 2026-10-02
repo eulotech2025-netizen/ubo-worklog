@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>UBO ONE 업무 일지</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=Gothic+A1:wght@800&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* 레이아웃: 머리(숫자) → 마일스톤 타임라인(노션형 계단) → 주별 묶음(주보 카드 + 일지 카드). 원본은 저장소의 일지 md, tools/report/site.mjs 가 만든다 */
+:root{
+  color-scheme:light;
+  --bg:#F3F5F8;--surface:#FFFFFF;--surface-2:#F7F9FB;--ink:#1B2430;--muted:#5F6B7A;--line:#D5DBE3;
+  --accent:#0E8A78;--accent-soft:#DDF1EC;
+  --p0:#7C8696;--p1:#0E8A78;--p2:#B7791F;--p3:#3B6FB6;--p4:#C2513A;--grid:#EDF0F3;--today:#E03E3E;--on-today:#FFFFFF;
+  --f-display:'Gothic A1','IBM Plex Sans KR','Noto Sans KR',sans-serif;
+  --f-body:'IBM Plex Sans KR','Noto Sans KR','Malgun Gothic',system-ui,sans-serif;
+  --f-mono:'IBM Plex Mono','IBM Plex Sans KR','Malgun Gothic',ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#11161D;--surface:#1A2029;--surface-2:#151B23;--ink:#E7EBF0;--muted:#98A3B1;--line:#2C3541;
+    --accent:#3FC7B0;--accent-soft:#143530;
+    --p0:#6E7886;--p1:#25A08B;--p2:#BA8828;--p3:#5A88CF;--p4:#D86A52;--grid:#212831;--today:#FF6B5E;--on-today:#11161D;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#11161D;--surface:#1A2029;--surface-2:#151B23;--ink:#E7EBF0;--muted:#98A3B1;--line:#2C3541;
+  --accent:#3FC7B0;--accent-soft:#143530;
+  --p0:#6E7886;--p1:#25A08B;--p2:#BA8828;--p3:#5A88CF;--p4:#D86A52;--grid:#212831;--today:#FF6B5E;--on-today:#11161D;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;margin:0}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:20px;padding-block:calc(36px + env(safe-area-inset-top,0px)) calc(56px + env(safe-area-inset-bottom,0px));display:grid;gap:44px}
+@media (max-width:520px){.wrap{padding-inline:16px;gap:36px}}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+h1,h2,h3{font-family:var(--f-display);font-weight:800;margin:0;text-wrap:balance}
+h2{font-size:21px;line-height:1.3}
+.sub{margin:6px 0 0;color:var(--muted);font-size:14px;max-width:70ch}
+section{display:grid;gap:16px;min-width:0}
+header{display:grid;gap:14px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;color:var(--muted)}
+h1{font-size:clamp(30px,5vw,44px);line-height:1.15}
+.lede{margin:0;color:var(--muted);font-size:16px;max-width:60ch}
+
+/* 숫자 */
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.stats > div{padding:12px 16px;display:grid;gap:2px;min-width:0}
+.stats > div + div{border-left:1px solid var(--line)}
+.stats small{font-size:12px;color:var(--muted)}
+.stats b{font-family:var(--f-mono);font-weight:500;font-size:22px;font-variant-numeric:tabular-nums;line-height:1.25}
+.stats b span{font-family:var(--f-body);font-size:13px;color:var(--muted);margin-left:3px}
+.stats .on b{color:var(--accent)}
+@media (max-width:720px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stats > div:nth-child(3){border-left:0}.stats > div:nth-child(n+3){border-top:1px solid var(--line)}}
+
+/* 마일스톤 타임라인 */
+.tl-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.tl-bar{display:flex;justify-content:space-between;align-items:center;gap:8px 16px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line)}
+.tl-bar .vw{display:inline-flex;align-items:baseline;gap:8px;font-size:14px;font-weight:600}
+.tl-bar .vw small{font-family:var(--f-mono);font-weight:500;font-size:12px;color:var(--muted)}
+.tl-bar .tools{display:flex;gap:14px;align-items:center;font-size:12.5px;color:var(--muted);flex-wrap:wrap}
+.k-dia{display:inline-block;width:9px;height:9px;background:var(--ink);transform:rotate(45deg);margin-right:6px}
+.k-today{display:inline-block;width:2px;height:13px;background:var(--today);vertical-align:-2px;margin-right:6px}
+.btn{font:inherit;font-size:12.5px;padding:3px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover{background:var(--surface-2)}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.tl-scroll{overflow-x:auto}
+.tl{--lw:336px;min-width:920px}
+.tl-body{position:relative}
+.tl-row{display:grid;grid-template-columns:var(--lw) minmax(0,1fr);min-height:42px;border-bottom:1px solid var(--grid)}
+.tl-row.sub{min-height:34px}
+.tl-row:last-child{border-bottom:0}
+.tl-row.sel .lc,.tl-row.sel .tr{background:color-mix(in oklab,var(--accent-soft) 55%,var(--surface))}
+.lc{position:sticky;left:0;z-index:4;background:var(--surface);border-right:1px solid var(--line);display:grid;grid-template-columns:22px minmax(0,1fr) 52px 64px;align-items:center;gap:6px;padding:0 10px 0 6px}
+.tr{position:relative}
+.tl-head{border-bottom:1px solid var(--line)}
+.tl-head .lc{font-size:11.5px;color:var(--muted);font-weight:600}
+.tl-head .tr{height:48px}
+.mo{position:absolute;top:6px;font-size:12px;font-weight:600;white-space:nowrap;padding-left:6px;border-left:1px solid var(--line)}
+.wk{position:absolute;top:28px;font-family:var(--f-mono);font-size:10.5px;color:var(--muted);transform:translateX(-50%)}
+.today-pill{position:absolute;top:26px;transform:translateX(-50%);background:var(--today);color:var(--on-today);font-size:10.5px;font-weight:600;line-height:1.6;padding:0 6px;border-radius:4px;z-index:3;white-space:nowrap}
+.tg{width:20px;height:20px;border:0;background:none;color:var(--muted);cursor:pointer;border-radius:4px;font-size:10px;padding:0;display:grid;place-items:center}
+.tg:hover{background:var(--surface-2)}
+.tg span{display:inline-block;transition:transform .15s}
+.tg[aria-expanded="true"] span{transform:rotate(90deg)}
+.nm{all:unset;cursor:pointer;display:flex;gap:8px;align-items:baseline;min-width:0;font-size:14px;font-weight:600}
+.nm:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+.nm .i{font-family:var(--f-mono);font-size:11.5px;color:var(--muted);font-weight:500;flex:none}
+.nm .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tl-row.sub .nm{cursor:default;font-weight:400;font-size:12.5px;color:var(--muted);padding-left:18px}
+.dueC{font-family:var(--f-mono);font-size:12px;font-variant-numeric:tabular-nums}
+.tl-row.sub .dueC{color:var(--muted);font-size:11px}
+.pill{justify-self:start;font-size:11.5px;font-weight:600;padding:1px 8px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.pill.cur{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.lines{position:absolute;top:0;bottom:0;left:var(--lw);right:0;pointer-events:none;z-index:1}
+.lines i{position:absolute;top:0;bottom:0;width:1px;background:var(--grid)}
+.lines i.m{background:var(--line)}
+.lines i.today{width:2px;margin-left:-1px;background:var(--today);z-index:2}
+.barx{position:absolute;top:50%;transform:translateY(-50%);height:28px;border-radius:6px;background:color-mix(in oklab,var(--c) 22%,var(--surface));border:1px solid color-mix(in oklab,var(--c) 60%,var(--surface));display:flex;align-items:center;cursor:pointer;z-index:2}
+.barx:hover{background:color-mix(in oklab,var(--c) 32%,var(--surface))}
+.tl-row.sub .barx{height:20px;border-radius:5px;cursor:default;background:color-mix(in oklab,var(--c) 12%,var(--surface));border-style:dashed}
+.barx .lb{font-size:12.5px;font-weight:600;padding:0 9px;white-space:nowrap;overflow:hidden}
+.tl-row.sub .barx .lb{font-size:11.5px;font-weight:400;color:var(--muted)}
+.barx.out .lb{position:absolute;left:calc(100% + 12px);padding:0;overflow:visible}
+.barx.out-l .lb{position:absolute;right:calc(100% + 8px);padding:0;overflow:visible}
+.dia{position:absolute;top:50%;width:11px;height:11px;background:var(--ink);transform:translate(-50%,-50%) rotate(45deg);box-shadow:0 0 0 2px var(--surface);z-index:3}
+.peek{border-top:1px solid var(--line);padding:16px 18px 18px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:12px 32px}
+@media (max-width:760px){.peek{grid-template-columns:1fr}}
+.peek h3{grid-column:1 / -1;font-size:19px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.peek h3 .i{font-family:var(--f-mono);font-size:13px;color:var(--muted);font-weight:500}
+.props{display:grid;grid-template-columns:70px minmax(0,1fr);gap:7px 12px;font-size:13.5px;margin:0;align-content:start}
+.props dt{color:var(--muted);font-size:12.5px;padding-top:1px}
+.props dd{margin:0;min-width:0}
+.props ul{margin:0;padding-left:16px;display:grid;gap:2px}
+.props .sm{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+
+/* 주 · 일지 카드 */
+.filter{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:12.5px;color:var(--muted)}
+.week{display:grid;gap:12px}
+.week-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px 16px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:6px}
+.week-h h3{font-size:16px}
+.week-h h3 small{font-family:var(--f-mono);font-weight:500;font-size:12px;color:var(--muted);margin-left:8px}
+.week-h .cnt{font-size:12.5px;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;align-items:start}
+@media (max-width:400px){.cards{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px 16px;display:grid;gap:10px;min-width:0}
+.card.wkly{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.card-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.card-h .d{font-family:var(--f-display);font-weight:800;font-size:18px}
+.card-h .d small{font-family:var(--f-body);font-weight:500;font-size:13px;color:var(--muted);margin-left:4px}
+.card-h .w{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.meta{font-size:12.5px;color:var(--muted);margin-top:-6px}
+.kicker{font-size:11.5px;font-weight:600;color:var(--accent);letter-spacing:.02em}
+.sec{font-size:11.5px;font-weight:600;color:var(--muted);letter-spacing:.02em}
+ul.items{margin:0;padding:0;list-style:none;display:grid;gap:5px;font-size:13.5px}
+ul.items li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:baseline}
+ul.items li.plain{grid-template-columns:10px minmax(0,1fr)}
+ul.items li.plain::before{content:"·";color:var(--muted)}
+ul.items li.dim{opacity:.28}
+.tag{display:inline-block;font-size:11px;font-weight:600;line-height:1.6;padding:0 6px;border-radius:4px;border:1px solid var(--line);background:var(--surface-2);white-space:nowrap}
+.tag::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--tc);margin-right:4px;vertical-align:1px}
+.tag.t-만듦{--tc:var(--p1)}.tag.t-정함{--tc:var(--p2)}.tag.t-조사{--tc:var(--p3)}
+.pf{font-size:11.5px;color:var(--muted);margin-left:4px}
+ol.wk5{margin:0;padding-left:0;list-style:none;display:grid;gap:5px;font-size:13.5px}
+ol.wk5 li{display:grid;grid-template-columns:76px minmax(0,1fr);gap:8px}
+ol.wk5 b{font-weight:600;font-size:12.5px;color:var(--muted)}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:18px;color:var(--muted);font-size:14px}
+footer{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;display:grid;gap:4px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">UBO ONE · 개발 업무 일지 · 1차 계약 2026-10-01 ~ 2027-03-31</div>
+    <h1>업무 일지</h1>
+    <p class="lede">우보브랜드샵 통합 플랫폼(UBO ONE) 개발에서 매일 한 일과 마일스톤 진행입니다. 일지는 근무일마다 쌓이고, 금요일 주보로 묶어 보고합니다.</p>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <section aria-labelledby="h-ms">
+    <div>
+      <h2 id="h-ms">마일스톤</h2>
+      <p class="sub">막대는 마일스톤까지 가는 기간, ◆ 는 목표일입니다. 줄을 누르면 산출물과 완료 기준이 나오고, ▶ 를 누르면 회차가 펼쳐집니다.</p>
+    </div>
+    <div class="tl-card">
+      <div class="tl-bar">
+        <span class="vw">타임라인 <small>2026-09-28 ~ 2027-03-31</small></span>
+        <span class="tools"><span><i class="k-dia"></i>목표일</span><span><i class="k-today"></i>오늘</span><button class="btn" id="expand" type="button" aria-pressed="false">회차 펼치기</button></span>
+      </div>
+      <div class="tl-scroll"><div class="tl" id="tl"></div></div>
+      <div class="peek" id="peek" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-log">
+    <div>
+      <h2 id="h-log">일지</h2>
+      <p class="sub">최근 주가 위에 있습니다. 한 줄마다 꼬리표 하나 — 만듦(새로 생긴 화면 · 기능 · 문서) · 정함(결정 · 서명 · 합의) · 조사(인터뷰 · 분석 · 측정) — 와 증거가 붙습니다.</p>
+    </div>
+    <div class="filter" role="group" aria-label="꼬리표로 보기">
+      <span>보기</span>
+      <button class="btn" type="button" data-f="" aria-pressed="true">전체</button>
+      <button class="btn" type="button" data-f="만듦" aria-pressed="false">만듦</button>
+      <button class="btn" type="button" data-f="정함" aria-pressed="false">정함</button>
+      <button class="btn" type="button" data-f="조사" aria-pressed="false">조사</button>
+    </div>
+    <div id="weeks" style="display:grid;gap:28px"></div>
+  </section>
+
+  <footer>
+    <div>저장소의 일지 파일에서 자동으로 만든 페이지입니다. 날짜 · 마일스톤 일정은 추정이며, 회차를 시작하며 서명할 때 맞춥니다.</div>
+    <div id="built"></div>
+  </footer>
+</div>
+
+<script id="data" type="application/json">{"contract":{"start":"2026-10-01","end":"2027-03-31"},"milestones":[{"id":"M1","name":"착수","a":"2026-09-28","due":"2026-10-08","c":"p0","ph":"회차 0","out":["출시 1 기능 목록 (시트)","총괄 기획안 PDF","첫 주보"],"ok":"사장님이 기능 목록에 서명","who":"사장님 · 과장","subs":[{"n":"회차 0","d":"시범 · 보고와 서명 한 바퀴","a":"2026-09-28","b":"2026-10-09","c":"p0"}]},{"id":"M2","name":"화면 가안 완료","a":"2026-10-12","due":"2026-11-19","c":"p1","ph":"회차 1 · 2","out":["화면 10개 가안 (샘플 데이터)","화면 페이지 PDF","기능별 업무 규칙"],"ok":"목요일 시연에서 화면 10개를 눌러 보고, 실무자가 업무 규칙을 확인","who":"과장 · 실무자","subs":[{"n":"회차 1","d":"화면 가안 ① 설정 · 견적 · 주문 · 재고 · 출고 요청함","a":"2026-10-12","b":"2026-10-30","c":"p1"},{"n":"회차 2","d":"화면 가안 ② 입고 · 작업지시 · 실사 · 접수함 · 발주 · 배송 · 링크","a":"2026-11-02","b":"2026-11-20","c":"p1"}]},{"id":"M3","name":"첫 연동 · 중간점검","a":"2026-11-23","due":"2027-01-07","c":"p2","ph":"회차 3 · 4","out":["저장 · 연결 설계 결정 기록","로그인 · 설정 · 주문 → 출고 실제 저장","중간점검 1장"],"ok":"실제 주문 1건이 주문 → 출고 요청 → 출고까지 저장되고 검수 체크리스트 통과","who":"과장 · 실무자 · 사장님","subs":[{"n":"회차 3","d":"저장 · 연결 설계만","a":"2026-11-23","b":"2026-12-04","c":"p2"},{"n":"회차 4","d":"연동 ① 설정 · 주문 · 재고 기본 (성탄 포함 4주)","a":"2026-12-07","b":"2026-12-31","c":"p3"}]},{"id":"M4","name":"병행 시작","a":"2027-01-04","due":"2027-02-18","c":"p3","ph":"회차 5 · 6","out":["이카운트 자료 이관 결과","숫자 대조 리포트","접수함 · 재고 확장 · 발주 · 배송 기본"],"ok":"자료 100% 이관, 업체 1곳 실제 주문을 워크스와 이카운트에 함께 입력 시작","who":"경리 · 과장","subs":[{"n":"회차 5","d":"연동 ② 접수함 · 재고 확장","a":"2027-01-04","b":"2027-01-22","c":"p3"},{"n":"회차 6","d":"연동 ③ 이카운트 연결 · 발주 · 배송 (설 02-05 ~ 02-08 추정)","a":"2027-01-25","b":"2027-02-12","c":"p3"}]},{"id":"M5","name":"성과 보고 · 연장 제안","a":"2027-02-15","due":"2027-03-18","c":"p4","ph":"병행","out":["성과 보고 PDF (전후 숫자)","출시 노트","연장 제안서 (출시 2)"],"ok":"병행 1개월 숫자 일치 · 실무자 확인 · 검수 전부 통과","who":"사장님","subs":[{"n":"병행","d":"업체 1곳 → 5곳","a":"2027-02-15","b":"2027-03-18","c":"p4"}]},{"id":"종료","name":"계약 종료","a":"2027-03-19","due":"2027-03-31","c":"p0","ph":"마무리","out":["인수인계 묶음 (운영 · 백업 · 매뉴얼 · 교육 자료)","회사 계정 넘기기"],"ok":"회사 계정으로 모든 자료가 넘어감","who":"사장님","subs":[]}],"weeks":[{"start":"2026-09-28","daily":[{"date":"2026-10-01","title":"10-01 (목) · 회차 0 · M1 착수 D-7","work":"15:20 ~ 17:45","minutes":145,"done":[{"tag":"정함","text":"화면 시안은 처음에는 Claude Design 으로 만든다","proof":"ADR 004"},{"tag":"조사","text":"이카운트 메뉴 지도 — 12묶음 · 화면 140개를 UBO ONE 기능에 연결","proof":"이카운트 메뉴 지도"},{"tag":"조사","text":"카카오워크 기능 지도 — 12묶음을 업무 체크리스트에 연결","proof":"카카오워크 기능 지도"},{"tag":"만듦","text":"업무별 기능 체크리스트에 모듈별 보기 탭 설계","proof":"체크리스트 설계"},{"tag":"만듦","text":"화면 느낌 고르기 시안 — 글꼴 · 색 · 표 등 7항목 × 3안","proof":"톤앤매너 시안"},{"tag":"만듦","text":"디자인 시스템 설계 — 값 · 부품 · 화면 틀을 한 장에","proof":"디자인 시스템 설계"},{"tag":"정함","text":"6개월 마일스톤 5개 · 일지와 주보 방식","proof":"진행판"},{"tag":"정함","text":"회사 계정 받음 — 같은 계정으로 GitHub 가입","proof":"회사 계정"}],"blocked":["이카운트 5계정 관리자 권한 — 09-28 계정 받음, 몇 계정 · 관리자 여부 확인 중","이카운트 외부 연결 기능 가능 여부 · 한도 · 비용 — 착수 전 확인 필요"],"next":["기능 목록 서명 준비 (M1 10-08)","업무 일지 웹페이지 공개"],"counts":{"만듦":3,"정함":3,"조사":2}}],"weekly":null}],"totals":{"만듦":3,"정함":3,"조사":2},"days":1,"minutes":145,"weeklyCount":0,"built":"2026-10-02T06:16:01.284Z"}</script>
+<script>
+(() => {
+  const DATA = JSON.parse(document.getElementById('data').textContent);
+  const D = s => new Date(s + 'T00:00:00');
+  const DAY = 864e5;
+  const n0 = new Date();
+  const today = new Date(n0.getFullYear(), n0.getMonth(), n0.getDate());
+  const md = x => x.slice(5);
+  const WD = '일월화수목금토';
+  const wd = x => WD[D(x).getDay()];
+  const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const MS = DATA.milestones;
+  const dd = x => Math.round((D(x) - today) / DAY);
+  const next = MS.find(m => dd(m.due) >= 0) || null;
+  const state = m => dd(m.due) < 0 ? ['확인', ''] : m === next ? ['진행 중', ' cur'] : ['예정', ''];
+
+  // ── 숫자 ──
+  const cs = D(DATA.contract.start), ce = D(DATA.contract.end);
+  const dayNo = Math.min(Math.max(Math.round((today - cs) / DAY) + 1, 0), Math.round((ce - cs) / DAY) + 1);
+  const t = DATA.totals;
+  document.getElementById('stats').innerHTML = [
+    `<div><small>계약</small><b>${dayNo}<span>일째 / 182</span></b></div>`,
+    next ? `<div class="on"><small>다음 마일스톤 · ${esc(next.id)} ${esc(next.name)}</small><b>D-${dd(next.due)}<span>${md(next.due)}</span></b></div>` : `<div><small>다음 마일스톤</small><b>—</b></div>`,
+    `<div><small>일지 · 기록된 근무</small><b>${DATA.days}<span>장</span> ${Math.round(DATA.minutes / 60 * 10) / 10}<span>시간</span></b></div>`,
+    `<div><small>쌓인 결과</small><b style="font-size:15px;padding-top:6px">만듦 ${t['만듦']} · 정함 ${t['정함']} · 조사 ${t['조사']}</b></div>`,
+  ].join('');
+
+  // ── 타임라인 ──
+  const S = D('2026-09-28'), E = D('2027-04-05'), T = E - S;
+  const pa = x => (D(x) - S) / T * 100;
+  const pb = x => (D(x) - S + DAY) / T * 100;
+  const months = [['2026-10-01', '2026년 10월'], ['2026-11-01', '11월'], ['2026-12-01', '12월'], ['2027-01-01', '2027년 1월'], ['2027-02-01', '2월'], ['2027-03-01', '3월']];
+  const mondays = []; for (let d = new Date(S); d < E; d.setDate(d.getDate() + 7)) mondays.push(new Date(d));
+  const tIso = iso(today), inRange = today >= S && today < E;
+  let h = `<div class="tl-row tl-head"><div class="lc"><span></span><span>마일스톤</span><span>목표일</span><span>상태</span></div><div class="tr">`;
+  months.forEach(([d, tx]) => { h += `<span class="mo" style="left:${pa(d)}%">${tx}</span>`; });
+  mondays.forEach(d => { const k = iso(d); if (pa(k) > 1.5 && pa(k) < 98.5 && !(inRange && Math.abs(pa(k) - pa(tIso)) < 2.2)) h += `<span class="wk" style="left:${pa(k)}%">${d.getDate()}</span>`; });
+  if (inRange) h += `<span class="today-pill" style="left:${(pa(tIso) + pb(tIso)) / 2}%">오늘</span>`;
+  h += `</div></div><div class="tl-body"><div class="lines">`;
+  mondays.forEach(d => { h += `<i style="left:${pa(iso(d))}%"></i>`; });
+  months.forEach(([d]) => { h += `<i class="m" style="left:${pa(d)}%"></i>`; });
+  if (inRange) h += `<i class="today" style="left:${(pa(tIso) + pb(tIso)) / 2}%"></i>`;
+  h += `</div>`;
+  MS.forEach((m, i) => {
+    const [st, cls] = state(m);
+    h += `<div class="tl-row ms-row" data-i="${i}"><div class="lc">`
+      + (m.subs.length ? `<button class="tg" type="button" aria-expanded="false" aria-label="${esc(m.id)} 회차 펼치기" data-t="${i}"><span>▶</span></button>` : `<span></span>`)
+      + `<button class="nm" type="button" data-s="${i}"><span class="i">${esc(m.id)}</span><span class="t">${esc(m.name)}</span></button>`
+      + `<span class="dueC">${md(m.due)}</span><span class="pill${cls}">${st}</span></div>`
+      + `<div class="tr"><div class="barx" data-s="${i}" title="${esc(m.id)} ${esc(m.name)} · ${md(m.a)} ~ ${md(m.due)}" style="left:${pa(m.a)}%;width:${pb(m.due) - pa(m.a)}%;--c:var(--${m.c})"><span class="lb">${esc(m.name)}</span></div>`
+      + `<i class="dia" title="목표일 ${md(m.due)} (${wd(m.due)})" style="left:${(pa(m.due) + pb(m.due)) / 2}%"></i></div></div>`;
+    m.subs.forEach(sb => {
+      h += `<div class="tl-row sub" data-p="${i}" hidden><div class="lc"><span></span><span class="nm"><span class="t">${esc(sb.n)} · ${esc(sb.d)}</span></span><span class="dueC">~${md(sb.b)}</span><span></span></div>`
+        + `<div class="tr"><div class="barx" title="${esc(sb.n)} · ${md(sb.a)} ~ ${md(sb.b)} · ${esc(sb.d)}" style="left:${pa(sb.a)}%;width:${pb(sb.b) - pa(sb.a)}%;--c:var(--${sb.c})"><span class="lb">${esc(sb.n)}</span></div></div></div>`;
+    });
+  });
+  h += `</div>`;
+  const tl = document.getElementById('tl');
+  tl.innerHTML = h;
+  const fit = () => tl.querySelectorAll('.barx').forEach(b => {
+    b.classList.remove('out', 'out-l');
+    const lb = b.querySelector('.lb');
+    if (lb.scrollWidth > b.clientWidth - 2) b.classList.add(parseFloat(b.style.left) + parseFloat(b.style.width) > 72 ? 'out-l' : 'out');
+  });
+  fit(); addEventListener('resize', fit);
+  const peek = document.getElementById('peek');
+  const select = i => {
+    const m = MS[i], n = dd(m.due), [st] = state(m);
+    tl.querySelectorAll('.ms-row').forEach(r => r.classList.toggle('sel', r.dataset.i === String(i)));
+    peek.innerHTML = `<h3><span class="i">${esc(m.id)}</span>${esc(m.name)}</h3>
+      <dl class="props">
+        <dt>목표일</dt><dd>${md(m.due)} (${wd(m.due)}) <span class="sm">${n > 0 ? 'D-' + n : n === 0 ? '오늘' : 'D+' + -n}</span></dd>
+        <dt>상태</dt><dd>${st}</dd>
+        <dt>기간</dt><dd>${md(m.a)} ~ ${md(m.due)} · ${esc(m.ph)}</dd>
+        <dt>확인</dt><dd>${esc(m.who)}</dd>
+      </dl>
+      <dl class="props">
+        <dt>산출물</dt><dd><ul>${m.out.map(o => `<li>${esc(o)}</li>`).join('')}</ul></dd>
+        <dt>완료 기준</dt><dd>${esc(m.ok)}</dd>
+        ${m.subs.length ? `<dt>회차</dt><dd><ul>${m.subs.map(sb => `<li>${esc(sb.n)} <span class="sm">${md(sb.a)} ~ ${md(sb.b)}</span> · ${esc(sb.d)}</li>`).join('')}</ul></dd>` : ''}
+      </dl>`;
+  };
+  select(next ? MS.indexOf(next) : MS.length - 1);
+  const setOpen = (i, open) => {
+    const tg = tl.querySelector(`.tg[data-t="${i}"]`); if (!tg) return;
+    tg.setAttribute('aria-expanded', String(open));
+    tl.querySelectorAll(`.tl-row.sub[data-p="${i}"]`).forEach(r => { r.hidden = !open; });
+  };
+  tl.addEventListener('click', e => {
+    const tg = e.target.closest('.tg');
+    if (tg) { setOpen(tg.dataset.t, tg.getAttribute('aria-expanded') !== 'true'); fit(); return; }
+    const sEl = e.target.closest('[data-s]');
+    if (sEl) select(+sEl.dataset.s);
+  });
+  const ex = document.getElementById('expand');
+  ex.addEventListener('click', () => {
+    const open = ex.getAttribute('aria-pressed') !== 'true';
+    ex.setAttribute('aria-pressed', String(open)); ex.textContent = open ? '회차 접기' : '회차 펼치기';
+    MS.forEach((m, i) => setOpen(i, open)); fit();
+  });
+
+  // ── 주 · 일지 ──
+  const tags = d => ['만듦', '정함', '조사'].map(k => `${k} ${d[k]}`).join(' · ');
+  const plain = arr => arr.map(x => `<li class="plain"><span>${esc(x)}</span></li>`).join('');
+  const dayCard = d => {
+    const rest = d.title.split(' · ').slice(1).join(' · ');
+    return `<article class="card">
+      <div class="card-h"><span class="d">${md(d.date)}<small>${wd(d.date)}</small></span>${d.work ? `<span class="w">${esc(d.work)}</span>` : ''}</div>
+      ${rest ? `<div class="meta">${esc(rest)}</div>` : ''}
+      <div class="sec">한 일 · ${tags(d.counts)}</div>
+      <ul class="items">${d.done.map(it => it.tag
+        ? `<li data-tag="${it.tag}"><span class="tag t-${it.tag}">${it.tag}</span><span>${esc(it.text)}${it.proof ? `<span class="pf">${esc(it.proof)}</span>` : ''}</span></li>`
+        : `<li class="plain"><span>${esc(it.text)}</span></li>`).join('')}</ul>
+      ${d.blocked.length ? `<div class="sec">막힌 것 · 회사 대기</div><ul class="items">${plain(d.blocked)}</ul>` : ''}
+      ${d.next.length ? `<div class="sec">다음</div><ul class="items">${plain(d.next)}</ul>` : ''}
+    </article>`;
+  };
+  const weeklyCard = w => `<article class="card wkly">
+      <div class="kicker">주보 · ${md(w.date)} (${wd(w.date)}) · 카카오워크로 보낸 5줄</div>
+      <div style="font-weight:600;font-size:14px">${esc(w.head)}</div>
+      <ol class="wk5">${w.items.map(it => `<li><b>${esc(it.label)}</b><span>${esc(it.text)}</span></li>`).join('')}</ol>
+    </article>`;
+  const weeksEl = document.getElementById('weeks');
+  if (!DATA.weeks.length) weeksEl.innerHTML = `<div class="empty">아직 일지가 없습니다. 첫 근무일이 끝나면 여기에 카드가 생깁니다.</div>`;
+  else weeksEl.innerHTML = DATA.weeks.map(w => {
+    const end = new Date(D(w.start)); end.setDate(end.getDate() + 6);
+    const sum = { 만듦: 0, 정함: 0, 조사: 0 }; w.daily.forEach(d => ['만듦', '정함', '조사'].forEach(k => { sum[k] += d.counts[k]; }));
+    return `<div class="week">
+      <div class="week-h"><h3>${md(w.start)} 주<small>${md(w.start)} ~ ${md(iso(end))}</small></h3><span class="cnt">일지 ${w.daily.length}장 · ${tags(sum)}</span></div>
+      <div class="cards">${w.weekly ? weeklyCard(w.weekly) : ''}${w.daily.slice().reverse().map(dayCard).join('')}</div>
+    </div>`;
+  }).join('');
+
+  document.querySelectorAll('.filter .btn').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.filter .btn').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    const f = b.dataset.f;
+    document.querySelectorAll('ul.items li[data-tag]').forEach(li => li.classList.toggle('dim', !!f && li.dataset.tag !== f));
+  }));
+
+  const bt = new Date(DATA.built);
+  document.getElementById('built').textContent = `마지막 갱신 ${iso(bt)} ${String(bt.getHours()).padStart(2, '0')}:${String(bt.getMinutes()).padStart(2, '0')}`;
+})();
+</script>
+</body>
+</html>
