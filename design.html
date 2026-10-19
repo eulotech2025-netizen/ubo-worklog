@@ -7,7 +7,8 @@
 <title>화면 느낌 고르기</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@800&family=IBM+Plex+Sans+KR:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@800&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
 /* 화면 느낌 고르기 (톤앤매너 시안) — 화면에서 열면 바꿔 보기, 인쇄하면 A4 가로 9장.
    설계: docs/superpowers/specs/2026-10-01-tone-manner-options-design.md
@@ -54,13 +55,13 @@ body{background:var(--desk);color:var(--chrome-ink);font-family:'IBM Plex Sans K
 .frame-in{position:absolute;top:0;left:0}
 
 /* ── 그림 (UI) — 항목 값은 data-* → 변수 ─────────────────────────────── */
-.ui{--u-ff:"Noto Sans KR","Malgun Gothic",sans-serif;--u-fs:14px;--u-row:36px;--u-pad:10px;--u-gap:10px;--u-ctl:32px;--u-r:6px;--u-rp:6px;--u-rc:8px;
+.ui{--u-ff:"Pretendard Variable","Pretendard","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif;--u-fs:14px;--u-row:36px;--u-pad:10px;--u-gap:10px;--u-ctl:32px;--u-r:6px;--u-rp:6px;--u-rc:8px;
   position:relative;width:100%;height:100%;overflow:hidden;display:flex;flex-direction:column;
   font-family:var(--u-ff);font-size:var(--u-fs);line-height:1.35;color:var(--u-ink);background:var(--u-bg);font-variant-numeric:tabular-nums;letter-spacing:0;text-align:left}
 .ui *{box-sizing:border-box}
 .ui[data-font="dotum"]{--u-ff:"Dotum","돋움","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",sans-serif}
 .ui[data-font="malgun"]{--u-ff:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",sans-serif}
-.ui[data-font="noto"]{--u-ff:"Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",sans-serif}
+.ui[data-font="pretendard"]{--u-ff:"Pretendard Variable","Pretendard","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif}
 .ui[data-size="s"]{--u-fs:13px}
 .ui[data-size="m"]{--u-fs:14px}
 .ui[data-size="l"]{--u-fs:16px}
@@ -385,7 +386,7 @@ const AXES = [
   { k: 'font', name: '글꼴', q: '어떤 글씨가 오래 읽기 편한가요?', crop: 'text', real: true, opts: [
     { v: 'dotum', label: '돋움', note: '지금 이카운트 글꼴' },
     { v: 'malgun', label: '맑은 고딕', note: '윈도 기본 글꼴' },
-    { v: 'noto', label: '본고딕', note: '요즘 앱에 많이 쓰는 글꼴' } ] },
+    { v: 'pretendard', label: 'Pretendard', note: '요즘 앱 글꼴' } ] },
   { k: 'size', name: '글자 크기', q: '자리에서 편하게 읽히는 크기는?', crop: 'text', real: true, opts: [
     { v: 's', label: '작게', note: '이카운트와 비슷' },
     { v: 'm', label: '보통', note: '' },
@@ -415,9 +416,9 @@ const PRESETS = {
   A: { name: '이카운트처럼', line: '지금 쓰는 이카운트와 거의 같은 모양입니다. 새로 익힐 게 가장 적습니다.',
     s: { font: 'dotum', size: 's', density: 'tight', color: 'blue', table: 'grid', btn: 'bottom', radius: 'sharp' } },
   B: { name: '차분하게 정리', line: '선을 줄이고 여백을 조금 두었습니다. 오래 봐도 눈이 덜 피곤한 쪽입니다.',
-    s: { font: 'noto', size: 'm', density: 'normal', color: 'navy', table: 'lines', btn: 'top', radius: 'soft' } },
+    s: { font: 'pretendard', size: 'm', density: 'normal', color: 'navy', table: 'lines', btn: 'top', radius: 'soft' } },
   C: { name: '크고 또렷하게', line: '창고 · 휴대폰에서도 잘 보이게 크게 했습니다. 대신 한 화면에 보이는 줄이 적습니다.',
-    s: { font: 'noto', size: 'l', density: 'loose', color: 'contrast', table: 'zebra', btn: 'big', radius: 'round' } },
+    s: { font: 'pretendard', size: 'l', density: 'loose', color: 'contrast', table: 'zebra', btn: 'big', radius: 'round' } },
 };
 // 용어 · 안내 문구 — 시안 장은 모두 이카운트 말 · 합니다 (모양과 말을 섞어 판단하지 않게)
 const SAY_AXES = [
