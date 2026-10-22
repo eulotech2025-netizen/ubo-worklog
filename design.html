@@ -4,335 +4,368 @@
 <meta name="robots" content="noindex,nofollow">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>화면 느낌 고르기</title>
+<title>화면 모양 고르기</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@800&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<!-- Pretendard 는 고정 굵기(static) 판으로 — 가변 글꼴은 PDF 에 그림 글꼴(Type 3)로 들어가 글자가 글자로 남지 않는다 (10-20 확인) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
 <style>
-/* 화면 느낌 고르기 (톤앤매너 시안) — 화면에서 열면 바꿔 보기, 인쇄하면 A4 가로 9장.
-   설계: docs/superpowers/specs/2026-10-01-tone-manner-options-design.md
-   문서 바탕은 중립 회색 — 어느 시안 색도 편들지 않는다. 종이는 늘 흰색. */
+/* 화면 모양 고르기 (10-20) — 10-02 화면 느낌 고르기(시안 A B C)를 이었다.
+   기준 화면 하나(견적 작성 ORD-S01, "정돈된 업무용")에서 한 번에 한 가지만 바꿔 본다.
+   화면에서 열면 바꿔 보기 · 바뀐 곳 노란 표시 · 합쳐 보기, 인쇄하면 A4 가로 12장.
+   문서 바탕은 중립 회색 — 어느 보기도 편들지 않는다. 종이는 늘 흰색. */
 :root{
-  --desk:#E4E7EB;--chrome:#FFFFFF;--chrome-ink:#1B2430;--chrome-sub:#5F6B7A;--chrome-rule:#D5DBE3;--chrome-on:#1B2430;--chrome-on-ink:#FFFFFF;
+  --desk:#E4E7EB;--chrome:#FFFFFF;--chrome-ink:#1B2430;--chrome-sub:#5F6B7A;--chrome-rule:#D5DBE3;--chrome-on:#1B2430;--chrome-on-ink:#FFFFFF;--chrome-soft:#F1F3F6;
   --ink:#1B2430;--sub:#5F6B7A;--mute:#9AA4B1;--rule:#CDD3DB;--faint:#F3F5F7;
+  --mk:#E2AE00;--mk-bg:rgba(255,206,0,.16);
 }
 @media screen and (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){color-scheme:dark;--desk:#14181D;--chrome:#1C2128;--chrome-ink:#E6EAF0;--chrome-sub:#9AA5B3;--chrome-rule:#2E3640;--chrome-on:#E6EAF0;--chrome-on-ink:#14181D}
+  :root:not([data-theme="light"]){color-scheme:dark;--desk:#14181D;--chrome:#1C2128;--chrome-ink:#E6EAF0;--chrome-sub:#9AA5B3;--chrome-rule:#2E3640;--chrome-on:#E6EAF0;--chrome-on-ink:#14181D;--chrome-soft:#242A32}
 }
-:root[data-theme="dark"]{color-scheme:dark;--desk:#14181D;--chrome:#1C2128;--chrome-ink:#E6EAF0;--chrome-sub:#9AA5B3;--chrome-rule:#2E3640;--chrome-on:#E6EAF0;--chrome-on-ink:#14181D}
+:root[data-theme="dark"]{color-scheme:dark;--desk:#14181D;--chrome:#1C2128;--chrome-ink:#E6EAF0;--chrome-sub:#9AA5B3;--chrome-rule:#2E3640;--chrome-on:#E6EAF0;--chrome-on-ink:#14181D;--chrome-soft:#242A32}
 
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background:var(--desk);color:var(--chrome-ink);font-family:'IBM Plex Sans KR','Malgun Gothic','Apple SD Gothic Neo',system-ui,sans-serif;font-size:14px;line-height:1.5}
+body{background:var(--desk);color:var(--chrome-ink);font-family:'IBM Plex Sans KR','Malgun Gothic','Apple SD Gothic Neo',system-ui,sans-serif;font-size:14px;line-height:1.5;word-break:keep-all}
+button{font:inherit;color:inherit}
 
 /* ── 바꿔 보기 (화면 전용) ───────────────────────────────────────────── */
-.panel{background:var(--chrome);border-bottom:1px solid var(--chrome-rule);padding:14px 16px;display:grid;gap:10px}
-.panel-top{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px}
-.panel h1{margin:0;font-family:'Gothic A1','IBM Plex Sans KR',sans-serif;font-weight:800;font-size:20px}
-.panel .hint{margin:0;color:var(--chrome-sub);font-size:13px}
-.panel .print{margin-left:auto;border:1px solid var(--chrome-on);background:var(--chrome-on);color:var(--chrome-on-ink);border-radius:8px;padding:7px 14px;font:inherit;font-weight:600;cursor:pointer}
-.ctl{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center}
-.grp{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0}
-.grp>span{font-size:12.5px;color:var(--chrome-sub);white-space:nowrap}
-.seg{display:inline-flex;flex-wrap:wrap;max-width:100%;border:1px solid var(--chrome-rule);border-radius:8px;overflow:hidden}
-.seg button{border:0;border-left:1px solid var(--chrome-rule);background:transparent;color:var(--chrome-ink);padding:5px 10px;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
+.bar{background:var(--chrome);border-bottom:1px solid var(--chrome-rule);padding:12px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px}
+.bar h1{margin:0;font-family:'Gothic A1','IBM Plex Sans KR',sans-serif;font-weight:800;font-size:20px;white-space:nowrap}
+.bar .hint{margin:0;flex:1 1 360px;color:var(--chrome-sub);font-size:13px}
+.btn-c{border:1px solid var(--chrome-rule);background:var(--chrome);color:var(--chrome-ink);border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;white-space:nowrap;transition:background-color .15s ease,border-color .15s ease}
+.btn-c:hover{background:var(--chrome-soft)}
+.btn-c.on{background:var(--chrome-on);border-color:var(--chrome-on);color:var(--chrome-on-ink);font-weight:600}
+.btn-c:focus-visible,.seg button:focus-visible,.sw input:focus-visible{outline:2px solid #5FA8FF;outline-offset:1px}
+
+.tool{display:grid;grid-template-columns:288px minmax(0,1fr);gap:16px;padding:16px;align-items:start}
+.ctl{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;background:var(--chrome);border:1px solid var(--chrome-rule);border-radius:10px;padding:12px;display:grid;gap:12px}
+.modes{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--chrome-rule);border-radius:8px;overflow:hidden}
+.modes button{border:0;border-left:1px solid var(--chrome-rule);background:transparent;padding:8px 6px;font-size:13px;cursor:pointer;transition:background-color .15s ease,color .15s ease}
+.modes button:first-child{border-left:0}
+.modes button[aria-pressed="true"]{background:var(--chrome-on);color:var(--chrome-on-ink);font-weight:600}
+.sws{display:grid;gap:4px}
+.sw{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--chrome-ink);cursor:pointer}
+.sw input{margin:0;width:16px;height:16px;accent-color:var(--chrome-on)}
+.sw[hidden]{display:none}
+.items{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.it{padding:7px 8px 8px;border-radius:8px;border:1px solid transparent;display:grid;gap:5px;transition:background-color .15s ease,border-color .15s ease}
+.it.cur{background:var(--chrome-soft);border-color:var(--chrome-rule)}
+.it-h{display:flex;align-items:baseline;gap:6px}
+.it-n{flex:none;width:18px;font-size:12px;color:var(--chrome-sub)}
+.it-h b{font-size:13.5px;font-weight:600}
+.it-h small{margin-left:auto;font-size:11.5px;color:var(--chrome-sub);white-space:nowrap}
+.it.chg .it-h b::after{content:"바뀜";margin-left:6px;padding:0 5px;border-radius:4px;background:var(--mk-bg);border:1px solid var(--mk);font-size:11px;font-weight:600;color:var(--chrome-ink)}
+.seg{display:grid;border:1px solid var(--chrome-rule);border-radius:8px;overflow:hidden}
+.seg button{position:relative;border:0;border-left:1px solid var(--chrome-rule);background:transparent;padding:5px 4px;font-size:13px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background-color .15s ease,color .15s ease}
 .seg button:first-child{border-left:0}
+.seg button:hover{background:var(--chrome-soft)}
 .seg button[aria-pressed="true"]{background:var(--chrome-on);color:var(--chrome-on-ink);font-weight:600}
-.seg button:focus-visible,.panel .print:focus-visible{outline:2px solid #5FA8FF;outline-offset:1px}
-.presets .seg button{padding:6px 14px;font-size:14px}
-.now{font-size:13px;color:var(--chrome-sub)}
-.now b{color:var(--chrome-ink)}
-.desk{padding:16px;display:grid;gap:16px;justify-items:center}
-.live{width:100%;max-width:1400px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:start}
-.live-pc{min-width:0}
-@media (max-width:900px){.live{grid-template-columns:minmax(0,1fr)}.live-ph{justify-self:center}}
-.desk-h{margin:12px 0 0;font-size:15px;color:var(--chrome-sub);font-weight:600;justify-self:start;max-width:1400px;width:100%}
+.seg button.picked::after{content:"";position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--mk)}
+.ctl .legend{margin:0;font-size:12px;color:var(--chrome-sub);line-height:1.45}
+.ctl .legend i{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--mk);margin-right:4px;vertical-align:1px}
+
+.stage-wrap{min-width:0;display:grid;gap:10px}
+.said{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;background:var(--chrome);border:1px solid var(--chrome-rule);border-radius:10px;padding:9px 12px;min-height:46px}
+.said p{margin:0;flex:1 1 320px;font-size:14px}
+.said p .s{color:var(--chrome-sub)}
+.said .acts{display:flex;gap:6px;flex-wrap:wrap}
+.stage{min-width:0;overflow:auto;position:relative}
+.stage .frame{border:1px solid var(--chrome-rule)}
+.stage-note{margin:0;font-size:13px;color:var(--chrome-sub)}
+.stage.phone .frame{width:auto!important;height:auto!important;overflow:visible}
+.stage.phone .frame-in{position:static;width:auto!important;height:auto!important;zoom:1!important}
+.desk-h{margin:8px 16px 0;font-size:15px;color:var(--chrome-sub);font-weight:600}
+.pages-wrap{padding:12px 16px 32px;overflow:hidden}
+#measure{position:absolute;left:-20000px;top:0;visibility:hidden;pointer-events:none}
+@media (max-width:1100px){
+  .tool{grid-template-columns:minmax(0,1fr)}
+  .ctl{position:static;max-height:none}
+  .items{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
 
 /* ── 그림 틀 — 실제 크기로 그리고 zoom 으로 줄인다.
    transform: scale 은 인쇄 때 줄이기 전 크기로 종이 끝에서 잘린다 (크롬, 10-01 확인) ── */
 .frame{position:relative;overflow:hidden;flex:none}
 .frame-in{position:absolute;top:0;left:0}
+/* 종이 위 그림은 틀 밖으로 아무것도 새지 않게 가둔다 — 안 가두면 인쇄 때 그림 속 위치 잡은 칸들이 종이 폭을 넓혀
+   크롬이 종이 전체를 71% 로 줄여 찍는다 (10-20 확인) */
+.sheet .frame{contain:strict}
+.sheet .u-tbl{overflow:hidden} /* 종이에는 스크롤 막대를 찍지 않는다 */
+.crop-in{position:absolute}
+.win{position:absolute;border:9px solid #1B2430;outline:6px solid #FFFFFF;pointer-events:none;z-index:30}
 
-/* ── 그림 (UI) — 항목 값은 data-* → 변수 ─────────────────────────────── */
-.ui{--u-ff:"Pretendard Variable","Pretendard","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif;--u-fs:14px;--u-row:36px;--u-pad:10px;--u-gap:10px;--u-ctl:32px;--u-r:6px;--u-rp:6px;--u-rc:8px;
-  position:relative;width:100%;height:100%;overflow:hidden;display:flex;flex-direction:column;
-  font-family:var(--u-ff);font-size:var(--u-fs);line-height:1.35;color:var(--u-ink);background:var(--u-bg);font-variant-numeric:tabular-nums;letter-spacing:0;text-align:left}
+/* ── 그림: 견적 작성 (ORD-S01) — 항목 값은 data-* → 변수.
+   기준 = "정돈된 업무용": 연회색 바탕 · 흰 판 · 파랑 하나 · 글자 14 · 가는 선 · 칸막이 + 줄 번호 표 ── */
+.ui{--fs:14px;--row:33px;--ctl:30px;--gap:12px;--fpad:14px;--sidew:216px;--toph:calc(var(--ctl) + 18px);
+  --r-in:3px;--r-btn:4px;--r-pn:4px;--r-pill:3px;
+  --bg:#EEF0F3;--pn:#FFFFFF;--in:#FFFFFF;--ln:#D8DCE2;--ln2:#ECEEF1;--lnh:#B9C0CA;--hd:#F6F7F9;--ink:#1D232B;--sub:#59626E;--hov:#F2F5FB;--zeb:#EDF0F4;--warn:#9B4C00;--ok:#1D7445;--chip:#F1F3F6;--red:#C0262D;
+  --acc:#2A5BB5;--acc-soft:#E8EEF9;--acc-hi:#86A9EC;--pri:#2A5BB5;--pri-h:#234E9C;--pri-ink:#FFFFFF;
+  --nav:var(--pn);--nav-ink:var(--ink);--nav-sub:var(--sub);--nav-ln:var(--ln);--nav-on:var(--acc-soft);--nav-on-ink:var(--ink);--nav-bar:var(--acc);--nav-hov:var(--hov);--nav-box:var(--ln);
+  position:relative;display:flex;overflow:hidden;width:1440px;height:900px;color-scheme:light;
+  font-family:Pretendard,"Pretendard Variable","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  font-size:var(--fs);line-height:1.4;color:var(--ink);background:var(--bg);font-variant-numeric:tabular-nums;letter-spacing:-0.01em;word-break:keep-all;text-align:left}
 .ui *{box-sizing:border-box}
-.ui[data-font="dotum"]{--u-ff:"Dotum","돋움","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",sans-serif}
-.ui[data-font="malgun"]{--u-ff:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",sans-serif}
-.ui[data-font="pretendard"]{--u-ff:"Pretendard Variable","Pretendard","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif}
-.ui[data-size="s"]{--u-fs:13px}
-.ui[data-size="m"]{--u-fs:14px}
-.ui[data-size="l"]{--u-fs:16px}
-.ui[data-density="tight"]{--u-row:28px;--u-pad:6px;--u-gap:6px;--u-ctl:24px}
-.ui[data-density="normal"]{--u-row:36px;--u-pad:10px;--u-gap:10px;--u-ctl:32px}
-.ui[data-density="loose"]{--u-row:48px;--u-pad:14px;--u-gap:14px;--u-ctl:42px}
-.ui[data-radius="sharp"]{--u-r:2px;--u-rp:2px;--u-rc:2px}
-.ui[data-radius="soft"]{--u-r:6px;--u-rp:6px;--u-rc:8px}
-.ui[data-radius="round"]{--u-r:12px;--u-rp:999px;--u-rc:16px}
+/* 강조색 */
+.ui[data-acc="teal"]{--acc:#0E8A78;--acc-soft:#E1F3EF;--acc-hi:#45C2AC;--pri:#0E7C6B;--pri-h:#0B6B5C}
+/* 화면 밝기 — 다크는 뒤집은 색이 아니라 따로 맞춘 색 */
+.ui[data-lum="dark"]{color-scheme:dark;--bg:#13161B;--pn:#1A1E24;--in:#16191E;--ln:#2D333C;--ln2:#242930;--lnh:#46505C;--hd:#1F242B;--ink:#E3E6EA;--sub:#9CA4AF;--hov:#212833;--zeb:#20252C;--warn:#E3A05C;--ok:#6CC08C;--chip:#242A32;--red:#D93A41;
+  --acc:#86A9EC;--acc-soft:#203050;--pri:#3F67BA;--pri-h:#4A73C6}
+.ui[data-lum="dark"][data-acc="teal"]{--acc:#4CC3AE;--acc-soft:#16382F;--acc-hi:#4CC3AE;--pri:#12806E;--pri-h:#17917D}
+/* 왼쪽 메뉴 색 */
+.ui[data-nav="navy"]{--nav:#1E3A5F;--nav-ink:#EEF3F9;--nav-sub:#A9BACD;--nav-ln:#1E3A5F;--nav-on:#2B4C77;--nav-on-ink:#FFFFFF;--nav-bar:var(--acc-hi);--nav-hov:#25466F;--nav-box:#3B5B83}
+.ui[data-nav="navy"][data-lum="dark"]{--nav:#172A42;--nav-ink:#DCE5F0;--nav-sub:#91A4BB;--nav-ln:#172A42;--nav-on:#223A5C;--nav-hov:#1D3352;--nav-box:#2F4868}
+/* 글자 크기 · 촘촘함 · 모서리 */
+.ui[data-fs="15"]{--fs:15px}
+.ui[data-fs="16"]{--fs:16px}
+.ui[data-den="normal"]{--row:40px;--ctl:34px;--gap:14px;--fpad:16px}
+.ui[data-den="loose"]{--row:48px;--ctl:40px;--gap:18px;--fpad:20px}
+.ui[data-rad="soft"]{--r-in:7px;--r-btn:8px;--r-pn:10px;--r-pill:6px}
+.ui[data-rad="round"]{--r-in:12px;--r-btn:12px;--r-pn:16px;--r-pill:999px}
+.ui[data-side="icon"]{--sidew:64px}
 
-/* 색 셋 — 상태 알약 다섯(완료 · 진행 · 검수 · 대기 · 지연) 포함 */
-.ui[data-color="blue"]{--u-bg:#F7F8F9;--u-surface:#FFFFFF;--u-panel:#F4F6F9;--u-line:#D9DDE3;--u-line2:#C3C9D1;--u-head:#F1F3F6;--u-head-ink:#222831;--u-ink:#111418;--u-sub:#646B74;
-  --u-pri:#2B4BD8;--u-pri-ink:#FFFFFF;--u-bar:#2B4BD8;--u-bar-ink:#FFFFFF;--u-nav:#FFFFFF;--u-nav-ink:#222831;--u-nav-on:#2B4BD8;--u-link:#2443C4;--u-acc:#2B4BD8;--u-ok:#1E7B3A;
-  --u-zebra:#F4F6F9;--u-warn-bg:#FFF4E5;--u-warn-ink:#A44A00;--u-warn-line:#F5C98A;
-  --s-done-bg:#E6F4EA;--s-done:#1E7B3A;--s-doing-bg:#E8EDFF;--s-doing:#2443C4;--s-check-bg:#F1E9FF;--s-check:#6A3DC0;--s-wait-bg:#EEF0F3;--s-wait:#4D545C;--s-late-bg:#FDE7E7;--s-late:#C62828}
-.ui[data-color="navy"]{--u-bg:#F2F4F7;--u-surface:#FFFFFF;--u-panel:#FFFFFF;--u-line:#E3E7ED;--u-line2:#CDD4DD;--u-head:#F7F9FB;--u-head-ink:#5B6675;--u-ink:#1B2430;--u-sub:#6B7685;
-  --u-pri:#1E3A5F;--u-pri-ink:#FFFFFF;--u-bar:#FFFFFF;--u-bar-ink:#1E3A5F;--u-nav:#1E3A5F;--u-nav-ink:#E8EEF5;--u-nav-on:#3FC7B0;--u-link:#0E7C6B;--u-acc:#0E8A78;--u-ok:#0B6B5C;
-  --u-zebra:#F6F8FA;--u-warn-bg:#FFF6E0;--u-warn-ink:#8A5300;--u-warn-line:#F1D08A;
-  --s-done-bg:#DDF1EC;--s-done:#0B6B5C;--s-doing-bg:#E3ECF7;--s-doing:#1E3A5F;--s-check-bg:#ECE8F7;--s-check:#5B47A8;--s-wait-bg:#EEF1F4;--s-wait:#5B6675;--s-late-bg:#FBE4E1;--s-late:#B3261E}
-.ui[data-color="contrast"]{--u-bg:#FFFFFF;--u-surface:#FFFFFF;--u-panel:#FFFFFF;--u-line:#A3AAB3;--u-line2:#4B5563;--u-head:#111827;--u-head-ink:#FFFFFF;--u-ink:#0B0F14;--u-sub:#374151;
-  --u-pri:#C2410C;--u-pri-ink:#FFFFFF;--u-bar:#111827;--u-bar-ink:#FFFFFF;--u-nav:#0B0F14;--u-nav-ink:#FFFFFF;--u-nav-on:#F97316;--u-link:#C2410C;--u-acc:#EA580C;--u-ok:#15803D;
-  --u-zebra:#F0F1F3;--u-warn-bg:#FFEDD5;--u-warn-ink:#9A3412;--u-warn-line:#FB923C;
-  --s-done-bg:#15803D;--s-done:#FFFFFF;--s-doing-bg:#1D4ED8;--s-doing:#FFFFFF;--s-check-bg:#6D28D9;--s-check:#FFFFFF;--s-wait-bg:#4B5563;--s-wait:#FFFFFF;--s-late-bg:#DC2626;--s-late:#FFFFFF}
+/* 바뀐 곳 표시 — 노란 테두리 · 노란 바탕 (그림 위에 덮는다) */
+.ui [data-z]{position:relative}
+.ui[data-z]::after,.ui [data-z]::after{content:"";position:absolute;inset:0;border:2.5px solid var(--mk);background:var(--mk-bg);border-radius:inherit;opacity:0;pointer-events:none;z-index:7;transition:opacity .18s ease}
+.ui [data-z].mk::after{opacity:1}
+/* 색을 고르는 항목은 노란 바탕을 깔지 않고 테두리만 — 바탕을 깔면 고르려는 색이 바뀌어 보인다 */
+.ui [data-z].mk.line::after{background:transparent;border-width:3px}
 
-.u-pill{display:inline-flex;align-items:center;height:1.75em;padding:0 .65em;border-radius:var(--u-rp);font-size:.82em;font-weight:700;white-space:nowrap;flex:none}
-.s-done{background:var(--s-done-bg);color:var(--s-done)}.s-doing{background:var(--s-doing-bg);color:var(--s-doing)}.s-check{background:var(--s-check-bg);color:var(--s-check)}
-.s-wait{background:var(--s-wait-bg);color:var(--s-wait)}.s-late{background:var(--s-late-bg);color:var(--s-late)}
-.u-btn{display:inline-flex;align-items:center;justify-content:center;gap:2px;height:var(--u-ctl);padding:0 calc(var(--u-pad) + 4px);border:1px solid var(--u-line2);border-radius:var(--u-r);background:var(--u-surface);color:var(--u-ink);font-size:.95em;white-space:nowrap;flex:none}
-.u-btn.pri{background:var(--u-pri);border-color:var(--u-pri);color:var(--u-pri-ink);font-weight:700}
-.u-btn kbd{font:inherit;font-size:.86em;opacity:.85}
-.u-btn.big{height:52px;min-width:150px;padding:0 22px;font-size:1.08em;font-weight:700}
-.ui[data-color="contrast"] .u-btn:not(.pri){border-width:1.5px;font-weight:500}
+/* 왼쪽 메뉴 */
+.u-side{flex:none;width:var(--sidew);display:flex;flex-direction:column;background:var(--nav);color:var(--nav-ink);border-right:1px solid var(--nav-ln);overflow:hidden;z-index:3}
+.u-brand{flex:none;display:flex;align-items:center;gap:10px;height:var(--toph);padding:0 16px;border-bottom:1px solid var(--nav-ln);font-weight:700;font-size:1.07em;white-space:nowrap}
+.u-mark{flex:none;display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border:1.5px solid currentColor;border-radius:var(--r-in);font-size:13px;font-weight:800}
+.u-co{flex:none;padding:12px 12px 12px;border-bottom:1px solid var(--nav-ln)}
+.u-co-l{display:block;margin:0 0 6px 4px;font-size:.86em;color:var(--nav-sub);white-space:nowrap}
+.u-co-b{display:flex;align-items:center;gap:8px;height:calc(var(--ctl) + 4px);padding:0 8px;border:1px solid var(--nav-box);border-radius:var(--r-in);white-space:nowrap;overflow:hidden;cursor:pointer}
+.u-co-n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.u-caret{flex:none;width:14px;height:14px;color:var(--nav-sub)}
+.u-logo{flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:22px;padding:0 4px;border:1px solid currentColor;border-radius:3px;font-size:11.5px;font-weight:800;letter-spacing:.02em;line-height:1}
+.u-menu{flex:1;display:flex;flex-direction:column;gap:2px;padding:10px 8px}
+.u-mi{position:relative;display:flex;align-items:center;gap:10px;height:calc(var(--ctl) + 6px);padding:0 10px;border-radius:var(--r-btn);color:var(--nav-ink);white-space:nowrap;cursor:pointer}
+.u-mi svg{flex:none;width:1.25em;height:1.25em;color:var(--nav-sub)}
+.u-mi:hover{background:var(--nav-hov)}
+.u-mi.on{background:var(--nav-on);color:var(--nav-on-ink);font-weight:600}
+.u-mi.on svg{color:var(--nav-bar)}
+.u-mi.on::before{content:"";position:absolute;left:-8px;top:7px;bottom:7px;width:3px;border-radius:0 2px 2px 0;background:var(--nav-bar)}
+.u-cnt{margin-left:auto;display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:19px;padding:0 6px;border:1px solid var(--nav-box);border-radius:var(--r-pill);font-size:.82em;color:var(--nav-sub)}
+.u-msp{flex:1}
+.ui[data-side="icon"] .u-side .u-lbl,.ui[data-side="icon"] .u-side .u-cnt{display:none}
+.ui[data-side="icon"] .u-brand{justify-content:center;padding:0}
+.ui[data-side="icon"] .u-co{padding:12px 8px}
+.ui[data-side="icon"] .u-co-b{justify-content:center;padding:0;border-color:transparent}
+.ui[data-side="icon"] .u-mi{justify-content:center;padding:0}
+
+/* 머리줄 · 본문 */
+.u-main{flex:1;min-width:0;display:flex;flex-direction:column}
+.u-top{flex:none;display:flex;align-items:center;gap:12px;height:var(--toph);padding:0 20px 0 10px;background:var(--pn);border-bottom:1px solid var(--ln)}
+.u-burger{flex:none;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:var(--r-btn);color:var(--sub);cursor:pointer}
+.u-burger svg{width:18px;height:18px}
+.u-burger:hover{background:var(--hov)}
+.u-crumb{font-size:.93em;color:var(--sub);white-space:nowrap}
+.u-crumb b{color:var(--ink);font-weight:600}
 .u-sp{flex:1}
-.u-ic{display:inline-block;width:.95em;height:.95em;flex:none;color:var(--u-sub)}
+.u-find{display:flex;align-items:center;gap:8px;width:280px;height:var(--ctl);padding:0 10px;border:1px solid var(--ln);border-radius:var(--r-in);background:var(--in);color:var(--sub);font-size:.93em;white-space:nowrap;overflow:hidden}
+.u-find svg{flex:none;width:14px;height:14px}
+.u-user{font-size:.93em;color:var(--sub);white-space:nowrap}
+.u-page{flex:1;min-height:0;display:flex;flex-direction:column;gap:var(--gap);padding:14px 20px 0}
+.u-titlerow{flex:none;display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;min-height:calc(var(--ctl) + 2px)}
+.u-h1{font-size:1.29em;font-weight:600;white-space:nowrap}
+.u-chip{display:inline-flex;align-items:center;height:22px;padding:0 8px;border:1px solid var(--ln);border-radius:var(--r-pill);background:var(--chip);font-size:.86em;color:var(--sub);white-space:nowrap}
+.u-qno{font-size:.93em;color:var(--sub);white-space:nowrap}
+.u-saved{font-size:.93em;color:var(--ok);white-space:nowrap}
+.u-acts-top{display:none;margin-left:auto;align-items:center;gap:8px}
+.u-panel{background:var(--pn);border:1px solid var(--ln);border-radius:var(--r-pn)}
+.u-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:calc(var(--gap) - 2px) 28px;padding:var(--fpad) 16px}
+.u-f{position:relative;display:flex;align-items:center;gap:10px;min-width:0}
+.u-l{flex:none;width:4.6em;text-align:right;font-size:.93em;color:var(--sub);white-space:nowrap}
+.u-in{flex:1;min-width:0;display:flex;align-items:center;gap:8px;height:var(--ctl);padding:0 9px;border:1px solid var(--ln);border-radius:var(--r-in);background:var(--in);white-space:nowrap;overflow:hidden;cursor:text}
+.u-in svg{flex:none;margin-left:auto;width:14px;height:14px;color:var(--sub)}
+.u-in:hover{border-color:var(--lnh)}
+.u-in .u-logo{height:20px;min-width:30px;font-size:11px}
+.u-info{display:flex;flex-wrap:wrap;align-items:center;gap:4px 18px;padding:9px 16px;border-top:1px solid var(--ln2);font-size:.93em}
+.u-s{color:var(--sub)}
+.u-warn{color:var(--warn);font-weight:600}
+.u-tp{flex:1;min-height:0;display:flex;flex-direction:column}
+.u-tph{flex:none;display:flex;align-items:center;gap:8px;height:calc(var(--ctl) + 10px);padding:0 16px;border-bottom:1px solid var(--ln)}
+.u-tph b{font-weight:600}
+.u-tph .u-s{font-size:.93em}
+.u-tbl{flex:1;min-height:0;overflow:auto}
+.u-tr{display:grid}
+.u-cols{grid-template-columns:3.2em 6em minmax(13em,1fr) 8em 3.8em 8.6em 7.6em 6.6em 7.6em 7.6em}
+.ui:not([data-tbl="grid"]) .u-cols{grid-template-columns:6em minmax(13em,1fr) 8em 3.8em 8.6em 7.6em 6.6em 7.6em 7.6em}
+.ui:not([data-tbl="grid"]) .u-no{display:none}
+.u-th{position:sticky;top:0;z-index:2}
+.u-th > div{height:calc(var(--row) + 1px);line-height:var(--row);padding:0 10px;background:var(--hd);color:var(--sub);font-size:.93em;font-weight:600;white-space:nowrap;overflow:hidden}
+.u-td{position:relative;height:var(--row);line-height:calc(var(--row) - 1px);padding:0 10px;background:var(--pn);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;cursor:cell}
+.u-td.u-name{display:flex;align-items:center;gap:8px}
+.u-tx{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.u-code,.u-spec{color:var(--sub)}
+.u-ph{color:var(--sub)}
+.n{text-align:right}
+.u-th > .n{text-align:right}
+.u-no{text-align:center;padding:0!important;color:var(--sub)}
+.u-tag{flex:none;display:inline-flex;align-items:center;height:19px;padding:0 6px;border:1px solid var(--ln);border-radius:var(--r-pill);font-size:.82em;line-height:1;color:var(--sub)}
+.u-fix{position:absolute;left:6px;top:50%;margin-top:-9px;height:18px;line-height:16px;padding:0 5px;border:1px solid var(--warn);border-radius:var(--r-pill);background:var(--pn);font-size:.82em;font-weight:600;color:var(--warn)}
+/* 표 모양 — 칸막이 + 줄 번호 (기준) · 가로줄 · 줄무늬 */
+.ui[data-tbl="grid"] .u-th > div{border-bottom:1px solid var(--ln);border-right:1px solid var(--ln2)}
+.ui[data-tbl="grid"] .u-td{border-bottom:1px solid var(--ln2);border-right:1px solid var(--ln2)}
+.ui[data-tbl="lines"] .u-th > div{background:transparent;border-bottom:1.5px solid var(--lnh)}
+.ui[data-tbl="lines"] .u-td{border-bottom:1px solid var(--ln)}
+.ui[data-tbl="zebra"] .u-th > div{border-bottom:1px solid var(--ln)}
+.ui[data-tbl="zebra"] .u-tb > .u-tr:nth-child(even) > .u-td{background:var(--zeb)}
+.u-tb > .u-tr:hover > .u-td{background:var(--hov)}
+.u-tb > .u-tr.on > .u-td{background:var(--acc-soft)}
+.u-td.sel{outline:2px solid var(--acc);outline-offset:-2px}
+.u-sum{flex:none;display:flex;justify-content:flex-end;align-items:baseline;flex-wrap:wrap;gap:6px 28px;padding:10px 16px;border-top:1px solid var(--ln);font-size:.93em;color:var(--sub)}
+.u-sum b{margin-left:6px;font-size:1.07em;font-weight:600;color:var(--ink)}
+.u-sum .g b{font-size:1.3em;font-weight:700}
 
-/* PC — 메뉴줄 · 창 · 칸 · 표 · 합계 · 안내 · 버튼 */
-.u-nav{flex:none;display:flex;align-items:center;gap:calc(var(--u-gap) * 2.2);height:calc(var(--u-row) + 14px);padding:0 18px;background:var(--u-nav);color:var(--u-nav-ink);border-bottom:1px solid var(--u-line)}
-.u-logo{font-weight:700;font-size:1.08em;white-space:nowrap}
-.ui[data-color="blue"] .u-logo{color:var(--u-pri)}
-.u-menu{display:flex;gap:calc(var(--u-gap) * 1.8);align-self:stretch}
-.u-menu span{display:flex;align-items:center;padding-top:3px;border-bottom:3px solid transparent;white-space:nowrap}
-.u-menu .on{border-bottom-color:var(--u-nav-on);font-weight:700}
-.u-user{margin-left:auto;font-size:.9em;opacity:.85;white-space:nowrap}
-.u-body{flex:1;min-height:0;display:flex;flex-direction:column;padding:var(--u-gap)}
-.u-win{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--u-surface);border:1px solid var(--u-line);border-radius:var(--u-rc);overflow:hidden}
-.ui[data-color="contrast"] .u-win{border:2px solid var(--u-ink)}
-.u-winbar{display:none;flex:none;align-items:center;gap:10px;height:28px;padding:0 10px;background:var(--u-bar);color:var(--u-bar-ink);font-size:12px}
-.ui[data-color="blue"] .u-winbar{display:flex}
-.u-winbar .ico{margin-left:auto;letter-spacing:6px;opacity:.9}
-.u-head{flex:none;display:flex;align-items:center;gap:var(--u-gap);padding:calc(var(--u-pad) + 2px) calc(var(--u-pad) + 6px)}
-.u-title{font-size:1.32em;font-weight:700;white-space:nowrap}
-.u-saved{font-size:.86em;color:var(--u-ok);white-space:nowrap}
-.u-form{flex:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--u-gap) calc(var(--u-gap) * 2);margin:0 calc(var(--u-pad) + 6px);padding:var(--u-pad) calc(var(--u-pad) + 4px);background:var(--u-panel);border-radius:var(--u-rc)}
-.ui[data-color="blue"] .u-form{border:1px solid var(--u-line)}
-.ui[data-color="navy"] .u-form,.ui[data-color="contrast"] .u-form{padding-left:0;padding-right:0}
-.u-f{display:flex;align-items:center;gap:8px;min-width:0}
-.u-l{flex:none;width:4.6em;color:var(--u-sub);white-space:nowrap}
-.u-in{flex:1;min-width:0;display:flex;align-items:center;gap:6px;height:var(--u-ctl);padding:0 9px;border:1px solid var(--u-line2);border-radius:var(--u-r);background:#FFFFFF;white-space:nowrap;overflow:hidden}
-.u-in .u-ic{margin-left:auto}
-.ui[data-color="contrast"] .u-in{border:1.5px solid var(--u-line2)}
-.u-tools{flex:none;display:flex;align-items:center;gap:6px;padding:var(--u-pad) calc(var(--u-pad) + 6px) calc(var(--u-pad) * .6)}
-.u-tools .u-btn{height:calc(var(--u-ctl) - 2px);font-size:.9em}
-.u-count{font-size:.86em;color:var(--u-sub)}
-.u-tablewrap{position:relative;flex:1;min-height:0;overflow:hidden;margin:0 calc(var(--u-pad) + 6px)}
-.u-table{width:100%;border-collapse:collapse;table-layout:fixed}
-.u-table th,.u-table td{height:var(--u-row);padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;vertical-align:middle}
-.u-table th{font-weight:700;font-size:.92em}
-.u-table .n{text-align:right}
-.u-table .c{text-align:center}
-.u-table .no{text-align:center;color:var(--u-sub);font-size:.84em;padding:0}
-.u-table .add{color:var(--u-link);font-size:.92em}
-.ui[data-table="grid"] .u-table th{background:var(--u-head);color:var(--u-head-ink)}
-.ui[data-table="grid"] .u-table th,.ui[data-table="grid"] .u-table td{border:1px solid var(--u-line)}
-.ui[data-table="grid"] .u-table .no span{display:inline-block;min-width:1.7em;border:1px solid var(--u-line2);border-radius:var(--u-r);line-height:1.4}
-.ui[data-table="lines"] .u-table th{background:transparent;color:var(--u-sub);border-bottom:1.5px solid var(--u-line2)}
-.ui[data-table="lines"] .u-table td{border-bottom:1px solid var(--u-line)}
-.ui[data-table="zebra"] .u-table th{background:var(--u-head);color:var(--u-head-ink)}
-.ui[data-table="zebra"] .u-table tbody tr:nth-child(even) td{background:var(--u-zebra)}
-.u-more{position:absolute;left:0;right:0;bottom:0;padding:22px 0 5px;text-align:center;font-size:.86em;font-weight:700;color:var(--u-sub);background:linear-gradient(to bottom,transparent,var(--u-surface) 60%)}
-.u-more[hidden]{display:none}
-.u-sum{flex:none;display:flex;justify-content:flex-end;align-items:baseline;gap:calc(var(--u-gap) * 2.2);margin:0 calc(var(--u-pad) + 6px);padding:calc(var(--u-pad) * .8) 8px;border-top:1.5px solid var(--u-line2)}
-.u-sum span{color:var(--u-sub);font-size:.9em}
-.u-sum b{color:var(--u-ink);margin-left:6px;font-size:1.04em}
-.u-sum .grand b{font-size:1.2em}
-.u-note{flex:none;display:flex;align-items:center;gap:8px;margin:calc(var(--u-pad) * .6) calc(var(--u-pad) + 6px) var(--u-pad);padding:calc(var(--u-pad) * .55) 10px;background:var(--u-warn-bg);color:var(--u-warn-ink);border:1px solid var(--u-warn-line);border-radius:var(--u-r);font-size:.92em}
-.u-actions{flex:none;display:flex;align-items:center;gap:6px;padding:var(--u-pad) calc(var(--u-pad) + 6px);border-top:1px solid var(--u-line);background:var(--u-panel)}
-.u-actions.big{gap:10px;padding:12px 16px;background:var(--u-surface);border-top:2px solid var(--u-line2)}
+/* 버튼 — 아래 보통 (기준) · 아래 큰 버튼 · 오른쪽 위 */
+.u-foot{flex:none;display:flex;align-items:center;gap:8px;min-height:calc(var(--ctl) + 26px);margin-top:var(--gap);padding:0 20px;background:var(--pn);border-top:1px solid var(--ln)}
+.u-msg{flex:1;min-width:0;margin:0 10px;font-size:.93em;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.u-bw{position:relative;display:inline-flex;flex:none}
+.u-btn{position:relative;display:inline-flex;align-items:center;justify-content:center;height:calc(var(--ctl) + 2px);padding:0 14px;border:1px solid var(--ln);border-radius:var(--r-btn);background:var(--pn);color:var(--ink);white-space:nowrap;cursor:pointer;flex:none}
+.u-btn:hover{background:var(--hov);border-color:var(--lnh)}
+.u-btn.ghost{border-color:transparent;background:transparent;color:var(--sub)}
+.u-btn.ghost:hover{background:var(--hov);color:var(--ink)}
+.u-btn.pri{border-color:var(--pri);background:var(--pri);color:var(--pri-ink);font-weight:600}
+.u-btn.pri:hover{border-color:var(--pri-h);background:var(--pri-h)}
+.ui[data-btn="big"] .u-foot{min-height:76px}
+.ui[data-btn="big"] .u-foot .u-btn.main{height:52px;padding:0 22px;font-size:1.07em;font-weight:600;min-width:6.5em}
+.ui[data-btn="big"] .u-foot .u-btn.pri{min-width:10em;font-weight:700}
+.ui[data-btn="top"] .u-foot{display:none}
+.ui[data-btn="top"] .u-acts-top{display:flex}
+.ui[data-btn="top"] .u-page{padding-bottom:20px}
 
-/* 휴대폰 — 출고 요청함 */
-.ph{border:8px solid #1D2026;border-radius:30px}
-.p-status{flex:none;height:22px;display:flex;justify-content:space-between;align-items:center;padding:0 16px;font-size:11px;background:var(--u-nav);color:var(--u-nav-ink)}
-.p-bar{flex:none;display:flex;align-items:center;gap:8px;padding:calc(var(--u-pad) + 2px) 14px;background:var(--u-nav);color:var(--u-nav-ink);border-bottom:1px solid var(--u-line)}
-.p-bar b{font-size:1.14em;white-space:nowrap}
-.p-cnt{display:inline-flex;align-items:center;justify-content:center;min-width:1.6em;height:1.6em;padding:0 .4em;border-radius:999px;background:var(--u-acc);color:#FFFFFF;font-size:.8em;font-weight:700}
-.p-who{margin-left:auto;font-size:.82em;opacity:.85;white-space:nowrap}
-.p-chips{flex:none;display:flex;gap:6px;padding:var(--u-pad) 12px;overflow:hidden;background:var(--u-surface);border-bottom:1px solid var(--u-line)}
-.p-chips span{display:inline-flex;align-items:center;height:calc(var(--u-ctl) - 4px);padding:0 10px;border:1px solid var(--u-line2);border-radius:var(--u-rp);font-size:.86em;white-space:nowrap;flex:none}
-.p-chips .on{background:var(--u-pri);border-color:var(--u-pri);color:var(--u-pri-ink);font-weight:700}
-.p-list{position:relative;flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:var(--u-gap);padding:var(--u-gap) 10px}
-.p-list .u-more{background:linear-gradient(to bottom,transparent,var(--u-bg) 60%)}
-.p-card{flex:none;display:flex;flex-direction:column;gap:calc(var(--u-gap) * .45);padding:var(--u-pad) 12px;background:var(--u-surface);border:1px solid var(--u-line);border-radius:var(--u-rc)}
-.ui[data-color="contrast"] .p-card{border:1.5px solid var(--u-line2)}
-.p-top{display:flex;align-items:center;gap:8px}
-.p-time{color:var(--u-sub);font-size:.9em;white-space:nowrap}
-.p-link{margin-left:auto;color:var(--u-link);font-weight:700;font-size:.92em;white-space:nowrap}
-.p-cust{display:flex;align-items:center;gap:6px;min-width:0}
-.p-cust b{font-size:1.04em;white-space:nowrap}
-.p-co{font-size:.78em;color:var(--u-sub);border:1px solid var(--u-line);padding:0 5px;border-radius:var(--u-rp);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.p-items,.p-wh{color:var(--u-sub);font-size:.92em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.p-act{display:flex;justify-content:flex-end;gap:6px}
-.p-act .u-btn{height:calc(var(--u-ctl) - 2px);font-size:.9em}
-.p-card .u-btn.big{width:100%;height:46px;min-width:0}
-.p-done{color:var(--u-ok);font-size:.88em;font-weight:700}
-.p-tabs{flex:none;display:flex;justify-content:space-around;align-items:center;height:48px;border-top:1px solid var(--u-line);background:var(--u-surface);font-size:.8em;color:var(--u-sub)}
-.p-tabs .on{color:var(--u-acc);font-weight:700}
+/* 빨간 번호 = 기능 ID (화면법 가-3) */
+.u-fid{position:absolute;z-index:8;top:-13px;left:-8px;height:18px;line-height:18px;padding:0 6px;border-radius:999px;background:var(--red);color:#FFFFFF;font-size:12px;font-weight:700;letter-spacing:0;white-space:nowrap;pointer-events:none}
+.ui[data-badges="off"] .u-fid{display:none}
+.u-scrim{display:none}
 
-/* 작은 그림 (항목별 장) */
-.mini{padding:6px;background:var(--u-surface)}
-.mini .u-tablewrap{margin:0}
-.mini.ctl{gap:var(--u-gap);padding:12px;justify-content:center;align-items:flex-start}
-.m-row{display:flex;align-items:center;gap:8px}
-.mini.ctl .u-in{flex:none;width:160px}
-.mini.ctl .p-card{max-width:100%;align-self:flex-start}
+/* 바꿔 볼 때 · 줄에 올릴 때 · 칸을 고를 때 — 짧게 (0.12~0.2초), 길게 미끄러지지 않는다 */
+.stage .ui,.stage .ui *{transition-property:background-color,border-color,color,border-radius,outline-color;transition-duration:.16s;transition-timing-function:ease}
+.stage .u-side{transition-property:width,background-color,border-color,color,transform;transition-duration:.18s}
+.stage .u-tb > .u-tr > .u-td{transition-duration:.12s}
+
+/* 휴대폰 폭 — 왼쪽 메뉴는 접고 ☰ 로 연다, 머리 칸은 한 줄씩, 표는 옆으로 민다 */
+.ui[data-dev="phone"]{width:100%;height:auto;min-height:620px}
+.ui[data-dev="phone"] .u-side{position:absolute;left:0;top:0;bottom:0;z-index:20;width:248px;transform:translateX(-101%)}
+.ui[data-dev="phone"][data-side="icon"] .u-side{width:64px}
+.ui[data-dev="phone"][data-drawer="open"] .u-side{transform:none}
+.ui[data-dev="phone"][data-drawer="open"] .u-scrim{display:block;position:absolute;inset:0;z-index:19;background:rgba(10,14,20,.38)}
+.ui[data-dev="phone"] .u-top{padding:0 12px 0 6px}
+.ui[data-dev="phone"] .u-find,.ui[data-dev="phone"] .u-user{display:none}
+.ui[data-dev="phone"] .u-page{padding:12px 12px 0}
+.ui[data-dev="phone"] .u-form{grid-template-columns:minmax(0,1fr);padding:var(--fpad) 12px}
+.ui[data-dev="phone"] .u-l{width:4.8em}
+.ui[data-dev="phone"] .u-tp{flex:none}
+.ui[data-dev="phone"] .u-tbl{max-height:calc(var(--row) * 9 + 2px)}
+.ui[data-dev="phone"] .u-tph .u-sp,.ui[data-dev="phone"] .u-tph .u-s + .u-sp + .u-s{display:none}
+.ui[data-dev="phone"] .u-tr{min-width:62em}
+.ui[data-dev="phone"] .u-sum{justify-content:flex-start;gap:4px 18px}
+.ui[data-dev="phone"] .u-foot{flex-wrap:wrap;padding:10px 12px;gap:8px}
+.ui[data-dev="phone"] .u-msg{order:-1;flex-basis:100%;margin:0;white-space:normal}
+.ui[data-dev="phone"][data-btn="big"] .u-foot .u-btn.main{min-width:0;padding:0 16px}
+.ui[data-dev="phone"][data-btn="big"] .u-foot .u-bw{flex:1 1 auto}
+.ui[data-dev="phone"][data-btn="big"] .u-foot .u-bw .u-btn{width:100%}
+.ui[data-dev="phone"] .u-acts-top{margin-left:0;flex-wrap:wrap;width:100%}
 
 /* ── 종이 ─────────────────────────────────────────────────────────────── */
 #pages{display:grid;gap:10mm;justify-items:center}
 .sheet{width:297mm;height:210mm;padding:9mm;background:#FFFFFF;color:var(--ink);position:relative;overflow:hidden;display:flex;flex-direction:column;gap:3mm;
   font-size:10pt;line-height:1.45;word-break:keep-all;box-shadow:0 1px 3px rgba(0,0,0,.12),0 10px 28px rgba(0,0,0,.10)}
-.sheet h2{margin:0;font-family:'Gothic A1','IBM Plex Sans KR',sans-serif;font-weight:800;font-size:17pt;line-height:1.2;letter-spacing:-.01em}
-.sheet .lede{margin:0;color:var(--sub);font-size:10pt}
-.pgno,.ex{position:absolute;bottom:4.5mm;font-size:8pt;color:var(--mute)}
+.sheet h2{margin:0;font-family:'Gothic A1','IBM Plex Sans KR',sans-serif;font-weight:800;font-size:16pt;line-height:1.2;letter-spacing:-.01em}
+.sheet .lede{margin:0;color:var(--sub);font-size:9.5pt}
+.pgno,.ex{position:absolute;bottom:4mm;font-size:8pt;color:var(--mute)}
 .pgno{right:9mm}.ex{left:9mm}
 .cb{display:inline-block;width:3.4mm;height:3.4mm;border:1.2px solid var(--ink);border-radius:.6mm;vertical-align:-.6mm;margin-right:1.2mm;background:#FFFFFF;flex:none}
-.wl{border-bottom:1px solid var(--rule);height:6.2mm}
+.cb.ro{border-radius:50%}
+.mk-sw{display:inline-block;width:7mm;height:4mm;border:1.5px solid var(--mk);background:var(--mk-bg);vertical-align:-.8mm;margin-right:1.5mm}
+.tag{font-style:normal;font-size:7.5pt;color:var(--sub);border:1px solid var(--rule);border-radius:1mm;padding:0 1.2mm;white-space:nowrap}
 
 /* 1쪽 */
-.cover{gap:6mm}
+.cover{gap:5mm}
 .eyebrow{margin:0;font-size:9pt;color:var(--sub);letter-spacing:.04em}
-.cover h1{margin:1mm 0 0;font-family:'Gothic A1','IBM Plex Sans KR',sans-serif;font-weight:800;font-size:30pt;line-height:1.1}
-.cover .lede{font-size:11.5pt;max-width:200mm}
-.asks{display:grid;grid-template-columns:repeat(3,1fr);gap:5mm}
-.asks div{border-top:2px solid var(--ink);padding-top:2mm}
-.asks b{display:block;font-size:11.5pt}
-.asks span{color:var(--sub);font-size:9.5pt}
-.thumbs{display:flex;gap:7mm;justify-content:flex-start}
-.thumbs figure{margin:0;display:grid;gap:1.5mm}
-.thumbs .frame{border:1px solid var(--rule)}
-.thumbs figcaption{font-size:10pt}
-.thumbs figcaption b{font-family:'Gothic A1',sans-serif;font-weight:800;margin-right:1.5mm}
-.order{display:grid;grid-template-columns:repeat(4,1fr);gap:4mm;margin:0;padding:0;list-style:none}
-.order li{background:var(--faint);padding:2.5mm 3mm;border-radius:1.5mm;font-size:9.5pt}
-.order b{display:block;font-size:10.5pt}
-.cover .note{margin:0;color:var(--sub);font-size:9pt}
+.cover h1{margin:1mm 0 0;font-family:'Gothic A1','IBM Plex Sans KR',sans-serif;font-weight:800;font-size:28pt;line-height:1.1}
+.cover .lede{font-size:11pt;max-width:205mm}
+.c-mid{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8mm;align-items:start}
+.steps{margin:0;padding:0;list-style:none;display:grid;gap:2.6mm}
+.steps li{display:grid;grid-template-columns:30mm minmax(0,1fr);gap:3mm;border-top:1.5px solid var(--ink);padding-top:1.6mm;font-size:9.5pt;color:var(--sub)}
+.steps b{color:var(--ink);font-size:10.5pt}
+.c-fig{margin:0;display:grid;gap:1.5mm;justify-items:start}
+.c-fig .frame{border:1px solid var(--rule)}
+.c-fig figcaption{font-size:9pt;color:var(--sub);max-width:80mm}
+.idx{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.6mm 5mm}
+.idx li{display:flex;align-items:baseline;gap:2mm;background:var(--faint);border-radius:1.5mm;padding:1.6mm 2.4mm;font-size:9.5pt;min-width:0}
+.idx b{white-space:nowrap}
+.idx span{color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.idx em{font-style:normal;color:var(--sub);font-size:8.5pt;white-space:nowrap}
+.cover .notes{margin:0;padding:0;list-style:none;display:grid;gap:1mm;font-size:9pt;color:var(--sub)}
+.cover .notes b{color:var(--ink)}
 
-/* 2~4쪽 */
-.p-head{display:flex;align-items:center;gap:4mm}
-.p-letter{font-family:'Gothic A1',sans-serif;font-weight:800;font-size:30pt;line-height:1;width:13mm;height:13mm;display:grid;place-items:center;border:1.5px solid var(--ink);border-radius:2mm;flex:none}
-.p-head h2{font-size:18pt}
-.p-head .lede{font-size:10pt}
-.chips{display:flex;flex-wrap:wrap;gap:1.5mm;margin:0;padding:0;list-style:none}
-.chips li{font-size:8.5pt;border:1px solid var(--rule);border-radius:1mm;padding:.3mm 2mm;white-space:nowrap}
-.chips li span{color:var(--sub);margin-right:1mm}
-.p-body{flex:1;min-height:0;display:grid;grid-template-columns:auto 1fr;gap:5mm}
-.p-body figure{margin:0;display:grid;gap:1.2mm;align-content:start}
-.p-body figcaption,.cap{font-size:8.5pt;color:var(--sub)}
-.p-right{display:grid;gap:4mm;align-content:start;justify-items:start}
-.opinion{width:100%;border:1px solid var(--rule);border-radius:1.5mm;padding:3mm;display:grid;gap:1mm}
-.opinion .op-h{font-weight:600;font-size:10.5pt}
-.op-pick{display:flex;gap:5mm;font-size:10pt;margin:1mm 0 1.5mm}
-.op-l{font-size:9pt;color:var(--sub);margin-top:1mm}
+/* 2쪽 */
+.b-head{display:grid;grid-template-columns:minmax(0,1fr) 92mm;gap:6mm;align-items:start}
+.b-head .lede{margin-top:1mm}
+.ord{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:.6mm 3mm;font-size:8.5pt}
+.ord li{white-space:nowrap}
+.ord b{display:inline-block;margin-right:1.2mm;padding:0 1.4mm;border-radius:2mm;background:#C0262D;color:#FFFFFF;font-size:7.5pt}
+.b-fig{margin:0;align-self:center}
+.b-fig .frame{border:1px solid var(--rule)}
 
-/* 5~7쪽 */
+/* 3~11쪽 — 항목마다 */
+.i-head{display:flex;align-items:center;gap:4mm}
+.i-no{flex:none;display:grid;place-items:center;width:11mm;height:11mm;border:1.5px solid var(--ink);border-radius:2mm;font-family:'Gothic A1',sans-serif;font-weight:800;font-size:20pt;line-height:1}
+.i-head .lede{margin-top:.6mm}
+.i-cols{flex:1;min-height:0;display:grid;gap:6mm}
+.i-cols.c2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.i-cols.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.o-col{min-width:0;display:flex;flex-direction:column;gap:2mm}
+.o-cap{display:flex;align-items:baseline;flex-wrap:wrap;gap:.5mm 2mm;min-height:6mm}
+.o-cap b{font-size:11.5pt}
+.o-note{font-size:8.5pt;color:var(--sub)}
+.o-cap .o-pick{margin-left:auto}
+.o-crop{display:flex;flex-direction:column;gap:1mm;align-items:flex-start}
+.o-crop .frame{border:1px solid var(--rule)}
+.o-where{font-size:7.5pt;color:var(--mute);line-height:1.2}
+.o-where + .frame{margin-bottom:1mm}
+.o-bot{margin-top:auto;display:flex;align-items:flex-end;gap:3mm}
+.o-thumb{margin:0;display:grid;gap:.8mm}
+.o-thumb .frame{border:1px solid var(--rule)}
+.o-thumb figcaption{font-size:7.5pt;color:var(--mute)}
+.o-side{display:grid;gap:1.6mm;align-content:end;font-size:9.5pt}
+.o-stat{font-size:9pt;color:var(--ink)}
+.o-stat:empty{display:none}
+.o-pick{white-space:nowrap;font-size:9.5pt}
+.i-rows{flex:1;min-height:0;display:grid;grid-template-rows:repeat(3,minmax(0,1fr));gap:3mm}
+.o-row{min-height:0;display:grid;grid-template-columns:40mm auto minmax(0,1fr);gap:5mm;align-items:start;border-top:1px solid var(--rule);padding-top:2mm}
+.o-row .o-side{align-content:start}
+.o-row .o-cap{flex-direction:column;align-items:flex-start}
+.o-row .o-thumb{justify-self:end}
+.o-full{margin:0}
+.o-full .frame{border:1px solid var(--rule)}
+
+/* 12쪽 */
 .a-head{display:grid;gap:1mm}
-.axis{display:grid;gap:1.6mm}
-.axis-h{display:flex;align-items:baseline;gap:3mm;border-top:1.5px solid var(--ink);padding-top:1.6mm}
-.axis-h b{font-size:12pt}
-.axis-h span{color:var(--sub);font-size:9.5pt}
-.axis-h small{margin-left:auto;font-size:8.5pt;color:var(--mute)}
-.axis-opts{display:grid;grid-template-columns:repeat(3,1fr);gap:5mm}
-.opt{margin:0;display:grid;gap:1.4mm;align-content:start}
-.opt .frame{border:1px solid var(--rule)}
-.opt figcaption{display:flex;align-items:center;gap:2mm;font-size:9pt}
-.opt figcaption b{font-size:10pt}
-.opt figcaption .tag{font-size:7.5pt;color:var(--sub);border:1px solid var(--rule);border-radius:1mm;padding:0 1.2mm;font-style:normal}
-.opt figcaption .pick{margin-left:auto;white-space:nowrap}
-.keys{border:1px solid var(--rule);border-radius:1.5mm;padding:3mm 4mm;display:flex;flex-wrap:wrap;align-items:center;gap:2mm 6mm;font-size:10pt}
-.keys b{font-size:11pt}
-
-/* 8~9쪽 */
-.t{width:100%;border-collapse:collapse;font-size:9.5pt}
-.t th,.t td{border:1px solid var(--rule);padding:1.6mm 2.4mm;text-align:left;vertical-align:middle}
-.t th{background:var(--faint);font-weight:600;font-size:9pt}
-.t td.big{font-size:11pt;font-weight:600}
-.t .pk{white-space:nowrap;font-size:9pt}
-.t .pk span{margin-right:3mm}
-.keep{margin:0;font-size:9.5pt;color:var(--sub)}
-.keep b{color:var(--ink)}
-.vote td{height:11.5mm}
-.vote th small{display:block;font-weight:400;color:var(--sub);font-size:7.5pt}
-.wrap-up{border:1.5px solid var(--ink);border-radius:1.5mm;padding:3mm 4mm;display:grid;grid-template-columns:repeat(3,1fr);gap:3mm 6mm;font-size:10pt}
-.wrap-up b{grid-column:1 / -1;font-size:11pt}
+.t{width:100%;border-collapse:collapse;font-size:9pt;table-layout:fixed}
+.t th,.t td{border:1px solid var(--rule);padding:1.4mm 1.8mm;text-align:left;vertical-align:top}
+.t th{background:var(--faint);font-weight:600;font-size:8.5pt;line-height:1.3}
+.t th small{display:block;font-weight:400;color:var(--sub);font-size:7.5pt}
+.vote td{height:13.4mm}
+.vote .vo{font-size:8pt;line-height:1.35;color:var(--ink)}
+.vote .vo span{display:block;white-space:nowrap}
+.vote .vo .cb{width:2.8mm;height:2.8mm;margin-right:1mm;vertical-align:-.5mm}
+.wrap-up{border:1.5px solid var(--ink);border-radius:1.5mm;padding:2.5mm 4mm;display:grid;grid-template-columns:repeat(4,1fr);gap:2.5mm 6mm;font-size:9.5pt}
+.wrap-up b{grid-column:1 / -1;font-size:10.5pt}
 .wrap-up span{border-bottom:1px solid var(--rule);padding-bottom:1mm;color:var(--sub)}
-
-/* ── 반응형 — 넓은 화면은 종이를 줄여 보이고(fitPages), 좁은 화면(휴대폰 · 태블릿 세로)은 종이 안을 한 줄로 다시 늘어놓는다.
-   화면에서만 — 인쇄는 늘 A4 가로 9장 그대로. 900px 은 script 의 NARROW 와 같은 값 ── */
-@media screen and (max-width:900px){
-  .panel{padding:12px 16px}
-  .panel h1{font-size:19px}
-  .panel .print{margin-left:0}
-  .presets .grp,.presets .seg{width:100%}
-  .presets .seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
-  .presets .seg button{white-space:normal;padding:6px 8px;font-size:13px;line-height:1.3}
-  .desk{padding:12px 16px;gap:14px;grid-template-columns:minmax(0,1fr);justify-items:stretch}
-  .desk-h{margin-top:6px}
-  #pages{gap:16px;grid-template-columns:minmax(0,1fr);justify-items:stretch;min-width:0}
-  .sheet{width:auto;height:auto;min-width:0;padding:16px 16px 40px;overflow:visible;gap:12px;font-size:14px;border-radius:8px}
-  .sheet h2,.p-head h2{font-size:20px}
-  .sheet .lede,.cover .lede,.p-head .lede{font-size:14px}
-  .pgno,.ex{bottom:12px;font-size:11px}
-  .pgno{right:16px}.ex{left:16px;right:64px}
-  .cover{gap:14px}
-  .cover h1{font-size:28px}
-  .eyebrow{font-size:12px}
-  .asks,.order,.axis-opts{grid-template-columns:minmax(0,1fr);gap:12px}
-  .asks div{padding-top:6px}
-  .asks b{font-size:15px}
-  .asks span,.order li,.cover .note,.keep{font-size:13px}
-  .order li{padding:10px 12px}
-  .order b{font-size:14px}
-  .thumbs{flex-direction:column;gap:14px}
-  .thumbs figcaption{font-size:14px}
-  .p-head{gap:12px}
-  .p-letter{width:44px;height:44px;font-size:28px}
-  .chips li{font-size:12px;padding:1px 8px}
-  .p-body{grid-template-columns:minmax(0,1fr);gap:16px}
-  .p-right{justify-items:stretch;gap:14px}
-  .p-body figcaption,.cap{font-size:12px}
-  .opinion{padding:12px}
-  .opinion .op-h{font-size:15px}
-  .op-pick{font-size:14px;gap:16px}
-  .op-l{font-size:12px}
-  .wl{height:26px}
-  .axis{gap:8px}
-  .axis-h{flex-wrap:wrap;gap:2px 10px;padding-top:8px}
-  .axis-h b{font-size:16px}
-  .axis-h span{font-size:13px}
-  .axis-h small{margin-left:0;font-size:11px}
-  .opt{min-width:0}
-  .opt figcaption{flex-wrap:wrap;font-size:13px}
-  .opt figcaption b{font-size:14px}
-  .opt figcaption .tag{font-size:11px;padding:0 5px}
-  .keys{padding:12px;gap:8px 16px;font-size:14px}
-  .tscroll{overflow-x:auto}
-  .tscroll>.t{min-width:560px}
-  .t{font-size:13px}
-  .t th{font-size:12px}
-  .t td.big{font-size:15px}
-  .t th,.t td{padding:6px 8px}
-  .t .pk{font-size:13px}
-  .cb{width:14px;height:14px;vertical-align:-2px;margin-right:4px}
-  .t.vote{min-width:640px}
-  .vote td{height:40px}
-  .vote th small{font-size:11px}
-  .wrap-up{grid-template-columns:repeat(2,minmax(0,1fr));padding:12px;font-size:14px}
-}
 
 @page{size:A4 landscape;margin:0}
 @media print{
   html,body{background:#FFFFFF}
-  .panel,.live,.desk-h{display:none!important}
-  .desk{padding:0;gap:0;display:block}
+  .bar,.tool,.desk-h,#measure{display:none!important}
+  .pages-wrap{padding:0;overflow:visible}
   #pages{display:block;zoom:1!important}
   .sheet{box-shadow:none;margin:0;break-after:page}
   .sheet:last-child{break-after:auto}
@@ -355,450 +388,421 @@ html{scroll-padding-top:64px}
 @media (max-width:520px){.wl-nav .wl-in{padding:0 12px}.wl-nav .wl-brand{margin-right:8px}.wl-nav a{padding:0 9px}}
 @media print{.wl-nav{display:none}}
 </style>
-<header class="panel" id="panel" aria-label="바꿔 보기">
-  <div class="panel-top">
-    <h1>화면 느낌 고르기</h1>
-    <p class="hint">회의 때 화면으로 바꿔 보세요. 인쇄하면 아래 종이 9장이 그대로 나옵니다 — A4 · 가로 · 배율 100% · 배경 그래픽 켜기</p>
-    <button type="button" class="print" id="print">인쇄 (9장)</button>
-  </div>
-  <div class="ctl presets" id="presetCtl"></div>
-  <div class="ctl" id="axisCtl"></div>
-  <div class="ctl" id="sayCtl"></div>
-  <p class="now" id="now"></p>
+<header class="bar">
+  <h1>화면 모양 고르기</h1>
+  <p class="hint">견적 작성 화면 하나를 두고 한 번에 한 가지만 바꿔 봅니다. 바뀐 자리는 노란 칸으로 잠깐 보입니다. 인쇄하면 아래 종이 12장이 나옵니다 — A4 · 가로 · 배율 100% · 배경 그래픽 켜기 · 컬러</p>
+  <button type="button" class="btn-c on" id="print">인쇄 (12장)</button>
 </header>
-<main class="desk">
-  <section class="live" aria-label="바꿔 보기 그림">
-    <div class="live-pc" id="livePc"></div>
-    <div class="live-ph" id="livePh"></div>
+<main>
+  <section class="tool" aria-label="바꿔 보기">
+    <aside class="ctl" aria-label="항목">
+      <div class="modes" role="group" aria-label="보는 방법">
+        <button type="button" data-mode="one">한 가지씩</button>
+        <button type="button" data-mode="all">고른 것 합쳐 보기</button>
+      </div>
+      <div class="sws">
+        <label class="sw"><input type="checkbox" id="keep"> 바뀐 곳 계속 표시</label>
+        <label class="sw"><input type="checkbox" id="badges" checked> 빨간 번호 (ORD-01~05)</label>
+        <label class="sw" id="fitSw"><input type="checkbox" id="fit" checked> 창에 맞춰 줄이기</label>
+      </div>
+      <ol class="items" id="items"></ol>
+      <p class="legend"><i></i>노란 점 = 골라 둔 보기. '고른 것 합쳐 보기' 에서 한 화면에 모입니다.</p>
+    </aside>
+    <section class="stage-wrap">
+      <div class="said">
+        <p id="said" aria-live="polite"></p>
+        <div class="acts">
+          <button type="button" class="btn-c" id="again">바뀐 곳 다시 보기</button>
+          <button type="button" class="btn-c" id="reset">기준으로 되돌리기</button>
+        </div>
+      </div>
+      <div class="stage" id="stage" role="img" aria-label="견적 작성 화면 그림 — 고른 보기대로 바뀝니다"></div>
+      <p class="stage-note" id="note"></p>
+    </section>
   </section>
-  <h2 class="desk-h">인쇄되는 종이 9장</h2>
-  <div id="pages"></div>
+  <h2 class="desk-h">인쇄되는 종이 12장</h2>
+  <div class="pages-wrap"><div id="pages"></div></div>
+  <div id="measure" aria-hidden="true"></div>
 </main>
 <script>
 'use strict';
 
-// ── 판매 업체 이름 — 이 파일에서 업체 이름은 여기서만 나온다. 공개 페이지로 올릴 때 이 줄만 바꿔 끼운다 ──
+// ── 판매 업체 — 이 파일에서 업체 이름은 여기서만 나온다. 공개 페이지(웹 일지)는 이 이름을 견본 이름으로 바꿔 싣는다 ──
 const COMPANIES = ['가람상사', '나래상사', '보람샵-김포', '보람샵-인천', '세움'];
+const logoOf = i => COMPANIES[i].split('-')[0].slice(0, 2); // 로고 자리 — 진짜 로고가 오면 바꿔 끼운다
+const CO = 1;         // 이 견적의 판매 업체
+const DEAL = [1, 0];  // 이 거래처와 거래하는 업체
+const CUST = '라온디자인';
 
-// ── 항목 7개 × 보기 3개 — 시안은 이 값의 묶음이다 ─────────────────────────
-// k 는 그림의 data-* 이름. tag 는 그 보기를 쓰는 시안(자동).
-const AXES = [
-  { k: 'font', name: '글꼴', q: '어떤 글씨가 오래 읽기 편한가요?', crop: 'text', real: true, opts: [
-    { v: 'dotum', label: '돋움', note: '지금 이카운트 글꼴' },
-    { v: 'malgun', label: '맑은 고딕', note: '윈도 기본 글꼴' },
-    { v: 'pretendard', label: 'Pretendard', note: '요즘 앱 글꼴' } ] },
-  { k: 'size', name: '글자 크기', q: '자리에서 편하게 읽히는 크기는?', crop: 'text', real: true, opts: [
-    { v: 's', label: '작게', note: '이카운트와 비슷' },
-    { v: 'm', label: '보통', note: '' },
-    { v: 'l', label: '크게', note: '창고 · 휴대폰에 맞춤' } ] },
-  { k: 'density', name: '촘촘함', q: '한 화면에 몇 줄이 보이면 좋을까요?', crop: 'density', real: true, opts: [
-    { v: 'tight', label: '촘촘', note: '한 화면에 많이' },
-    { v: 'normal', label: '보통', note: '' },
-    { v: 'loose', label: '넉넉', note: '누르기 쉽고 덜 보임' } ] },
-  { k: 'color', name: '색', q: '하루 종일 봐도 괜찮은 색은?', crop: 'screen', opts: [
-    { v: 'blue', label: '진한 파랑', note: '이카운트와 비슷' },
-    { v: 'navy', label: '남색 + 청록', note: '차분함' },
-    { v: 'contrast', label: '검정 대비 + 주황', note: '멀리서도 또렷' } ] },
-  { k: 'table', name: '표 모양', q: '숫자를 따라 읽기 쉬운 표는?', crop: 'table', opts: [
-    { v: 'grid', label: '칸막이 + 줄 번호', note: '이카운트와 같음' },
-    { v: 'lines', label: '가로줄', note: '선을 줄임' },
-    { v: 'zebra', label: '줄무늬', note: '한 줄씩 색' } ] },
-  { k: 'btn', name: '버튼 자리', q: '저장 · 확정 버튼이 어디 있으면 편할까요?', crop: 'screen', opts: [
-    { v: 'bottom', label: '아래 모음 + 단축키', note: '이카운트와 같음' },
-    { v: 'top', label: '오른쪽 위', note: '제목 옆' },
-    { v: 'big', label: '아래 큰 버튼', note: '터치 · 휴대폰에 편함' } ] },
-  { k: 'radius', name: '모서리', q: '버튼 · 칸의 모서리는?', crop: 'controls', real: true, opts: [
-    { v: 'sharp', label: '각지게', note: '이카운트와 비슷' },
-    { v: 'soft', label: '살짝 둥글게', note: '' },
-    { v: 'round', label: '둥글게', note: '부드러움' } ] },
+// ── 예시 데이터 — 지어낸 상품 · 금액이다 (실제 거래처 · 금액이 아니다).
+// [코드, 상품명, 규격, 수량, 단가, 메모, 손으로 고친 단가인가, 세트]
+const ROWS = [
+  ['TB-2410', '대형 회의 테이블 24인용 상판 분리형 (배선 구멍 6개)', '2400×1200', 2, 2663100, '3층 대회의실', 0, 0],
+  ['CH-220', '인체공학 메쉬 의자 헤드레스트 · 4D 팔걸이', '블랙', 24, 298000, '', 1, 0],
+  ['DK-160E', '높이 조절 전동 모션 데스크 듀얼 모터', '1600×800 화이트', 12, 564000, '배선 정리 포함', 0, 0],
+  ['CH-015', '사무용 의자', '메쉬 블랙', 30, 82000, '', 0, 0],
+  ['PT-1512', '사무실 칸막이 파티션 패브릭', '1500×1200 그레이', 18, 88500, '', 0, 0],
+  ['CB-090', '철제 캐비닛 3단 서랍 잠금형', '900 그레이', 12, 193500, '', 0, 0],
+  ['LK-200', '사물함 20칸 번호 키', '1800 그레이', 2, 995200, '탈의실', 0, 0],
+  ['SF-415', '4인 아쿠아텍스 코너 소파 (카우치 좌우 변경형)', '2740×1650 차콜', 1, 1548100, '라운지', 0, 0],
+  ['LB-300', '로비 소파 3인 스테인리스 다리', '2400 네이비', 2, 1437500, '1층 로비', 0, 0],
+  ['TB-090', '회의 테이블', '900 원형', 6, 285700, '', 0, 0],
+  ['BS-0806', '5단 오픈 책장', '800×1800', 8, 145600, '', 0, 0],
+  ['CF-075', '카페 테이블 원형 주물 다리', '750', 10, 108700, '휴게 공간', 0, 0],
+  ['CF-CH2', '카페 의자 라탄 등받이', '내추럴', 40, 68200, '휴게 공간', 0, 0],
+  ['ST-6SET', '6인 세라믹 식탁 세트 (테이블 1 · 벤치 1 · 의자 4)', '1800 포세린', 2, 2266900, '임원 식당', 0, 1],
+  ['RC-01', '1인 전동 리클라이너 천연 가죽', '브라운', 2, 866200, '', 0, 0],
+  ['TV-200', '거실장 2000', '화이트 오크', 1, 354800, '', 0, 0],
+  ['WD-180', '슬라이딩 옷장', '1800 화이트', 4, 1059700, '숙직실', 0, 0],
+  ['BD-SS2', '슈퍼싱글 2층 침대 계단 서랍형', '1100×2000', 2, 1142700, '숙직실', 0, 0],
+  ['EX-PAD', '의자 바닥 보호 패드 (4개 1묶음)', '투명', 60, 6000, '', 0, 0],
+  ['SV-INS', '설치 · 조립비 (엘리베이터 없는 층 운반 포함)', '1식', 1, 1200000, '3층 운반', 1, 0],
 ];
-const PRESETS = {
-  A: { name: '이카운트처럼', line: '지금 쓰는 이카운트와 거의 같은 모양입니다. 새로 익힐 게 가장 적습니다.',
-    s: { font: 'dotum', size: 's', density: 'tight', color: 'blue', table: 'grid', btn: 'bottom', radius: 'sharp' } },
-  B: { name: '차분하게 정리', line: '선을 줄이고 여백을 조금 두었습니다. 오래 봐도 눈이 덜 피곤한 쪽입니다.',
-    s: { font: 'pretendard', size: 'm', density: 'normal', color: 'navy', table: 'lines', btn: 'top', radius: 'soft' } },
-  C: { name: '크고 또렷하게', line: '창고 · 휴대폰에서도 잘 보이게 크게 했습니다. 대신 한 화면에 보이는 줄이 적습니다.',
-    s: { font: 'pretendard', size: 'l', density: 'loose', color: 'contrast', table: 'zebra', btn: 'big', radius: 'round' } },
-};
-// 용어 · 안내 문구 — 시안 장은 모두 이카운트 말 · 합니다 (모양과 말을 섞어 판단하지 않게)
-const SAY_AXES = [
-  { k: 'words', name: '용어', opts: [{ v: 'ecount', label: '이카운트 말' }, { v: 'easy', label: '쉬운 말' }] },
-  { k: 'tone', name: '안내 문구', opts: [{ v: 'formal', label: '합니다' }, { v: 'polite', label: '해요' }, { v: 'short', label: '짧게' }] },
-];
-const SAY = { words: 'ecount', tone: 'formal' };
+const SEL = 2; // 그림에서 고른 줄 (강조색이 보이는 자리)
+const ORD = [['ORD-01', '고객 찾기 · 등록'], ['ORD-02', '판매 업체 고르기'], ['ORD-03', '상품 담기'], ['ORD-04', '견적 확정 → 주문'], ['ORD-05', '견적서 PDF · 보내기']];
 
-// ── 그림 속 말 ──────────────────────────────────────────────────────────
-const WORDS = {
-  ecount: { quote: '견적서입력', item: '품목', code: '품목코드', name: '품목명', wh: '출하창고', memo: '적요', date: '일자', find: '품목 찾기', save: '저장', confirm: '주문 확정', print: '견적서 인쇄', reset: '다시 작성', ship: '출하지시서', act: '출하 처리', detail: '상세' },
-  easy: { quote: '견적 작성', item: '상품', code: '상품 코드', name: '상품명', wh: '출고 창고', memo: '메모', date: '날짜', find: '상품 찾기', save: '저장', confirm: '주문으로 확정', print: '견적서 PDF', reset: '처음부터', ship: '출고 요청함', act: '출고 처리', detail: '자세히' },
-};
-const KEYS = { save: 'F8', confirm: 'F7', find: 'F3' }; // 이카운트와 같은 키 — '아래 모음' 버튼에서만 보인다
-const TONES = {
-  formal: { saved: '저장했습니다', lack: n => `${n} 재고가 부족합니다. 가용 수량 0개` },
-  polite: { saved: '저장했어요', lack: n => `${n} 재고가 부족해요. 가용 수량 0개` },
-  short: { saved: '저장 완료', lack: n => `${n} 재고 부족 · 가용 0` },
-};
-
-// ── 예시 데이터 — 실제 거래처 · 금액이 아니다. co 는 COMPANIES 의 번호 ─────────
+// ── 항목 9개 — 보기는 2~3개, 첫 보기가 기준이다.
+// k 는 그림의 data-* 이름, zones 는 바뀌는 자리(노란 표시 — line 항목은 테두리만), pr 은 인쇄 때 잘라 보일 자리(1440×900 화면 좌표) ──
 const ITEMS = [
-  { code: 'SF-301', name: '3인 패브릭 소파', spec: '그레이 2100', qty: 2, price: 890000, memo: '2층 배송' },
-  { code: 'DK-120', name: '원목 책상', spec: '1200×600', qty: 4, price: 245000, memo: '' },
-  { code: 'CH-015', name: '사무용 의자', spec: '메쉬 블랙', qty: 8, price: 89000, memo: '' },
-  { code: 'WD-180', name: '슬라이딩 옷장', spec: '1800 화이트', qty: 1, price: 1150000, memo: '', lack: true },
-  { code: 'SH-012', name: '신발장 12단', spec: '월넛', qty: 3, price: 132000, memo: '현관 설치' },
+  { k: 'nav', name: '왼쪽 메뉴 색', q: '왼쪽 메뉴의 바탕색은 어느 쪽이 편할까요?', zones: ['side'], line: true,
+    opts: [{ v: 'light', label: '밝게', note: '흰 바탕' }, { v: 'navy', label: '남색', note: '메뉴와 일하는 칸이 또렷이 나뉩니다' }],
+    pr: { lay: 'cols', rects: [{ x: 0, y: 0, w: 688, h: 612 }] } },
+  { k: 'side', name: '왼쪽 메뉴 모양', q: '메뉴 이름을 늘 펼쳐 둘까요, 아이콘만 남길까요?', zones: ['side'],
+    opts: [{ v: 'open', label: '펼침', note: '메뉴 이름이 늘 보입니다' }, { v: 'icon', label: '아이콘만', note: '표가 그만큼 넓어집니다' }],
+    pr: { lay: 'cols', rects: [{ x: 0, y: 0, w: 688, h: 612 }] } },
+  { k: 'acc', name: '강조색', q: '지금 있는 메뉴 · 고른 줄 · 누를 버튼을 표시하는 색은?', zones: ['menu-on', 'sel', 'pri'], line: true,
+    opts: [{ v: 'blue', label: '파랑', note: '' }, { v: 'teal', label: '청록', note: '' }],
+    pr: { lay: 'cols', rects: [{ x: 0, y: 0, w: 688, h: 448, label: '왼쪽 위' }, { x: 752, y: 790, w: 688, h: 110, label: '오른쪽 아래' }] } },
+  { k: 'fs', name: '글자 크기', q: '자리에서 편하게 읽히는 크기는? (글자 크기 숫자는 화면 기준)', zones: ['form', 'table'],
+    opts: [{ v: '14', label: '14', note: '이카운트와 비슷' }, { v: '15', label: '15', note: '' }, { v: '16', label: '16', note: '멀리서도 잘 보입니다' }],
+    pr: { lay: 'cols', rects: [{ x: 222, y: 48, w: 448, h: 612 }] } },
+  { k: 'den', name: '촘촘함', q: '표 한 줄의 높이 — 한 화면에 몇 줄이 보이면 좋을까요?', zones: ['form', 'table'], count: true,
+    opts: [{ v: 'tight', label: '촘촘', note: '줄 높이 33 · 한 화면에 많이' }, { v: 'normal', label: '보통', note: '줄 높이 40' }, { v: 'loose', label: '넉넉', note: '줄 높이 48 · 누르기 쉽고 덜 보임' }],
+    pr: { lay: 'cols', rects: [{ x: 222, y: 48, w: 448, h: 612 }] } },
+  { k: 'tbl', name: '표 모양', q: '숫자를 따라 읽기 쉬운 표는?', zones: ['table'], line: true,
+    opts: [{ v: 'grid', label: '칸막이 + 줄 번호', btn: '칸막이', short: '칸막이', note: '이카운트와 같음' }, { v: 'lines', label: '가로줄', note: '세로선 · 줄 번호 없음' }, { v: 'zebra', label: '줄무늬', note: '한 줄씩 바탕색' }],
+    pr: { lay: 'rows', rects: [{ x: 222, y: 252, w: 811, h: 262 }] } },
+  { k: 'btn', name: '버튼 자리 · 크기', q: '저장 · 확정 버튼이 어디에, 얼마나 크면 편할까요?', zones: ['foot', 'acts-top'], count: true,
+    opts: [{ v: 'bottom', label: '아래 보통', note: '이카운트와 같은 자리' }, { v: 'big', label: '아래 큰 버튼', btn: '아래 크게', short: '아래 크게', note: '누르기 쉽습니다 · 터치 화면' }, { v: 'top', label: '오른쪽 위', note: '제목 옆 · 표가 길어집니다' }],
+    pr: { lay: 'rows', rects: [{ x: 629, y: 48, w: 811, h: 80, label: '위' }, { x: 629, y: 800, w: 811, h: 100, label: '아래' }] } },
+  { k: 'rad', name: '모서리', q: '칸 · 버튼 · 판의 모서리는?', zones: ['menu-on', 'form', 'table', 'foot', 'acts-top'],
+    opts: [{ v: 'sharp', label: '각지게', note: '이카운트와 비슷' }, { v: 'soft', label: '살짝 둥글게', btn: '살짝', short: '살짝', note: '' }, { v: 'round', label: '둥글게', note: '부드러움' }],
+    pr: { lay: 'cols', rects: [{ x: 222, y: 48, w: 448, h: 420, label: '왼쪽 위' }, { x: 992, y: 770, w: 448, h: 130, label: '오른쪽 아래' }] } },
+  { k: 'lum', name: '화면 밝기', q: '밝은 화면과 어두운 화면 중 어느 쪽이 편할까요?', zones: [],
+    opts: [{ v: 'light', label: '라이트', note: '밝은 화면' }, { v: 'dark', label: '다크', note: '어두운 화면 — 색을 뒤집지 않고 따로 맞췄습니다' }],
+    pr: { lay: 'lum', rects: [{ x: 222, y: 240, w: 688, h: 400 }] } },
 ];
-const EXTRA = { code: 'TB-090', name: '회의 테이블', spec: '900 원형', qty: 2, price: 310000, memo: '' };
-const CARDS = [
-  { st: 'late', time: '10:30까지', cust: '가나인테리어', co: 1, items: '3인 패브릭 소파 외 2건 · 7개', wh: '김포 1창고' },
-  { st: 'wait', time: '11:00까지', cust: '한결가구', co: 0, items: '원목 책상 · 4개', wh: '김포 1창고' },
-  { st: 'doing', time: '13:00까지', cust: '다온오피스', co: 2, items: '사무용 의자 · 8개', wh: '김포 2창고' },
-  { st: 'check', time: '14:30까지', cust: '서해건설', co: 4, items: '슬라이딩 옷장 · 1개', wh: '파주 창고' },
-  { st: 'done', time: '09:10 처리', cust: '예시상회', co: 3, items: '신발장 12단 · 3개', wh: '인천 창고' },
-];
-const ST = { done: '완료', doing: '진행', check: '검수', wait: '대기', late: '지연' };
+const BASE = Object.fromEntries(ITEMS.map(it => [it.k, it.opts[0].v]));
+const itemOf = k => ITEMS.find(it => it.k === k);
+const optOf = (it, v) => it.opts.find(o => o.v === v) || it.opts[0];
 
+// ── 그림 ────────────────────────────────────────────────────────────────
 const fmt = n => n.toLocaleString('ko-KR');
-const supply = it => it.qty * it.price;
-const vat = it => supply(it) / 10;
-const SEARCH = '<svg class="u-ic" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.4 10.4 14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
-const optOf = (axis, v) => axis.opts.find(o => o.v === v) || axis.opts[0];
-const axis = k => AXES.find(a => a.k === k);
-const attrs = s => Object.entries(s).map(([k, v]) => `data-${k}="${v}"`).join(' ');
-const full = s => ({ ...SAY, ...s });
-
-// 실제 크기(w × h)로 그리고 scale 로 줄인 틀
-// data-fw/fh/fs 는 좁은 화면에서 종이 그림을 다시 맞출 때(refitSheets) 쓰는 원래 크기
-function frame(inner, w, h, scale) {
-  return `<div class="frame" data-fw="${w}" data-fh="${h}" data-fs="${scale}" style="width:${(w * scale).toFixed(1)}px;height:${(h * scale).toFixed(1)}px">`
-    + `<div class="frame-in" style="width:${w}px;height:${h}px;zoom:${scale}">${inner}</div></div>`;
-}
-
-// ── 그림: PC 견적 작성 (ORD-S01) ────────────────────────────────────────
-function btnHtml(s, key, label, cls = '') {
-  const k = s.btn === 'bottom' && KEYS[key] ? `<kbd>(${KEYS[key]})</kbd>` : '';
-  return `<span class="u-btn ${cls}">${label}${k}</span>`;
-}
-function tableHtml(s, items, cols, opt = {}) {
-  const W = WORDS[s.words];
-  const grid = s.table === 'grid';
-  const all = {
-    code: { h: W.code, w: 9, td: it => it.code },
-    name: { h: W.name, w: 19, td: it => it.name },
-    spec: { h: '규격', w: 12, td: it => it.spec },
-    qty: { h: '수량', w: 6, n: 1, td: it => it.qty },
-    price: { h: '단가', w: 10, n: 1, td: it => fmt(it.price) },
-    supply: { h: '공급가액', w: 11, n: 1, td: it => fmt(supply(it)) },
-    vat: { h: '부가세', w: 9, n: 1, td: it => fmt(vat(it)) },
-    total: { h: '합계', w: 11, n: 1, td: it => fmt(supply(it) + vat(it)) },
-    memo: { h: W.memo, w: 13, td: it => it.lack ? '<span class="u-pill s-late">가용 0</span>' : it.memo },
-  };
-  const cs = cols.map(c => all[c]);
-  const sum = cs.reduce((a, c) => a + c.w, 0);
-  const col = (grid ? '<col style="width:38px">' : '') + cs.map(c => `<col style="width:${(c.w / sum * 100).toFixed(2)}%">`).join('');
-  const head = (grid ? '<th class="c">No</th>' : '') + cs.map(c => `<th${c.n ? ' class="n"' : ''}>${c.h}</th>`).join('');
-  const rows = items.map((it, i) => `<tr data-r>${grid ? `<td class="no"><span>${i + 1}</span></td>` : ''}${cs.map(c => `<td${c.n ? ' class="n"' : ''}>${c.td(it)}</td>`).join('')}</tr>`).join('');
-  // 이카운트처럼 칸막이 표는 빈 줄에도 번호를 단다. 나머지는 '줄 추가' 한 줄
-  const tail = !opt.fill ? ''
-    : grid ? Array.from({ length: opt.fill }, (_, i) => `<tr><td class="no"><span>${items.length + i + 1}</span></td>${cs.map(() => '<td></td>').join('')}</tr>`).join('')
-    : `<tr><td class="add" colspan="${cs.length}">+ 줄 추가</td></tr>`;
-  return `<table class="u-table"><colgroup>${col}</colgroup><thead><tr>${head}</tr></thead><tbody>${rows}${tail}</tbody></table>`;
-}
-function pcMock(s) {
-  const W = WORDS[s.words];
-  const T = TONES[s.tone];
-  const totalSupply = ITEMS.reduce((a, it) => a + supply(it), 0);
-  const totalVat = ITEMS.reduce((a, it) => a + vat(it), 0);
-  const qty = ITEMS.reduce((a, it) => a + it.qty, 0);
-  const field = (l, v, icon = '') => `<div class="u-f"><span class="u-l">${l}</span><span class="u-in">${v}${icon}</span></div>`;
-  const topBtns = s.btn === 'top' ? `${btnHtml(s, 'print', W.print)}${btnHtml(s, 'confirm', W.confirm)}${btnHtml(s, 'save', W.save, 'pri')}` : '';
-  const actions = s.btn === 'bottom'
-    ? `<div class="u-actions">${btnHtml(s, 'save', W.save, 'pri')}${btnHtml(s, 'confirm', W.confirm)}${btnHtml(s, 'print', W.print)}${btnHtml(s, 'reset', W.reset)}${btnHtml(s, 'close', '닫기')}</div>`
-    : s.btn === 'big'
-      ? `<div class="u-actions big">${btnHtml(s, 'close', '닫기')}${btnHtml(s, 'reset', W.reset)}${btnHtml(s, 'print', W.print)}<span class="u-sp"></span>${btnHtml(s, 'confirm', W.confirm, 'big')}${btnHtml(s, 'save', W.save, 'pri big')}</div>`
-      : '';
-  return `<div class="ui pc" ${attrs(s)}>
-<div class="u-nav"><span class="u-logo">UBO 워크스</span><div class="u-menu"><span class="on">견적</span><span>주문</span><span>재고</span><span>출고</span><span>구매</span><span>배송</span><span>설정</span></div><span class="u-user">박지훈 · 영업</span></div>
-<div class="u-body"><div class="u-win">
-<div class="u-winbar"><span>${W.quote}</span><span class="ico">▢ ✕</span></div>
-<div class="u-head"><span class="u-title">${W.quote}</span><span class="u-pill s-wait">작성 중</span><span class="u-saved">✓ ${T.saved} · 10:42</span><span class="u-sp"></span>${topBtns}</div>
-<div class="u-form">${field('판매 업체', COMPANIES[1], '<span class="u-ic" style="width:auto">▾</span>')}${field(W.date, '2026-10-01')}${field('거래처', '가나인테리어', SEARCH)}${field('담당자', '박지훈')}${field(W.wh, '김포 1창고', SEARCH)}${field('납기일', '2026-10-08')}</div>
-<div class="u-tools">${btnHtml(s, 'find', W.find)}<span class="u-btn">재고 보기</span><span class="u-btn">줄 추가</span><span class="u-sp"></span><span class="u-count">${ITEMS.length}줄</span></div>
-<div class="u-tablewrap" data-scroll="줄">${tableHtml(s, ITEMS, ['code', 'name', 'spec', 'qty', 'price', 'supply', 'vat', 'total', 'memo'], { fill: 12 })}<div class="u-more" hidden></div></div>
-<div class="u-sum"><span>수량<b>${qty}</b></span><span>공급가액<b>${fmt(totalSupply)}</b></span><span>부가세<b>${fmt(totalVat)}</b></span><span class="grand">합계<b>${fmt(totalSupply + totalVat)}</b></span></div>
-<div class="u-note">⚠ ${T.lack(ITEMS.find(it => it.lack).name)}</div>
-${actions}
-</div></div></div>`;
-}
-
-// ── 그림: 휴대폰 출고 요청함 (STK-S01) ──────────────────────────────────
-function phoneMock(s) {
-  const W = WORDS[s.words];
-  const card = c => {
-    const done = c.st === 'done';
-    const link = s.btn === 'top' && !done ? `<span class="p-link">${W.act} ›</span>` : '';
-    const act = done ? '<span class="p-done">✓ 처리 끝</span>'
-      : s.btn === 'big' ? `<span class="u-btn pri big">${W.act}</span>`
-      : s.btn === 'bottom' ? `<div class="p-act"><span class="u-btn">${W.detail}</span><span class="u-btn pri">${W.act}</span></div>` : '';
-    return `<div class="p-card" data-r><div class="p-top"><span class="u-pill s-${c.st}">${ST[c.st]}</span><span class="p-time">${c.time}</span>${link}</div>`
-      + `<div class="p-cust"><b>${c.cust}</b><span class="p-co">${COMPANIES[c.co]}</span></div><div class="p-items">${c.items}</div><div class="p-wh">${c.wh}</div>${act}</div>`;
-  };
-  return `<div class="ui ph" ${attrs(s)}>
-<div class="p-status"><span>9:41</span><span>▮▮▮ ◔</span></div>
-<div class="p-bar"><b>${W.ship}</b><span class="p-cnt">5</span><span class="p-who">김포 1창고</span></div>
-<div class="p-chips"><span class="on">전체 5</span><span>대기 1</span><span>진행 1</span><span>검수 1</span><span>지연 1</span><span>완료 1</span></div>
-<div class="p-list" data-scroll="건">${CARDS.map(card).join('')}<div class="u-more" hidden></div></div>
-<div class="p-tabs"><span>홈</span><span class="on">출고</span><span>재고</span><span>더보기</span></div>
-</div>`;
-}
-
-// ── 작은 그림 (항목별 장) ────────────────────────────────────────────────
-function mini(s, kind) {
-  if (kind === 'text') return `<div class="ui mini" ${attrs(s)}><div class="u-tablewrap">${tableHtml(s, ITEMS.slice(0, 2), ['name', 'qty', 'total'])}</div></div>`;
-  if (kind === 'density') return `<div class="ui mini" ${attrs(s)}><div class="u-tablewrap" data-scroll="줄">${tableHtml(s, [...ITEMS, EXTRA], ['name', 'qty', 'total'])}<div class="u-more" hidden></div></div></div>`;
-  if (kind === 'table') return `<div class="ui mini" ${attrs(s)}><div class="u-tablewrap">${tableHtml(s, ITEMS.slice(0, 4), ['name', 'spec', 'qty', 'total'])}</div></div>`;
-  if (kind === 'status') return `<div class="ui mini ctl" ${attrs(s)}><div class="m-row">${Object.entries(ST).map(([k, v]) => `<span class="u-pill s-${k}">${v}</span>`).join('')}</div></div>`;
-  // controls — 칸 · 버튼 · 알약 · 카드
-  return `<div class="ui mini ctl" ${attrs(s)}>
-<div class="m-row"><span class="u-in">가나인테리어${SEARCH}</span><span class="u-btn pri">저장</span><span class="u-btn">닫기</span></div>
-<div class="m-row"><span class="u-pill s-done">완료</span><span class="u-pill s-doing">진행</span><span class="u-pill s-check">검수</span><span class="u-pill s-wait">대기</span><span class="u-pill s-late">지연</span></div>
-<div class="p-card"><div class="p-top"><span class="u-pill s-wait">대기</span><span class="p-time">11:00까지</span></div><div class="p-cust"><b>한결가구</b><span class="p-co">${COMPANIES[0]}</span></div></div>
-</div>`;
-}
-// 항목별 장의 그림 크기 — 글꼴 · 글자 크기 · 촘촘함 · 모서리는 실제 크기(1)
-const CROP = {
-  text: { w: 330, h: 122, scale: 1 },
-  density: { w: 330, h: 208, scale: 1 },
-  screen: { w: 1000, h: 800, scale: 0.33 },
-  table: { w: 470, h: 190, scale: 0.7 },
-  controls: { w: 330, h: 168, scale: 1 },
-  status: { w: 330, h: 44, scale: 1 },
+const svg = (p, cls = '') => `<svg class="${cls}" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+const I = {
+  quote: '<path d="M4 1.8h5.3L12 4.5v9.7H4z"/><path d="M9.2 1.8v2.9H12M6 8.2h4M6 10.8h4"/>',
+  order: '<rect x="3.5" y="2.8" width="9" height="11.4" rx="1"/><path d="M6 2.8V1.8h4v1M5.9 8.7l1.5 1.5 2.9-3"/>',
+  stock: '<path d="M2.5 5 8 2.2 13.5 5v6.2L8 14l-5.5-2.8z"/><path d="M2.5 5 8 7.8 13.5 5M8 7.8V14"/>',
+  out: '<path d="M2.5 9.5v4h11v-4M8 2.2v8M5.2 5 8 2.2 10.8 5"/>',
+  buy: '<path d="M1.8 2.5h2l1.6 7.8h7.2l1.4-5.4H4.5"/><circle cx="6.6" cy="13.1" r=".9"/><circle cx="11.7" cy="13.1" r=".9"/>',
+  ship: '<path d="M1.5 4h8.5v7H1.5zM10 6.5h2.6l1.9 2.2V11H10"/><circle cx="4.2" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/>',
+  inbox: '<path d="M2 9.5 3.8 3h8.4L14 9.5v3.7H2z"/><path d="M2 9.5h3.5l1 1.6h3l1-1.6H14"/>',
+  set: '<circle cx="8" cy="8" r="2.2"/><path d="M8 1.8v1.8M8 12.4v1.8M1.8 8h1.8M12.4 8h1.8M3.6 3.6l1.3 1.3M11.1 11.1l1.3 1.3M3.6 12.4l1.3-1.3M11.1 4.9l1.3-1.3"/>',
+  burger: '<path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/>',
+  search: '<circle cx="7" cy="7" r="4.6"/><path d="M10.4 10.4 14 14"/>',
+  caret: '<path d="M4.5 6.2 8 9.8l3.5-3.6"/>',
 };
-function cropHtml(s, kind) {
-  const c = CROP[kind];
-  return frame(kind === 'screen' ? pcMock(s) : mini(s, kind), c.w, c.h, c.scale);
+const MENU = [['quote', '견적'], ['order', '주문'], ['stock', '재고'], ['out', '출고'], ['buy', '구매'], ['ship', '배송'], ['inbox', '접수함', 3]];
+const TOTAL = ROWS.reduce((a, r) => { const amt = r[3] * r[4], vat = Math.floor(amt / 10); a.q += r[3]; a.s += amt; a.v += vat; return a; }, { q: 0, s: 0, v: 0 });
+
+// s = 항목별 보기, o = { marks: 노란 표시할 자리, lines: 그중 테두리만 할 자리, badges: 빨간 번호, dev: 'pc' | 'phone', id }
+function mock(s, o = {}) {
+  const marks = o.marks || [], lines = o.lines || [];
+  const z = name => ` data-z="${name}"`;
+  const m = name => (marks.includes(name) ? (lines.includes(name) ? ' mk line' : ' mk') : '');
+  const fid = id => `<span class="u-fid">${id}</span>`;
+  const attrs = ITEMS.map(it => `data-${it.k}="${s[it.k]}"`).join(' ');
+  const menu = MENU.map(([ic, label, cnt], i) => `<span class="u-mi${i ? '' : ' on' + m('menu-on')}"${i ? '' : z('menu-on')} title="${label}">${svg(I[ic])}<span class="u-lbl">${label}</span>${cnt ? `<span class="u-cnt">${cnt}</span>` : ''}</span>`).join('');
+  const btns = where => `<span class="u-btn ghost">닫기</span><span class="u-btn ghost">처음부터</span>`
+    + (where === 'foot' ? `<p class="u-msg">${COMPANIES[CO]} · ${CUST} 단가로 넣었습니다. 손으로 고친 단가 2줄은 그대로 둡니다.</p>` : '')
+    + `<span class="u-btn main">저장</span><span class="u-bw">${fid('ORD-05')}<span class="u-btn main">견적서 PDF · 보내기</span></span>`
+    + `<span class="u-bw${m('pri')}"${z('pri')}>${fid('ORD-04')}<span class="u-btn main pri">주문으로 확정</span></span>`;
+  const rows = ROWS.map((r, i) => {
+    const amt = r[3] * r[4], vat = Math.floor(amt / 10), sel = i === SEL;
+    return `<div class="u-tr u-cols${sel ? ' on' + m('sel') : ''}" data-r${sel ? z('sel') : ''}><div class="u-td u-no">${i + 1}</div><div class="u-td u-code">${r[0]}</div>`
+      + `<div class="u-td u-name"><span class="u-tx">${r[1]}</span>${r[7] ? '<span class="u-tag">세트</span>' : ''}</div><div class="u-td u-spec">${r[2]}</div>`
+      + `<div class="u-td n${sel ? ' sel' : ''}">${r[3]}</div><div class="u-td n">${r[6] ? '<span class="u-fix">고침</span>' : ''}${fmt(r[4])}</div>`
+      + `<div class="u-td n">${fmt(amt)}</div><div class="u-td n">${fmt(vat)}</div><div class="u-td n">${fmt(amt + vat)}</div><div class="u-td">${r[5]}</div></div>`;
+  }).join('');
+  const empty = (no, ph) => `<div class="u-tr u-cols"><div class="u-td u-no">${no}</div><div class="u-td"></div><div class="u-td u-ph">${ph}</div>${'<div class="u-td"></div>'.repeat(7)}</div>`;
+  const f = (label, val, extra = '') => `<div class="u-f">${extra}<span class="u-l">${label}</span><span class="u-in">${val}</span></div>`;
+  return `<div class="ui${m('app')}" ${attrs} data-badges="${o.badges ? 'on' : 'off'}" data-dev="${o.dev || 'pc'}"${o.id ? ` id="${o.id}"` : ''}>
+<aside class="u-side${m('side')}"${z('side')}>
+<div class="u-brand"><span class="u-mark">U</span><span class="u-lbl">UBO 워크스</span></div>
+<div class="u-co"><span class="u-co-l u-lbl">판매 업체</span><div class="u-co-b" title="${COMPANIES[CO]}"><span class="u-logo">${logoOf(CO)}</span><span class="u-lbl u-co-n">${COMPANIES[CO]}</span>${svg(I.caret, 'u-lbl u-caret')}</div></div>
+<nav class="u-menu">${menu}<span class="u-msp"></span><span class="u-mi" title="설정">${svg(I.set)}<span class="u-lbl">설정</span></span></nav>
+</aside>
+<span class="u-scrim"></span>
+<div class="u-main">
+<header class="u-top"><span class="u-burger" title="메뉴">${svg(I.burger)}</span><span class="u-crumb">견적 › <b>견적 작성</b></span><span class="u-sp"></span><span class="u-find">${svg(I.search)}<span>거래처 · 상품 · 문서 찾기</span></span><span class="u-user">박지훈 · 영업</span></header>
+<div class="u-page">
+<div class="u-titlerow"><span class="u-h1">견적 작성</span><span class="u-chip">작성 중</span><span class="u-qno">Q-261020-0142</span><span class="u-saved">저장했습니다 · 10:42</span><div class="u-acts-top${m('acts-top')}"${z('acts-top')}>${btns('top')}</div></div>
+<section class="u-panel u-formp${m('form')}"${z('form')}>
+<div class="u-form">${f('판매 업체', `<span class="u-logo">${logoOf(CO)}</span>${COMPANIES[CO]}${svg(I.caret)}`, fid('ORD-02'))}${f('거래처', `${CUST}${svg(I.search)}`, fid('ORD-01'))}${f('날짜', '2026-10-20')}${f('담당자', '박지훈')}${f('출고 창고', `김포 1창고${svg(I.caret)}`)}${f('납기일', '2026-10-27')}</div>
+<div class="u-info"><b>${CUST}</b><span class="u-s">010-1234-5678</span><span><span class="u-s">거래 업체</span> ${DEAL.map(i => COMPANIES[i]).join(' · ')}</span><span><span class="u-s">미수금</span> <span class="u-warn">3,240,000원</span></span></div>
+</section>
+<section class="u-panel u-tp${m('table')}"${z('table')}>${fid('ORD-03')}
+<div class="u-tph"><b>담은 상품</b><span class="u-s">${ROWS.length}줄</span><span class="u-sp"></span><span class="u-s">단가 기준 ${COMPANIES[CO]} · ${CUST}</span></div>
+<div class="u-tbl"><div class="u-tr u-th u-cols"><div class="u-no">No</div><div>상품 코드</div><div>상품명</div><div>규격</div><div class="n">수량</div><div class="n">단가</div><div class="n">공급가액</div><div class="n">부가세</div><div class="n">합계</div><div>메모</div></div>
+<div class="u-tb">${rows}${empty(ROWS.length + 1, '코드나 이름으로 찾습니다')}${empty(ROWS.length + 2, '')}</div></div>
+<div class="u-sum"><span>수량<b>${fmt(TOTAL.q)}</b></span><span>공급가액<b>${fmt(TOTAL.s)}</b></span><span>부가세<b>${fmt(TOTAL.v)}</b></span><span class="g">합계<b>${fmt(TOTAL.s + TOTAL.v)}원</b></span></div>
+</section>
+</div>
+<footer class="u-foot${m('foot')}"${z('foot')}>${btns('foot')}</footer>
+</div>
+</div>`;
 }
 
-// ── 종이 9장 ────────────────────────────────────────────────────────────
-const PAGES = 9;
-const sheet = (n, cls, body, pics = true) => `<section class="sheet ${cls}" aria-label="${n}쪽">${body}${pics ? '<span class="ex">그림 속 거래처 · 상품 · 금액은 모두 예시입니다</span>' : ''}<span class="pgno">${n} / ${PAGES}</span></section>`;
+// 실제 크기(w × h)로 그리고 zoom 으로 줄인 틀
+function frame(inner, w, h, scale) {
+  return `<div class="frame" style="width:${(w * scale).toFixed(1)}px;height:${(h * scale).toFixed(1)}px"><div class="frame-in" style="width:${w}px;height:${h}px;zoom:${scale}">${inner}</div></div>`;
+}
+// 화면(1440×900)의 한 자리 r 만 잘라 보이는 틀
+function cropFrame(inner, r, scale) {
+  return `<div class="frame" style="width:${(r.w * scale).toFixed(1)}px;height:${(r.h * scale).toFixed(1)}px"><div class="frame-in" style="width:${r.w}px;height:${r.h}px;overflow:hidden;zoom:${scale}"><div class="crop-in" style="left:${-r.x}px;top:${-r.y}px;width:1440px;height:900px">${inner}</div></div></div>`;
+}
+
+// 표에서 스크롤 없이 보이는 상품 줄 수 — 같은 그림 하나에 보기만 바꿔 끼워 센다 (1440×900)
+function visibleRows(s) {
+  const ui = document.querySelector('#measure .ui');
+  for (const it of ITEMS) ui.dataset[it.k] = s[it.k];
+  const box = ui.querySelector('.u-tbl').getBoundingClientRect();
+  const head = ui.querySelector('.u-th').getBoundingClientRect();
+  return [...ui.querySelectorAll('.u-tr[data-r]')].filter(r => { const b = r.getBoundingClientRect(); return b.top >= head.bottom - 1 && b.bottom <= box.bottom + 1; }).length;
+}
+const rowsText = n => (n >= ROWS.length ? `한 화면에 상품 ${ROWS.length}줄 모두` : `한 화면에 상품 ${n}줄`);
+
+// ── 종이 12장 ───────────────────────────────────────────────────────────
+const PAGES = 12;
+const MM = 96 / 25.4;      // 1mm = 3.78px
+const CROP = 0.75;         // 항목 쪽의 큰 그림 = 실제의 75% (표 글자 14 → 7.9pt)
+const THUMB = 64;          // 항목 쪽의 작은 전체 화면 폭 (mm)
 const cb = '<i class="cb"></i>';
-const tagsFor = (k, v) => Object.entries(PRESETS).filter(([, p]) => p.s[k] === v).map(([key]) => key);
+const ro = '<i class="cb ro"></i>';
+const sheet = (n, cls, body, ex = true) => `<section class="sheet ${cls}" aria-label="${n}쪽">${body}${ex ? '<span class="ex">그림 속 거래처 · 상품 · 금액은 모두 예시입니다</span>' : ''}<span class="pgno">${n} / ${PAGES}</span></section>`;
+const stateFor = (it, v) => ({ ...BASE, [it.k]: v });
+const cropBox = (s, o, rects) => `<div class="o-crop">${rects.map(r => `${r.label ? `<span class="o-where">${r.label}</span>` : ''}${cropFrame(mock(s, o), r, CROP)}`).join('')}</div>`;
+function thumbBox(s, o, rects, wmm) {
+  const wins = rects.map(r => `<span class="win" style="left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px"></span>`).join('');
+  return frame(mock(s, o) + wins, 1440, 900, wmm * MM / 1440);
+}
 
 function coverPage() {
-  const thumbs = Object.entries(PRESETS).map(([key, p]) =>
-    `<figure>${frame(pcMock(full(p.s)), 1000, 800, 0.26)}<figcaption><b>${key}</b>${p.name}</figcaption></figure>`).join('');
+  const nav = itemOf('nav');
+  const ex = cropFrame(mock(stateFor(nav, 'navy'), { marks: nav.zones, lines: nav.zones }), { x: 0, y: 0, w: 580, h: 290 }, 0.62);
+  const idx = ITEMS.map((it, i) => `<li><b>${i + 3}쪽</b>${it.name}<span>${it.opts.map(o => o.label).join(' · ')}</span></li>`).join('');
   return sheet(1, 'cover', `
-<p class="eyebrow">UBO ONE · UBO 워크스 · 2026-10-01</p>
-<div><h1>화면 느낌 고르기</h1>
-<p class="lede">새 프로그램 화면을 어떤 느낌으로 만들지 같이 고릅니다. 지금 쓰시는 이카운트와 비교해 보시고, 편한 쪽에 표시해 주세요. 정답은 없습니다.</p></div>
-<div class="asks">
-  <div><b>① 오래 봐도 눈이 편한가</b><span>하루 종일 켜 두는 화면입니다. 글씨 · 색이 피곤하지 않은지</span></div>
-  <div><b>② 한 화면에 충분히 보이나</b><span>스크롤 없이 봐야 하는 것이 다 보이는지 — 많이 보일수록 글씨는 작아집니다</span></div>
-  <div><b>③ 이카운트에서 넘어와도 안 헷갈리나</b><span>버튼 자리 · 말 · 단축키가 바뀌어도 괜찮은지</span></div>
-</div>
-<div class="thumbs">${thumbs}</div>
-<ol class="order">
-  <li><b>2~4쪽 · 시안 A B C</b>화면째로 비교하고 의견 표시</li>
-  <li><b>5~7쪽 · 항목별로</b>글꼴 · 색 · 버튼 자리 … 마음에 드는 것만 골라 섞기</li>
-  <li><b>8쪽 · 말투 · 용어</b>이카운트 말을 그대로 쓸지</li>
-  <li><b>9쪽 · 고르기 표</b>한 분씩 적고 진행자가 정리</li>
+<p class="eyebrow">UBO ONE · UBO 워크스 · 견적 작성 화면 (ORD-S01) · 2026-10-20</p>
+<div><h1>화면 모양 고르기</h1>
+<p class="lede">새 프로그램 화면의 모양을 고릅니다. 기준 화면 하나를 두고, 한 쪽에 한 가지만 바꿔 보여 드립니다. 바뀐 자리는 노란 칸으로 표시했습니다. 편한 쪽에 표시해 주세요. 정답은 없습니다.</p></div>
+<div class="c-mid">
+<ol class="steps">
+  <li><b>2쪽 · 기준 화면</b><span>모든 그림은 이 화면에서 시작합니다. 먼저 한 번 훑어봐 주세요. 빨간 번호(ORD-01~05)는 기능 번호입니다.</span></li>
+  <li><b>3~11쪽 · 항목 9개</b><span>한 쪽에 한 항목만 바꿨습니다. 맨 왼쪽(또는 맨 위)이 기준이고, <i class="mk-sw"></i>노란 칸이 기준에서 바뀐 자리입니다. 작은 그림은 전체 화면이고, 검은 테두리가 큰 그림의 자리입니다.</span></li>
+  <li><b>12쪽 · 고르기 표</b><span>한 분씩 항목마다 마음에 드는 보기 하나에 표시해 주세요. 기준이 좋으면 기준에.</span></li>
+  <li><b>마지막 · 합쳐 보기</b><span>고른 것을 모두 합치면 어색할 수 있습니다. 회의 때 화면에서 '고른 것 합쳐 보기' 로 같이 확인합니다.</span></li>
 </ol>
-<p class="note">종이에서는 실제 화면보다 작게 보입니다. 세 시안 모두 같은 비율로 줄였고, 5~7쪽의 글꼴 · 글자 크기 · 촘촘함 · 모서리는 실제 크기입니다.</p>`);
+<figure class="c-fig">${ex}<figcaption>예) 3쪽 왼쪽 메뉴 색을 남색으로 바꾼 그림 — 노란 칸이 바뀐 자리입니다.</figcaption></figure>
+</div>
+<ol class="idx">${idx}</ol>
+<ul class="notes">
+  <li><b>컬러로 인쇄해 주세요.</b> 색을 고르는 쪽이 있고, 노란 표시도 색으로 보입니다 (A4 가로 · 배율 100% · 배경 그래픽 켜기).</li>
+  <li>항목 쪽의 큰 그림은 실제 화면의 75% 크기입니다. 글자 크기 · 촘촘함은 화면에서 실제 크기로 보면 더 정확합니다.</li>
+  <li>의견은 쪽 번호와 빨간 번호로 주세요 — 예) 8쪽 ORD-03 표 선이 흐립니다.</li>
+</ul>`, false);
 }
 
-function presetPage(key, n) {
-  const p = PRESETS[key];
-  const s = full(p.s);
-  const chips = AXES.map(a => `<li><span>${a.name}</span>${optOf(a, p.s[a.k]).label}</li>`).join('');
-  return sheet(n, 'preset', `
-<div class="p-head"><span class="p-letter">${key}</span><div><h2>${p.name}</h2><p class="lede">${p.line}</p></div></div>
-<ul class="chips">${chips}</ul>
-<div class="p-body">
-  <figure>${frame(pcMock(s), 1000, 800, 0.75)}<figcaption>PC · 견적 작성 화면 (ORD-S01)</figcaption></figure>
-  <div class="p-right">
-    <figure>${frame(phoneMock(s), 360, 640, 0.56)}<figcaption>휴대폰 · 출고 요청함 (STK-S01)</figcaption></figure>
-    <div class="opinion"><span class="op-h">이 시안 어떠세요?</span>
-      <div class="op-pick"><span>${cb}좋음</span><span>${cb}보통</span><span>${cb}별로</span></div>
-      <span class="op-l">좋은 점</span><div class="wl"></div><div class="wl"></div>
-      <span class="op-l">아쉬운 점</span><div class="wl"></div><div class="wl"></div>
-    </div>
-  </div>
-</div>`);
+function basePage(n) {
+  const sc = 0.705; // 270mm × 169mm — 표 글자 14 → 7.4pt
+  const pick = ITEMS.map(it => `${it.name} <b>${it.opts[0].label}</b>`).join(' · ');
+  return sheet(n, 'base', `
+<div class="b-head"><div><h2>기준 화면 — 견적 작성 (ORD-S01)</h2><p class="lede">항목마다 첫 보기를 모은 화면입니다: ${pick}. 3~11쪽은 모두 이 화면에서 한 가지만 바꿉니다.</p></div>
+<ul class="ord">${ORD.map(([id, t]) => `<li><b>${id}</b>${t}</li>`).join('')}</ul></div>
+<figure class="b-fig">${frame(mock(BASE, { badges: true }), 1440, 900, sc)}</figure>`);
 }
 
-function axisPage(n, part, title, keys, extra = '') {
-  const base = PRESETS.B.s;
-  // keys 에 HTML 을 넣으면 그 자리에 그대로 끼운다
-  const rows = keys.map(k => {
-    if (k.startsWith('<')) return k;
-    const a = axis(k);
-    const opts = a.opts.map(o => {
-      const tags = tagsFor(k, o.v).map(t => `<em class="tag">시안 ${t}</em>`).join('');
-      return `<figure class="opt">${cropHtml(full({ ...base, [k]: o.v }), a.crop)}`
-        + `<figcaption><b>${o.label}</b>${o.note ? `<span>${o.note}</span>` : ''}${tags}<span class="pick">${cb}이게 좋다</span></figcaption></figure>`;
-    }).join('');
-    return `<div class="axis"><div class="axis-h"><b>${a.name}</b><span>${a.q}</span><small>${a.real ? '실제 크기' : '작게 줄임'}</small></div><div class="axis-opts">${opts}</div></div>`;
+function itemPage(it, i, n) {
+  const lay = it.pr.lay;
+  const cols = it.opts.map((o, j) => {
+    const s = stateFor(it, o.v);
+    const oo = { marks: j ? it.zones : [], lines: it.line ? it.zones : [] };
+    const pick = `<span class="o-pick">${cb}이게 좋다</span>`;
+    const stat = it.count ? `<span class="o-stat" data-count="${it.k}=${o.v}"></span>` : '';
+    const cap = `<div class="o-cap"><b>${o.label}</b>${j ? '' : '<em class="tag">기준</em>'}${o.note ? `<span class="o-note">${o.note}</span>` : ''}${lay === 'lum' ? pick : ''}</div>`;
+    if (lay === 'rows') return `<div class="o-row"><div class="o-side">${cap}${stat}${pick}</div>${cropBox(s, oo, it.pr.rects)}<figure class="o-thumb">${thumbBox(s, oo, it.pr.rects, 58)}<figcaption>전체 화면</figcaption></figure></div>`;
+    if (lay === 'lum') return `<div class="o-col">${cap}<figure class="o-full">${thumbBox(s, oo, it.pr.rects, 118)}</figure>${cropBox(s, oo, it.pr.rects)}</div>`;
+    return `<div class="o-col">${cap}${cropBox(s, oo, it.pr.rects)}<div class="o-bot"><figure class="o-thumb">${thumbBox(s, oo, it.pr.rects, THUMB)}<figcaption>전체 화면 · 검은 테두리 = 위 그림 자리</figcaption></figure><div class="o-side">${stat}${pick}</div></div></div>`;
   }).join('');
-  return sheet(n, 'axes', `
-<div class="a-head"><h2>항목별로 고르기 ${part} / 3 — ${title}</h2>
-<p class="lede">바꾸는 항목 말고는 시안 B 로 두었습니다. 마음에 드는 쪽에 표시해 주세요. 여러 시안을 섞어도 됩니다 — 예) "B 인데 글자는 크게"</p></div>
-${rows}${extra}`);
-}
-
-const TERMS = [
-  ['파는 물건', '품목', '상품'],
-  ['물건 번호', '품목코드', '상품 코드'],
-  ['창고에 내보내라고 넘기는 문서', '출하지시서', '출고 요청'],
-  ['창고에서 물건을 내보냄', '출하', '출고'],
-  ['줄마다 적는 짧은 말', '적요', '메모'],
-  ['날짜 칸', '일자', '날짜'],
-  ['새 문서 만들기', '신규', '새로 만들기'],
-  ['적던 것을 지우고 처음부터', '다시 작성', '처음부터'],
-  ['견적 만드는 화면', '견적서입력', '견적 작성'],
-  ['판매 넣는 화면', '판매입력', '판매 등록'],
-];
-const TONE_ROWS = [
-  ['저장했을 때', '저장했습니다', '저장했어요', '저장 완료'],
-  ['재고가 모자랄 때', '재고가 부족합니다. 가용 수량 0개', '재고가 부족해요. 가용 수량 0개', '재고 부족 · 가용 0'],
-  ['칸을 안 채웠을 때', '거래처를 선택해 주세요', '거래처를 골라 주세요', '거래처 필수'],
-  ['지우기 전에 물을 때', '이 견적을 삭제할까요? 되돌릴 수 없습니다', '이 견적을 지울까요? 되돌릴 수 없어요', '견적 삭제? 되돌릴 수 없음'],
-];
-function termsPage(n) {
-  const terms = TERMS.map(([what, ec, easy]) =>
-    `<tr><td>${what}</td><td class="big">${ec}</td><td class="big">${easy}</td><td class="pk"><span>${cb}이카운트</span><span>${cb}쉬운 말</span><span>${cb}다른 말 ________</span></td></tr>`).join('');
-  const tones = TONE_ROWS.map(([when, ...say]) => `<tr><td>${when}</td>${say.map(t => `<td class="big">${t}</td>`).join('')}</tr>`).join('');
-  return sheet(n, 'terms', `
-<div class="a-head"><h2>말투 · 용어 고르기</h2>
-<p class="lede">이카운트에서 쓰던 말을 그대로 둘지, 쉬운 말로 바꿀지 고릅니다. 바꾸면 처음 며칠은 헷갈릴 수 있습니다.</p></div>
-<div class="tscroll"><table class="t"><colgroup><col style="width:24%"><col style="width:17%"><col style="width:17%"><col></colgroup>
-<thead><tr><th>무엇</th><th>지금 이카운트</th><th>쉬운 말 (제안)</th><th>고르기</th></tr></thead><tbody>${terms}</tbody></table></div>
-<p class="keep"><b>그대로 두는 말</b> — 거래처 · 담당자 · 규격 · 단가 · 공급가액 · 부가세 · 미수금 · 잔액. 세금계산서 · 장부에 그대로 찍히는 말이라 바꾸지 않습니다.</p>
-<div class="tscroll"><table class="t"><colgroup><col style="width:16%"><col style="width:28%"><col style="width:28%"><col></colgroup>
-<thead><tr><th>안내 문구 말투</th><th>합니다</th><th>해요</th><th>짧게</th></tr></thead>
-<tbody>${tones}<tr><td>고르기</td><td>${cb}이걸로</td><td>${cb}이걸로</td><td>${cb}이걸로</td></tr></tbody></table></div>`, false);
+  const body = lay === 'rows' ? `<div class="i-rows">${cols}</div>` : `<div class="i-cols c${it.opts.length}">${cols}</div>`;
+  const tail = lay === 'lum' ? '화면 전체가 바뀌어서 노란 칸은 달지 않았습니다.' : '바꾼 것은 이 항목 하나뿐이고, 나머지는 2쪽 기준 화면 그대로입니다.';
+  return sheet(n, 'item', `<div class="i-head"><span class="i-no">${i + 1}</span><div><h2>${it.name}</h2><p class="lede">${it.q} ${tail}</p></div></div>${body}`);
 }
 
 function votePage(n) {
-  const row = `<tr><td></td><td></td><td class="pk"><span>${cb}A</span><span>${cb}B</span><span>${cb}C</span></td><td></td><td class="pk"><span>${cb}이카운트</span><span>${cb}쉬운 말</span></td><td class="pk"><span>${cb}합니다</span><span>${cb}해요</span><span>${cb}짧게</span></td><td></td></tr>`;
+  const head = ITEMS.map((it, i) => `<th>${i + 1}. ${it.name}</th>`).join('');
+  const cell = ITEMS.map(it => `<td class="vo">${it.opts.map(o => `<span>${ro}${o.short || o.label}</span>`).join('')}</td>`).join('');
   return sheet(n, 'vote', `
 <div class="a-head"><h2>고르기 표 — 한 분씩 적어 주세요</h2>
-<p class="lede">고른 시안 하나에 표시하고, 다른 시안에서 가져오고 싶은 것이 있으면 "섞고 싶은 것" 에 적어 주세요.</p></div>
-<div class="tscroll"><table class="t vote"><colgroup><col style="width:10%"><col style="width:11%"><col style="width:12%"><col style="width:21%"><col style="width:13%"><col style="width:15%"><col></colgroup>
-<thead><tr><th>이름</th><th>역할<small>영업 · 창고 · 경리 · 과장</small></th><th>고른 시안</th><th>섞고 싶은 것<small>예) B 인데 글자는 크게, 버튼은 아래</small></th><th>용어</th><th>안내 문구</th><th>한 마디</th></tr></thead>
-<tbody>${row.repeat(9)}</tbody></table></div>
-<div class="wrap-up"><b>정리 (진행자)</b><span>최종 시안</span><span>바꿀 항목</span><span>용어</span><span>안내 문구</span><span>날짜</span><span>진행</span></div>`, false);
+<p class="lede">항목마다 마음에 드는 보기 하나에 표시해 주세요. 기준(첫 보기)이 좋으면 기준에. 섞으면 어울리지 않을 수 있어서, 다 고른 뒤 화면의 '고른 것 합쳐 보기' 로 같이 확인합니다.</p></div>
+<table class="t vote"><colgroup><col style="width:21mm">${ITEMS.map(() => '<col>').join('')}<col style="width:33mm"></colgroup>
+<thead><tr><th>이름<small>역할</small></th>${head}<th>메모<small>섞어 보니 어색한 곳 등</small></th></tr></thead>
+<tbody>${`<tr><td></td>${cell}<td></td></tr>`.repeat(8)}</tbody></table>
+<div class="wrap-up"><b>정리 (진행자)</b><span>많이 고른 보기</span><span>합쳐 본 화면 — 그대로 · 다시</span><span>다시 볼 항목</span><span>날짜</span></div>`, false);
 }
 
 function buildPages() {
-  const status = `<div class="axis"><div class="axis-h"><b>상태 표시</b><span>색마다 이렇게 보입니다 — 위 '색' 에서 같이 고릅니다</span><small>실제 크기</small></div><div class="axis-opts">${axis('color').opts.map(o => `<figure class="opt">${cropHtml(full({ ...PRESETS.B.s, color: o.v }), 'status')}</figure>`).join('')}</div></div>`;
-  const keys = `<div class="keys"><b>단축키</b><span>이카운트에서 쓰던 키(F2 신규 · F3 찾기 · F8 저장)를 새 프로그램에서도 똑같이 쓸까요?</span><span>${cb}똑같이</span><span>${cb}필요 없음</span><span>${cb}잘 모르겠음</span></div>`;
-  document.getElementById('pages').innerHTML = [
-    coverPage(),
-    presetPage('A', 2), presetPage('B', 3), presetPage('C', 4),
-    axisPage(5, 1, '글자와 촘촘함', ['font', 'size', 'density']),
-    axisPage(6, 2, '색과 표', ['color', status, 'table']),
-    axisPage(7, 3, '버튼과 모서리', ['btn', 'radius'], keys),
-    termsPage(8), votePage(9),
-  ].join('');
+  $('pages').innerHTML = [coverPage(), basePage(2), ...ITEMS.map((it, i) => itemPage(it, i, i + 3)), votePage(PAGES)].join('');
 }
-
-// 높이를 고정한 표 · 목록에서 가려진 줄을 센다 — 넉넉할수록 덜 보이는 걸 그대로 보여준다
-function markMore(root) {
-  root.querySelectorAll('[data-scroll]').forEach(box => {
-    const more = box.querySelector('.u-more');
-    if (!more) return;
-    more.hidden = true;
-    const bottom = box.getBoundingClientRect().bottom;
-    const hidden = [...box.querySelectorAll('[data-r]')].filter(r => r.getBoundingClientRect().bottom > bottom + 0.5).length;
-    if (!hidden) return;
-    more.textContent = `아래로 ${hidden}${box.dataset.scroll} 더 ↓`;
-    more.hidden = false;
+function fillCounts() {
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const [k, v] = el.dataset.count.split('=');
+    el.textContent = rowsText(visibleRows(stateFor(itemOf(k), v)));
   });
 }
 
 // ── 바꿔 보기 ───────────────────────────────────────────────────────────
-const state = { ...PRESETS.A.s, ...SAY };
 const $ = id => document.getElementById(id);
-const seg = (k, opts) => `<div class="seg" role="group">${opts.map(o => `<button type="button" data-k="${k}" data-v="${o.v}">${o.label}</button>`).join('')}</div>`;
+const ui = { mode: 'one', focus: null, picks: { ...BASE }, keep: false, badges: true, fit: true, drawer: false, phone: false };
+let liveUi = null;
+let flashT = 0, noteT = 0;
 
-function buildPanel() {
-  $('presetCtl').innerHTML = `<div class="grp"><span>시안</span>${seg('preset', Object.entries(PRESETS).map(([v, p]) => ({ v, label: `${v} ${p.name}` })))}</div>`;
-  $('axisCtl').innerHTML = AXES.map(a => `<div class="grp"><span>${a.name}</span>${seg(a.k, a.opts)}</div>`).join('');
-  $('sayCtl').innerHTML = SAY_AXES.map(a => `<div class="grp"><span>${a.name}</span>${seg(a.k, a.opts)}</div>`).join('');
+// 지금 그림에 보일 보기 — 한 가지씩이면 지금 고른 항목 하나만, 합쳐 보기면 고른 것 전부
+function shown() {
+  if (ui.mode === 'all') return { ...ui.picks };
+  return ui.focus ? { ...BASE, [ui.focus]: ui.picks[ui.focus] } : { ...BASE };
 }
-function nearest() {
-  let best = 'A', hit = -1;
-  for (const [key, p] of Object.entries(PRESETS)) {
-    const n = AXES.filter(a => p.s[a.k] === state[a.k]).length;
-    if (n > hit) { best = key; hit = n; }
+const changed = s => ITEMS.filter(it => s[it.k] !== BASE[it.k]);
+const zonesOf = s => changed(s).flatMap(it => it.zones);
+// 색 · 표처럼 바탕을 보고 고르는 항목(line)은 테두리만 (다른 항목도 같은 자리를 바꿨으면 바탕까지)
+const linesOf = s => { const d = changed(s); return d.filter(it => it.line).flatMap(it => it.zones).filter(zn => !d.some(it => !it.line && it.zones.includes(zn))); };
+
+function buildCtl() {
+  $('items').innerHTML = ITEMS.map((it, i) => `<li class="it" data-item="${it.k}">
+<div class="it-h"><span class="it-n">${i + 1}</span><b>${it.name}</b><small>기준 ${it.opts[0].btn || it.opts[0].label}</small></div>
+<div class="seg" role="group" aria-label="${it.name}" style="grid-template-columns:repeat(${it.opts.length},minmax(0,1fr))">${it.opts.map(o => `<button type="button" data-k="${it.k}" data-v="${o.v}" title="${o.label}${o.note ? ' — ' + o.note : ''}">${o.btn || o.label}</button>`).join('')}</div></li>`).join('');
+}
+
+function setMarks(zones, lines = []) {
+  liveUi.querySelectorAll('[data-z]').forEach(el => { el.classList.toggle('mk', zones.includes(el.dataset.z)); el.classList.toggle('line', lines.includes(el.dataset.z)); });
+}
+function flash() {
+  clearTimeout(flashT);
+  setMarks(zonesOf(shown()), linesOf(shown()));
+  if (!ui.keep) flashT = setTimeout(() => setMarks([]), 1600);
+}
+
+function paint() {
+  const s = shown();
+  for (const it of ITEMS) liveUi.dataset[it.k] = s[it.k];
+  liveUi.dataset.badges = ui.badges ? 'on' : 'off';
+  // 휴대폰 폭에서는 왼쪽 메뉴가 접혀 있다 — 메뉴 항목을 볼 때만 열어 보인다
+  liveUi.dataset.drawer = ui.phone && (ui.drawer || (ui.mode === 'one' && ['nav', 'side'].includes(ui.focus))) ? 'open' : 'closed';
+  document.querySelectorAll('.modes button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === ui.mode)));
+  document.querySelectorAll('#items button[data-k]').forEach(b => {
+    const { k, v } = b.dataset;
+    b.setAttribute('aria-pressed', String(s[k] === v));
+    b.classList.toggle('picked', ui.picks[k] === v && v !== BASE[k] && s[k] !== v);
+  });
+  document.querySelectorAll('#items .it').forEach(li => {
+    const k = li.dataset.item;
+    li.classList.toggle('cur', ui.mode === 'one' && k === ui.focus);
+    li.classList.toggle('chg', s[k] !== BASE[k]);
+  });
+  const diff = changed(s);
+  const say = it => `${it.name} <b>${optOf(it, s[it.k]).label}</b>`;
+  $('said').innerHTML = ui.mode === 'all'
+    ? (diff.length ? `<b>고른 것 합친 화면</b> — 기준과 다른 것 ${diff.length}가지: ${diff.map(say).join(' · ')} <span class="s">· 섞으면 어울리지 않을 수 있습니다</span>`
+      : '<b>고른 것 합친 화면</b> <span class="s">— 아직 고른 것이 없어 기준 화면과 같습니다</span>')
+    : (diff.length ? `<b>바뀐 것: ${diff[0].name}</b> — ${optOf(diff[0], s[diff[0].k]).label} <span class="s">(기준 ${diff[0].opts[0].label})${diff[0].zones.length ? '' : ' · 화면 전체'}</span>`
+      : '<b>기준 화면</b> <span class="s">— 항목에서 보기를 하나 누르면 그 자리만 바뀝니다</span>');
+  $('again').disabled = !zonesOf(s).length;
+  // 줄 수 세기는 그림이 먼저 바뀐 뒤에 (누른 반응을 늦추지 않게)
+  clearTimeout(noteT);
+  noteT = setTimeout(() => {
+    const now = visibleRows(s), base = visibleRows(BASE);
+    $('note').textContent = ui.phone ? '휴대폰 폭으로 보는 중 — 왼쪽 메뉴는 ☰ 를 누르면 나옵니다. 넓은 화면에서 보면 1440 폭 그대로 보입니다.'
+      : `${rowsText(now)}이 보입니다${now === base ? '' : ` (기준 ${base}줄)`}. 표의 줄에 마우스를 올리거나 칸을 눌러 보세요.`;
+  }, 120);
+}
+
+// 창 폭에 맞추기 — 넓으면 1440×900 을 줄여 보이고, 좁으면(700px 아래) 휴대폰 화면으로 다시 늘어놓는다
+function fitLive() {
+  const stage = $('stage');
+  const w = stage.clientWidth;
+  ui.phone = w < 700;
+  stage.classList.toggle('phone', ui.phone);
+  liveUi.dataset.dev = ui.phone ? 'phone' : 'pc';
+  $('fitSw').hidden = ui.phone;
+  const fr = stage.firstElementChild, fi = fr.firstElementChild;
+  if (ui.phone) { fr.style.width = fr.style.height = fi.style.zoom = ''; }
+  else {
+    const sc = ui.fit ? Math.min(1, (w - 2) / 1440) : 1;
+    fr.style.width = `${(1440 * sc).toFixed(1)}px`; fr.style.height = `${(900 * sc).toFixed(1)}px`; fi.style.zoom = sc;
   }
-  return best;
-}
-function paintPanel() {
-  const near = nearest();
-  const diff = AXES.filter(a => PRESETS[near].s[a.k] !== state[a.k]);
-  document.querySelectorAll('#panel [data-k]').forEach(b => {
-    const on = b.dataset.k === 'preset' ? !diff.length && b.dataset.v === near : state[b.dataset.k] === b.dataset.v;
-    b.setAttribute('aria-pressed', on);
-  });
-  const say = SAY_AXES.map(a => optOf(a, state[a.k]).label).join(' · ');
-  $('now').innerHTML = diff.length
-    ? `지금: <b>시안 ${near} 바탕</b> + ${diff.map(a => `${a.name} ${optOf(a, state[a.k]).label}`).join(' · ')} — ${say}`
-    : `지금: <b>시안 ${near} 그대로</b> — ${say}`;
-}
-// 휴대폰 그림을 먼저 그려야 PC 그림 칸 폭이 맞게 잡힌다 (넓은 화면은 두 칸, 좁은 화면은 위아래)
-function renderLive() {
-  const live = document.querySelector('.live');
-  $('livePh').innerHTML = frame(phoneMock(state), 360, 640, Math.min(0.9, live.clientWidth / 360));
-  const box = $('livePc');
-  const scale = Math.min(1, box.clientWidth / 1000) || 1;
-  box.innerHTML = frame(pcMock(state), 1000, 800, scale);
-  markMore(live);
-}
-$('panel').addEventListener('click', e => {
-  const b = e.target.closest('button[data-k]');
-  if (!b) return;
-  if (b.dataset.k === 'preset') Object.assign(state, PRESETS[b.dataset.v].s);
-  else state[b.dataset.k] = b.dataset.v;
-  paintPanel();
-  renderLive();
-});
-$('print').addEventListener('click', () => window.print());
-
-// 화면 폭에 맞추기 (인쇄는 늘 100%) — 넓으면 종이째 줄이고, 좁으면(CSS 의 900px 과 같은 값) 종이 안을 다시 늘어놓고 그림만 줄인다
-const NARROW = matchMedia('screen and (max-width: 900px)');
-function refitSheets(narrow) {
-  document.querySelectorAll('.sheet').forEach(sh => {
-    const cs = getComputedStyle(sh);
-    const avail = sh.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 2;
-    sh.querySelectorAll('.frame[data-fw]').forEach(fr => {
-      const w = +fr.dataset.fw, h = +fr.dataset.fh, s0 = +fr.dataset.fs;
-      const s = narrow ? Math.min(s0, avail / w) : s0;
-      fr.style.width = `${(w * s).toFixed(1)}px`;
-      fr.style.height = `${(h * s).toFixed(1)}px`;
-      fr.firstElementChild.style.zoom = s;
-    });
-  });
 }
 function fitPages() {
-  const narrow = NARROW.matches;
-  $('pages').style.zoom = narrow ? '1' : Math.min(1, (document.documentElement.clientWidth - 32) / 1123).toFixed(3);
-  refitSheets(narrow);
+  $('pages').style.zoom = Math.min(1, (document.documentElement.clientWidth - 32) / 1123).toFixed(3);
 }
 
-buildPanel();
-buildPages();
-paintPanel();
-fitPages();
-renderLive();
-markMore($('pages'));
-let resizing = 0;
-addEventListener('resize', () => { cancelAnimationFrame(resizing); resizing = requestAnimationFrame(() => { fitPages(); renderLive(); markMore($('pages')); }); });
-// 글꼴이 늦게 오면 줄 높이가 바뀐다 — 다 온 뒤 다시 센다
-if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { fitPages(); renderLive(); markMore($('pages')); });
-// 인쇄 — 좁은 화면에서 줄였던 종이 그림을 원래 크기로 돌려 찍고, 끝나면 다시 맞춘다
-addEventListener('beforeprint', () => { refitSheets(false); markMore($('pages')); });
-addEventListener('afterprint', () => { fitPages(); markMore($('pages')); });
+function bind() {
+  $('items').addEventListener('click', e => {
+    const b = e.target.closest('button[data-k]');
+    if (!b) return;
+    ui.picks[b.dataset.k] = b.dataset.v;
+    if (ui.mode === 'one') ui.focus = b.dataset.k;
+    ui.drawer = false;
+    paint(); flash();
+  });
+  document.querySelector('.modes').addEventListener('click', e => {
+    const b = e.target.closest('button[data-mode]');
+    if (!b) return;
+    ui.mode = b.dataset.mode;
+    paint(); flash();
+  });
+  $('reset').addEventListener('click', () => { ui.picks = { ...BASE }; ui.focus = null; ui.drawer = false; paint(); setMarks([]); });
+  $('again').addEventListener('click', flash);
+  $('keep').addEventListener('change', e => { ui.keep = e.target.checked; ui.keep ? flash() : (clearTimeout(flashT), setMarks([])); });
+  $('badges').addEventListener('change', e => { ui.badges = e.target.checked; paint(); });
+  $('fit').addEventListener('change', e => { ui.fit = e.target.checked; fitLive(); });
+  $('print').addEventListener('click', () => window.print());
+  // 그림 안 — 칸을 누르면 그 줄 · 칸을 고른다, ☰ 는 휴대폰 폭에서 메뉴를 연다
+  $('stage').addEventListener('click', e => {
+    if (e.target.closest('.u-burger')) { if (ui.phone) { ui.drawer = liveUi.dataset.drawer !== 'open'; paint(); } return; }
+    if (e.target.closest('.u-scrim')) { ui.drawer = false; if (['nav', 'side'].includes(ui.focus)) ui.focus = null; paint(); return; }
+    const td = e.target.closest('.u-tb .u-td');
+    if (!td) return;
+    const tr = td.parentElement;
+    liveUi.querySelectorAll('.u-tb .on').forEach(r => { r.classList.remove('on', 'mk', 'line'); r.removeAttribute('data-z'); });
+    liveUi.querySelectorAll('.u-td.sel').forEach(c => c.classList.remove('sel'));
+    tr.classList.add('on'); tr.dataset.z = 'sel'; td.classList.add('sel');
+  });
+}
+
+function init() {
+  buildCtl();
+  $('measure').innerHTML = mock(BASE);
+  $('stage').innerHTML = frame(mock(BASE, { badges: true, id: 'liveUi' }), 1440, 900, 1);
+  liveUi = $('liveUi');
+  buildPages();
+  bind();
+  fitLive(); fitPages(); paint(); fillCounts();
+  let raf = 0;
+  addEventListener('resize', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { fitLive(); fitPages(); paint(); }); });
+  // 글꼴이 늦게 오면 줄 높이가 바뀐다 — 다 온 뒤 다시 센다. 인쇄 도구는 ready 를 보고 뽑는다
+  const done = () => { fitLive(); paint(); fillCounts(); document.documentElement.dataset.ready = '1'; };
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(done); else done();
+}
+init();
 </script>
 </body>
 </html>
